@@ -21,6 +21,7 @@
 package org.onebusaway.android.ui;
 
 
+import org.onebusaway.android.BuildConfig;
 import org.onebusaway.android.R;
 import org.onebusaway.android.app.Application;
 import org.onebusaway.android.io.elements.ObaRegion;
@@ -430,9 +431,10 @@ public class NavigationDrawerFragment extends Fragment {
             }
         }
 
-        mNavDrawerItems.add(NAVDRAWER_ITEM_SEPARATOR);
-
-        mNavDrawerItems.add(NAVDRAWER_ITEM_OPEN_SOURCE);
+        if (!BuildConfig.USE_FIXED_REGION) {
+            mNavDrawerItems.add(NAVDRAWER_ITEM_SEPARATOR);
+            mNavDrawerItems.add(NAVDRAWER_ITEM_OPEN_SOURCE);
+        }
 
         mNavDrawerItems.add(NAVDRAWER_ITEM_SEPARATOR);
 

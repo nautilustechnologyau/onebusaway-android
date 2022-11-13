@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2010-2014 Paul Watts (paulcwatts@gmail.com)
+    and individual contributors.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<resources>
+    <string name="app_name">MyMetro</string>
+
+    <!-- Tutorial -->
+    <string name="tutorial_welcome_title">Welcome to MyMetro!</string>
+    <string name="tutorial_welcome_text">Tap on a stop (purple dot on the map) to see arrival
+        times.
+    </string>
+    <string name="tutorial_opt_out_dialog_text">Would you like to see popup descriptions for how to
+        use MyMetro? You can always turn the popups on or off in Settings, or show the
+        tutorial later via Help.
+    </string>
+    <string name="tutorial_arrival_header_arrival_info_text">This long! Colored background tells you
+        if the bus is early (dark indigo) or late (light indigo). On time = normal indigo background. If we don\'t
+        know
+        where the bus is, the scheduled time is shown (light purple background).
+    </string>
+    <string name="location_permissions_message">We recommend allowing location use while the app is
+        running to show your real-time position on the map and automatically select your MyMetro
+        region for your local transit agency. This location data is not collected by MyMetro.
+    </string>
+    <string name="storage_permissions_message">To backup or restore your data, MyMetro needs permission to access your local device storage.</string>
+
+    <string name="report_problem_hint">Your reports help MyMetro find and fix problems!</string>
+    <!--  Bug report -->
+    <string name="bug_report_subject">MyMetro Android: Feedback</string>
+    <string name="bug_report_subject_trip_plan">MyMetro Android: Trip Plan Feedback</string>
+    <string name="bug_report_subject_trip_plan_fail">MyMetro Android: Trip Plan Failed Feedback</string>
+
+    <string name="preferences_arrival_info_style_options_a">MyMetro classic</string>
+    <string name="preferences_db_restored">Restore successful! Please restart MyMetro.</string>
+    <string name="preferences_preferred_vibration_summary">Let MyMetro notifications vibrate</string>
+    <string name="preferences_preferred_sound_summary">Select the MyMetro notification tone</string>
+
+    <string name="about_text">
+        "Nautilus Technology is an Australian startup technology company with the vision of"
+        "creating and accelerating competitive advantages through cutting-edge technology and"
+        "solutions.\n\nMyMetro has been launched to provide support to the transit riders of"
+        "Adelaide Metro. MyMetro is a free to use real-time transit platform. The real-time"
+        "transit data is provided by Adelaide Metro Real-Time Data"
+        "Feed (https://www.adelaidemetro.com.au/developer-info).\n\nVisit"
+        "https://nautilus-tech.com.au and https://mymetro.au to find out more.\n\nMyMetro"
+        "is using the OneBusAway transit platform. OneBusWay is a project of the non-profit"
+        "Open Transit Software Foundation (OTSF). It began in 2008 as a graduate student project"
+        "by Brian Ferris and Kari Watkins at the University of Washington and evolved to become"
+        "the topic of both of their PhD dissertations.Find out more about the OneBusAway"
+        "open-source project at https://onebusaway.org.\n\nThe project is licensed under"
+        "Apache v2.0 (https://www.apache.org/licenses/LICENSE-2.0)."
+    </string>
+
+    <!-- Trip Planner strings -->
+    <string name="title_activity_trip_plan">Trip Planner</string>
+    <string name="navdrawer_item_plan_trip">Plan a trip</string>
+
+    <string name="preferences_restore_summary">Restores from previous save. After selecting this option you\'ll be asked to pick a file. Please select \"db.backup\" or \"MyMetro.backup\", which will be in a folder \"MyMetroBackups\", likely on your SD card or under your \"Documents\" folder.</string>
+
+    <!-- See src/main/res/strings.xml for more strings you can override here -->
+    <string name="main_help_legend_ontime">Indigo means \"On time\"</string>
+    <string name="main_help_legend_late">Light indigo means \"Running late\"</string>
+    <string name="main_help_legend_early">Dark indigo means \"Running early\"</string>
+    <string name="main_help_legend_scheduled">Light purple means \"Scheduled arrival\" - We don\'t know
+        where the bus is now, but the schedule says there is an upcoming arrival
+    </string>
+    <string name="main_help_legend_canceled">Light purple with strikethrough means the trip has been
+        canceled - this bus is NOT coming
+    </string>
+
+    <string name="preferences_powered_by_oba_title">Powered by MyMetro</string>
+    <string name="preferences_powered_by_oba_summary">Find out more about the project</string>
+</resources>

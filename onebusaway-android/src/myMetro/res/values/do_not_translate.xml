@@ -16,8 +16,18 @@
 <resources>
     <!-- DO NOT TRANSLATE ANY STRINGS IN THIS FILE. -->
 
-    <!-- Android Maps API v2 key for Agency X -->
-    <string name="apiv2_key">AIzaSyBooMg0AliKO3WXfg8Z4s7ASS9pjSU9TJY</string>
+    <!-- Android Maps API v2 key for MyMetro -->
+    <string name="apiv2_key">AIzaSyBboqo-KyChJSMAcEwOwLyMmQsnljKcy_s</string>
+
+    <!-- Problem reporting additions -->
+    <string name="ri_static_user_name">MyMetro</string>
+    <string name="ri_app_feedback_email">mymetro@nautilus-tech.com.au</string>
+
+    <!-- Open-source link for Github project -->
+    <string name="open_source_github">https://mymetro.au</string>
+
+    <!-- Powered by OBA URL -->
+    <string name="powered_by_oba_url">https://mymetro.au</string>
 
     <!-- See src/main/res/do_not_translate.xml for more strings you can override here -->
 </resources>

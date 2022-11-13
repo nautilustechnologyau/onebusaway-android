@@ -43,8 +43,8 @@ android {
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 31
-        versionCode 128
-        versionName "2.10.1"
+        versionCode 131
+        versionName "2.10.2"
 
         multiDexEnabled true
 
@@ -134,7 +134,7 @@ android {
          *  For generating icons for the res/mipmap-* folders, see http://romannurik.github.io/AndroidAssetStudio/icons-launcher.html
          */
 
-        /*
+
         agencyX {
             // "Agency X" rebranding OneBusAway as another app - see src/agencyX/res for branded resources
             dimension "brand"
@@ -170,7 +170,7 @@ android {
             buildConfigField "String", "FIXED_REGION_PAYMENT_WARNING_BODY", "null"
             buildConfigField "boolean", "FIXED_REGION_TRAVEL_BEHAVIOR_DATA_COLLECTION", "false"
             buildConfigField "boolean", "FIXED_REGION_ENROLL_PARTICIPANTS_IN_STUDY", "false"
-        }*/
+        }
 
         agencyY {
             // "Agency Y" rebranding OneBusAway as another app - see src/agencyY/res for branded resources
@@ -213,6 +213,7 @@ android {
             buildConfigField "boolean", "FIXED_REGION_TRAVEL_BEHAVIOR_DATA_COLLECTION", "false"
             buildConfigField "boolean", "FIXED_REGION_ENROLL_PARTICIPANTS_IN_STUDY", "false"
         }
+
         yrt {
             // "YRT - York Region Transit - Canada" rebranding - https://play.google.com/store/apps/details?id=can.yrt.onebusaway
             dimension "brand"
@@ -253,15 +254,16 @@ android {
             buildConfigField "boolean", "FIXED_REGION_TRAVEL_BEHAVIOR_DATA_COLLECTION", "false"
             buildConfigField "boolean", "FIXED_REGION_ENROLL_PARTICIPANTS_IN_STUDY", "false"
         }
+
         /**
          * Add more rebranding flavors here...
          */
-        agencyX {
-            // "AdelaideMetro - Adelaide Metro Transit" rebranding
+        myMetro {
+            // "MyMetro - Adelaide Metro Transit" rebranding
             dimension "brand"
-            applicationId "org.agencyx.android"
+            applicationId "au.mymetro.android"
             manifestPlaceholders = [databaseAuthority: applicationId.toString() + '.provider']
-            buildConfigField "int", "ARRIVAL_INFO_STYLE", "0" // Defined in BuildFlavorConstants
+            buildConfigField "int", "ARRIVAL_INFO_STYLE", "1" // Defined in BuildFlavorConstants
             buildConfigField "boolean", "USE_FIXED_REGION", "true" // Supports multi-region
             buildConfigField "boolean", "USE_PELIAS_GEOCODING", "false"
             buildConfigField "String", "PELIAS_API_KEY", "\"" + getPeliasKey(name) + "\""
@@ -269,26 +271,26 @@ android {
             buildConfigField "String", "FIXED_REGION_NAME", "\"Adelaide Metro\""
             buildConfigField "String", "FIXED_REGION_OBA_BASE_URL",
                     "\"https://transit.nautilus-tech.com.au/onebusaway-api-webapp/\""
-            buildConfigField "String", "FIXED_REGION_SIRI_BASE_URL", "null"
+            buildConfigField "String", "FIXED_REGION_SIRI_BASE_URL", "\"https://transit.nautilus-tech.com.au/onebusaway-api-webapp/siri/\""
             buildConfigField "double", "FIXED_REGION_BOUNDS_LAT", "-34.89224"
             buildConfigField "double", "FIXED_REGION_BOUNDS_LON", "138.61566499999998"
             buildConfigField "double", "FIXED_REGION_BOUNDS_LAT_SPAN", "0.5954540000000037"
             buildConfigField "double", "FIXED_REGION_BOUNDS_LON_SPAN", "0.2644420000000025"
             buildConfigField "String", "FIXED_REGION_LANG", "\"en_AU\""
-            buildConfigField "String", "FIXED_REGION_CONTACT_EMAIL", "\"transit@nautilus-tech.com.au\""
+            buildConfigField "String", "FIXED_REGION_CONTACT_EMAIL", "\"mymetro@nautilus-tech.com.au\""
             buildConfigField "boolean", "FIXED_REGION_SUPPORTS_OBA_DISCOVERY_APIS", "true"
             buildConfigField "boolean", "FIXED_REGION_SUPPORTS_OBA_REALTIME_APIS", "true"
-            buildConfigField "boolean", "FIXED_REGION_SUPPORTS_SIRI_REALTIME_APIS", "false"
+            buildConfigField "boolean", "FIXED_REGION_SUPPORTS_SIRI_REALTIME_APIS", "true"
             buildConfigField "String", "FIXED_REGION_TWITTER_URL", "null"
             buildConfigField "String", "FIXED_REGION_STOP_INFO_URL", "null"
             buildConfigField "String", "FIXED_REGION_OPEN311_JURISDICTION_ID", "null"
             buildConfigField "String", "FIXED_REGION_OPEN311_API_KEY", "null"
             buildConfigField "String", "FIXED_REGION_OPEN311_BASE_URL", "null"
             buildConfigField "String", "FIXED_REGION_OTP_BASE_URL",
-                    "\"http://nautilus-tech.com.au:8090/otp/\""
+                    "\"https://otp.nautilus-tech.com.au/otp\""
             buildConfigField "String", "FIXED_REGION_OTP_CONTACT_EMAIL",
-                    "\"transit@nautilus-tech.com.au\""
-            buildConfigField "boolean", "FIXED_REGION_SUPPORTS_OTP_BIKESHARE", "false"
+                    "\"mymetro@nautilus-tech.com.au\""
+            buildConfigField "boolean", "FIXED_REGION_SUPPORTS_OTP_BIKESHARE", "true"
             buildConfigField "String", "FIXED_REGION_PAYMENT_ANDROID_APP_ID", "null"
             buildConfigField "String", "FIXED_REGION_PAYMENT_WARNING_TITLE", "null"
             buildConfigField "String", "FIXED_REGION_PAYMENT_WARNING_BODY", "null"
@@ -349,7 +351,6 @@ android {
             }
 
             release {
-                // Nothing here
             }
         }
     }
@@ -482,7 +483,7 @@ dependencies {
     // Pelias for point-of-interest search and geocoding for trip planning origin and destination
     implementation 'edu.usf.cutr:pelias-client-library:1.1.0'
     // Google Play Services Maps (only for Google flavor)
-    googleImplementation 'com.google.android.gms:play-services-maps:18.0.2'
+    googleImplementation 'com.google.android.gms:play-services-maps:18.1.0'
     // Google Play Services Places is required by ProprietaryMapHelpV2 (only for Google flavor)
     googleImplementation 'com.google.android.libraries.places:places-compat:1.1.0'
     // Amazon Maps (only for Amazon flavor)

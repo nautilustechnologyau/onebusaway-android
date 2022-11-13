@@ -42,9 +42,9 @@ import java.io.IOException;
  */
 public final class Backup {
 
-    private static final String FILE_NAME = "OneBusAway.backup";
+    private static final String FILE_NAME = "MyMetro.backup";
 
-    private static final String DIRECTORY_NAME = "OBABackups";
+    private static final String DIRECTORY_NAME = "MyMetroBackups";
 
     private static File getDB(Context context) {
         return ObaProvider.getDatabasePath(context);
