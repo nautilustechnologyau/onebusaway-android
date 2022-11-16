@@ -720,9 +720,8 @@ public final class UIUtils {
             }
         }
 
-        Intent send = new Intent(Intent.ACTION_SEND);
-        send.putExtra(Intent.EXTRA_EMAIL,
-                new String[]{email});
+        Intent send = new Intent(Intent.ACTION_SENDTO);
+        send.putExtra(Intent.EXTRA_EMAIL, new String[]{email});
         // Show trip planner subject line if we have a trip planning URL
         String subject;
         if (tripPlanUrl == null) {
@@ -740,6 +739,7 @@ public final class UIUtils {
         }
         send.putExtra(Intent.EXTRA_SUBJECT, subject);
         send.putExtra(Intent.EXTRA_TEXT, body);
+        send.setData(Uri.parse("mailto:"));
         send.setType("message/rfc822");
         try {
             context.startActivity(Intent.createChooser(send, subject));

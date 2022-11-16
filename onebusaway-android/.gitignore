@@ -1,3 +1,5 @@
 /build
 /secure.properties
 /gradle.properties
+/secrets-debug.properties
+/secrets-release.properties

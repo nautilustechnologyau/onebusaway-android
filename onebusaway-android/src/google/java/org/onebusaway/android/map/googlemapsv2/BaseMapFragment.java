@@ -60,6 +60,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.VisibleRegion;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
+import org.onebusaway.android.BuildConfig;
 import org.onebusaway.android.R;
 import org.onebusaway.android.app.Application;
 import org.onebusaway.android.io.ObaAnalytics;
@@ -321,6 +322,9 @@ public class BaseMapFragment extends SupportMapFragment
 
         mMap.setOnMarkerClickListener(mapClickListeners);
         mMap.setOnMapClickListener(mapClickListeners);
+
+        LatLng latLng = new LatLng(BuildConfig.FIXED_REGION_MAP_CENTRE_LAT, BuildConfig.FIXED_REGION_MAP_CENTRE_LON);
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, BuildConfig.FIXED_REGION_MAP_ZOOM_LEVEL));
 
         initMap(mLastSavedInstanceState);
     }

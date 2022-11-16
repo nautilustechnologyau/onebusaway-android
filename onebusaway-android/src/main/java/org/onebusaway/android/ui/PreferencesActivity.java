@@ -202,8 +202,12 @@ public class PreferencesActivity extends PreferenceActivity
             Preference experimentalRegion = findPreference(
                     getString(R.string.preference_key_experimental_regions));
             advancedCategory.removePreference(experimentalRegion);
-            // advancedCategory.removeAll();
-            // getPreferenceScreen().removePreference(advancedCategory);
+
+            if (BuildConfig.DISABLE_ADVANCED_PREFERENCE) {
+                PreferenceCategory category = (PreferenceCategory) preferenceScreen.findPreference(
+                        getString(R.string.preferences_category_parent_advanced));
+                getPreferenceScreen().removePreference(category);
+            }
         }
 
         // If the Android version is Oreo (8.0) hide "Notification" preference

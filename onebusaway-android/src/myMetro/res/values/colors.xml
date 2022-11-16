@@ -35,6 +35,6 @@
     -->
 
     <!-- Tutorials -->
-    <color name="tutorial_background">#D5B3FB</color>
+    <color name="tutorial_background">#E6D5B3FB</color>
     <!-- See src/main/res/colors.xml for more colors you can override here -->
 </resources>

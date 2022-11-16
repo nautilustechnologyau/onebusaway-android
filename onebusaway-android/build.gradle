@@ -20,6 +20,7 @@ import org.apache.tools.ant.filters.ConcatFilter
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'com.google.gms.google-services'
 
 repositories {
     maven {
@@ -34,6 +35,7 @@ repositories {
         // CUTR Releases
         url "https://github.com/CUTR-at-USF/cutr-mvn-repo/raw/master/snapshots"
     }
+    google()
     mavenCentral()
 }
 
@@ -43,7 +45,7 @@ android {
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 31
-        versionCode 131
+        versionCode 132
         versionName "2.10.2"
 
         multiDexEnabled true
@@ -123,6 +125,7 @@ android {
             buildConfigField "String", "FIXED_REGION_PAYMENT_WARNING_BODY", "null"
             buildConfigField "boolean", "FIXED_REGION_TRAVEL_BEHAVIOR_DATA_COLLECTION", "false"
             buildConfigField "boolean", "FIXED_REGION_ENROLL_PARTICIPANTS_IN_STUDY", "false"
+            buildConfigField "boolean", "ENABLE_ADMOB", "false"
         }
 
         /**
@@ -133,8 +136,6 @@ android {
          *
          *  For generating icons for the res/mipmap-* folders, see http://romannurik.github.io/AndroidAssetStudio/icons-launcher.html
          */
-
-
         agencyX {
             // "Agency X" rebranding OneBusAway as another app - see src/agencyX/res for branded resources
             dimension "brand"
@@ -256,14 +257,14 @@ android {
         }
 
         /**
-         * Add more rebranding flavors here...
+         * MyMetro - Adelaide Metro Transit" rebranding
          */
         myMetro {
             // "MyMetro - Adelaide Metro Transit" rebranding
             dimension "brand"
             applicationId "au.mymetro.android"
             manifestPlaceholders = [databaseAuthority: applicationId.toString() + '.provider']
-            buildConfigField "int", "ARRIVAL_INFO_STYLE", "1" // Defined in BuildFlavorConstants
+            buildConfigField "int", "ARRIVAL_INFO_STYLE", "0" // Defined in BuildFlavorConstants
             buildConfigField "boolean", "USE_FIXED_REGION", "true" // Supports multi-region
             buildConfigField "boolean", "USE_PELIAS_GEOCODING", "false"
             buildConfigField "String", "PELIAS_API_KEY", "\"" + getPeliasKey(name) + "\""
@@ -290,12 +291,17 @@ android {
                     "\"https://otp.nautilus-tech.com.au/otp\""
             buildConfigField "String", "FIXED_REGION_OTP_CONTACT_EMAIL",
                     "\"mymetro@nautilus-tech.com.au\""
-            buildConfigField "boolean", "FIXED_REGION_SUPPORTS_OTP_BIKESHARE", "true"
+            buildConfigField "boolean", "FIXED_REGION_SUPPORTS_OTP_BIKESHARE", "false"
             buildConfigField "String", "FIXED_REGION_PAYMENT_ANDROID_APP_ID", "null"
             buildConfigField "String", "FIXED_REGION_PAYMENT_WARNING_TITLE", "null"
             buildConfigField "String", "FIXED_REGION_PAYMENT_WARNING_BODY", "null"
             buildConfigField "boolean", "FIXED_REGION_TRAVEL_BEHAVIOR_DATA_COLLECTION", "false"
             buildConfigField "boolean", "FIXED_REGION_ENROLL_PARTICIPANTS_IN_STUDY", "false"
+            buildConfigField "boolean", "ENABLE_ADMOB", "true"
+            buildConfigField "boolean", "DISABLE_ADVANCED_PREFERENCE", "true"
+            buildConfigField "double", "FIXED_REGION_MAP_CENTRE_LAT", "-34.921230"
+            buildConfigField "double", "FIXED_REGION_MAP_CENTRE_LON", "138.599503"
+            buildConfigField "int", "FIXED_REGION_MAP_ZOOM_LEVEL", "10"
         }
     }
 
@@ -316,6 +322,18 @@ android {
             }
     }
 
+    // Get the secrets
+    applicationVariants.all { variant ->
+        def buildType = variant.buildType.name // Sets the current build type
+        def apikeyProperties = new Properties()
+        def filename = "./onebusaway-android/secrets-${buildType}.properties"
+        def apikeyPropertiesFile = rootProject.file(filename)
+        apikeyProperties.load(new FileInputStream(apikeyPropertiesFile))
+        variant.resValue "string", "admob_application_id", apikeyProperties['ADMOB_APPLICATION_ID']
+        variant.resValue "string", "admob_unit_id", apikeyProperties['ADMOB_UNIT_ID']
+        variant.resValue "string", "google_maps_api_key", apikeyProperties['GOOGLE_MAPS_API_KEY']
+    }
+
     // http://stackoverflow.com/questions/20673625/gradle-0-7-0-duplicate-files-during-packaging-of-apk
     packagingOptions {
         exclude 'META-INF/LICENSE'
@@ -329,6 +347,7 @@ android {
     if (project.hasProperty("secure.properties")
             && new File(project.property("secure.properties")).exists()) {
 
+        project.logger.lifecycle('secure.properties exists')
         Properties props = new Properties()
         props.load(new FileInputStream(file(project.property("secure.properties"))))
 
@@ -503,6 +522,8 @@ dependencies {
     implementation "androidx.concurrent:concurrent-listenablefuture-callback:1.0.0-beta01"
     implementation "androidx.core:core-ktx:1.7.0"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    // Google Ad
+    implementation 'com.google.android.gms:play-services-ads:21.3.0'
 
 }
 

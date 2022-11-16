@@ -65,7 +65,6 @@ import android.view.Window;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -82,6 +81,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.initialization.InitializationStatus;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -178,6 +182,8 @@ public class HomeActivity extends AppCompatActivity
     private FloatingActionButton mFabMyLocation;
 
     uk.co.markormesher.android_fab.FloatingActionButton mLayersFab;
+    uk.co.markormesher.android_fab.FloatingActionButton mZoomInFab;
+    uk.co.markormesher.android_fab.FloatingActionButton mZoomOutFab;
 
     private static int MY_LOC_DEFAULT_BOTTOM_MARGIN;
 
@@ -186,6 +192,8 @@ public class HomeActivity extends AppCompatActivity
     private static final int MY_LOC_BTN_ANIM_DURATION = 100;  // ms
 
     Animation mMyLocationAnimation;
+
+    private AdView mBottomAdView;
 
     /**
      * GoogleApiClient being used for Location Services
@@ -401,6 +409,21 @@ public class HomeActivity extends AppCompatActivity
                 ShowcaseViewUtils.showTutorial(ShowcaseViewUtils.TUTORIAL_WELCOME, this, null, false);
             }
         }
+
+        // Google Ad initialisation
+        if (BuildConfig.ENABLE_ADMOB) {
+            MobileAds.initialize(this, new OnInitializationCompleteListener() {
+                @Override
+                public void onInitializationComplete(InitializationStatus initializationStatus) {
+                }
+            });
+
+            AdRequest bottomAdRequest = new AdRequest.Builder().build();
+            mBottomAdView = findViewById(R.id.adViewBottom);
+            mBottomAdView.loadAd(bottomAdRequest);
+        } else {
+            mBottomAdView.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -578,6 +601,9 @@ public class HomeActivity extends AppCompatActivity
                                 mInitialStartup = false;
                                 PreferenceUtils.saveBoolean(INITIAL_STARTUP, false);
                                 checkRegionStatus();
+
+                                // forcefully invoke location button onclick to go to the location
+                                mFabMyLocation.callOnClick();
                             }
                         });
                 fm.beginTransaction()
@@ -797,6 +823,8 @@ public class HomeActivity extends AppCompatActivity
                             case 3:
                                 AgenciesActivity.start(HomeActivity.this);
                                 break;
+// TODO: MyMetro
+                                /*
                             case 4:
                                 String twitterUrl = TWITTER_URL;
                                 if (Application.get().getCurrentRegion() != null &&
@@ -810,7 +838,9 @@ public class HomeActivity extends AppCompatActivity
                                         getString(R.string.analytics_label_twitter),
                                         null);
                                 break;
-                            case 5:
+
+ */
+                            case 4:
                                 // Contact us
                                 goToSendFeedBack();
                                 break;
@@ -1345,10 +1375,19 @@ public class HomeActivity extends AppCompatActivity
     }
 
     private void setupZoomButtons() {
-        ImageButton mZoomInBtn = findViewById(R.id.btnZoomIn);
+        mZoomInFab = findViewById(R.id.btnZoomIn);
+        mZoomOutFab = findViewById(R.id.btnZoomOut);
+        mZoomInFab.setButtonIconResource(R.drawable.ic_zoom_in);
+        mZoomInFab.setButtonBackgroundColour(ContextCompat.getColor(this, R.color.theme_accent));
+        mZoomOutFab.setButtonIconResource(R.drawable.ic_zoom_out);
+        mZoomOutFab.setButtonBackgroundColour(ContextCompat.getColor(this, R.color.theme_accent));
+        mZoomInFab.setOnClickListener(view -> mMapFragment.zoomIn());
+        mZoomOutFab.setOnClickListener(view -> mMapFragment.zoomOut());
+
+        /*ImageButton mZoomInBtn = findViewById(R.id.btnZoomIn);
         ImageButton mZoomOutBtn = findViewById(R.id.btnZoomOut);
         mZoomInBtn.setOnClickListener(view -> mMapFragment.zoomIn());
-        mZoomOutBtn.setOnClickListener(view -> mMapFragment.zoomOut());
+        mZoomOutBtn.setOnClickListener(view -> mMapFragment.zoomOut());*/
     }
 
     private void setupMyLocationButton() {
@@ -1390,6 +1429,23 @@ public class HomeActivity extends AppCompatActivity
      * @param showZoom true if the zoom controls should be visible, false if they should be hidden
      */
     private void showZoomControls(boolean showZoom) {
+        if (mZoomInFab != null) {
+            if (showZoom) {
+                mZoomInFab.setVisibility(LinearLayout.VISIBLE);
+            } else {
+                mZoomInFab.setVisibility(LinearLayout.GONE);
+            }
+        }
+
+        if (mZoomOutFab != null) {
+            if (showZoom) {
+                mZoomOutFab.setVisibility(LinearLayout.VISIBLE);
+            } else {
+                mZoomOutFab.setVisibility(LinearLayout.GONE);
+            }
+        }
+
+        /*
         LinearLayout zoomLayout = findViewById(R.id.zoom_buttons_layout);
         if (zoomLayout != null) {
             if (showZoom) {
@@ -1397,7 +1453,7 @@ public class HomeActivity extends AppCompatActivity
             } else {
                 zoomLayout.setVisibility(LinearLayout.GONE);
             }
-        }
+        }*/
     }
 
     private void checkLeftHandMode() {
@@ -1430,6 +1486,22 @@ public class HomeActivity extends AppCompatActivity
                 mLayersFab.setButtonPosition(POSITION_BOTTOM | POSITION_END);
             }
         }
+
+        if (mZoomInFab != null) {
+            if (leftHandMode) {
+                mZoomInFab.setButtonPosition(POSITION_BOTTOM | POSITION_START);
+            } else {
+                mZoomInFab.setButtonPosition(POSITION_BOTTOM | POSITION_END);
+            }
+        }
+
+        if (mZoomOutFab != null) {
+            if (leftHandMode) {
+                mZoomOutFab.setButtonPosition(POSITION_BOTTOM | POSITION_START);
+            } else {
+                mZoomOutFab.setButtonPosition(POSITION_BOTTOM | POSITION_END);
+            }
+        }
     }
     
     /**
@@ -1440,6 +1512,8 @@ public class HomeActivity extends AppCompatActivity
     synchronized private void moveFabsLocation() {
         moveFabLocation(mFabMyLocation, MY_LOC_DEFAULT_BOTTOM_MARGIN);
         moveFabLocation(mLayersFab, LAYERS_FAB_DEFAULT_BOTTOM_MARGIN);
+        moveFabLocation(mZoomInFab, LAYERS_FAB_DEFAULT_BOTTOM_MARGIN);
+        moveFabLocation(mZoomOutFab, LAYERS_FAB_DEFAULT_BOTTOM_MARGIN + 120);
     }
 
     private void moveFabLocation(final View fab, final int initialMargin) {

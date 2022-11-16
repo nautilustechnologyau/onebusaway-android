@@ -20,7 +20,9 @@ import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.text.Html;
 import android.text.TextUtils;
 import android.text.style.ClickableSpan;
 import android.view.View;
@@ -162,7 +164,12 @@ public class SituationDialogFragment extends DialogFragment {
         title.setText(args.getString(TITLE));
 
         TextView desc = (TextView) dialog.findViewById(R.id.alert_description);
-        desc.setText(args.getString(DESCRIPTION));
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            desc.setText(Html.fromHtml(args.getString(DESCRIPTION), Html.FROM_HTML_MODE_COMPACT));
+        } else {
+            desc.setText(Html.fromHtml(args.getString(DESCRIPTION)));
+        }
 
         TextView urlView = (TextView) dialog.findViewById(R.id.alert_url);
 

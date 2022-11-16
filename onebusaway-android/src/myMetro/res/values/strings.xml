@@ -47,6 +47,10 @@
     <string name="preferences_db_restored">Restore successful! Please restart MyMetro.</string>
     <string name="preferences_preferred_vibration_summary">Let MyMetro notifications vibrate</string>
     <string name="preferences_preferred_sound_summary">Select the MyMetro notification tone</string>
+    <string name="preferences_category_parent_advanced">Parent Advanced</string>
+    <string name="preferences_restore_summary">Restores from previous save. After selecting this option you\'ll be asked to pick a file. Please select \"db.backup\" or \"MyMetro.backup\", which will be in a folder \"MyMetroBackups\", likely on your SD card or under your \"Documents\" folder.</string>
+    <string name="preferences_powered_by_oba_title">MyMetro Web</string>
+    <string name="preferences_powered_by_oba_summary">Go to MyMetro web (mobile version)</string>
 
     <string name="about_text">
         "Nautilus Technology is an Australian startup technology company with the vision of"
@@ -59,7 +63,7 @@
         "is using the OneBusAway transit platform. OneBusWay is a project of the non-profit"
         "Open Transit Software Foundation (OTSF). It began in 2008 as a graduate student project"
         "by Brian Ferris and Kari Watkins at the University of Washington and evolved to become"
-        "the topic of both of their PhD dissertations.Find out more about the OneBusAway"
+        "the topic of both of their PhD dissertations. Find out more about the OneBusAway"
         "open-source project at https://onebusaway.org.\n\nThe project is licensed under"
         "Apache v2.0 (https://www.apache.org/licenses/LICENSE-2.0)."
     </string>
@@ -67,8 +71,6 @@
     <!-- Trip Planner strings -->
     <string name="title_activity_trip_plan">Trip Planner</string>
     <string name="navdrawer_item_plan_trip">Plan a trip</string>
-
-    <string name="preferences_restore_summary">Restores from previous save. After selecting this option you\'ll be asked to pick a file. Please select \"db.backup\" or \"MyMetro.backup\", which will be in a folder \"MyMetroBackups\", likely on your SD card or under your \"Documents\" folder.</string>
 
     <!-- See src/main/res/strings.xml for more strings you can override here -->
     <string name="main_help_legend_ontime">Indigo means \"On time\"</string>
@@ -81,6 +83,18 @@
         canceled - this bus is NOT coming
     </string>
 
-    <string name="preferences_powered_by_oba_title">Powered by MyMetro</string>
-    <string name="preferences_powered_by_oba_summary">Find out more about the project</string>
+    <string name="zoom_control_zoom_in">Zoom In</string>
+    <string name="zoom_control_zoom_out">Zoom Out</string>
+
+    <string name="application_ignoring_battery_opt_message">Battery optimizations are enabled for
+        this application which may decrease the performance of the application. To get the best experience
+        from this application, please go to settings and disable performance optimizations for MyMetro.
+    </string>
+    <string name="main_help_whatsnew">
+        <b>Initial Release</b>\n&#8226;\u0020
+        Integrated with MyMetro transit platform for Adelaide Metro region.\n&#8226;\u0020
+        Open Trip Planner added with Google search.\n&#8226;\u0020
+        Material theme.
+    </string>
+    <string name="navdrawer_item_remove_ad">Remove advertisements</string>
 </resources>
