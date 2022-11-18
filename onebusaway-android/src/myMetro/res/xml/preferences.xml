@@ -63,7 +63,7 @@
             android:summary="@string/preferences_show_header_arrivals_summary"
             android:title="@string/preferences_show_header_arrivals_title" />
         <ListPreference
-            android:defaultValue="@string/preferences_preferred_units_option_automatic"
+            android:defaultValue="@string/preferences_preferred_units_option_metric"
             android:entries="@array/preferred_units_options"
             android:entryValues="@array/preferred_units_options"
             android:key="@string/preference_key_preferred_units"

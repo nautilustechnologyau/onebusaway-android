@@ -89,7 +89,7 @@ public class DistanceToStopView extends TextView implements LocationHelper.Liste
         mSettings = Application.getPrefs();
         preferredUnits = mSettings
                 .getString(mContext.getString(R.string.preference_key_preferred_units),
-                        AUTOMATIC);
+                        METRIC);
     }
 
     public synchronized void registerListener(Listener listener) {
@@ -120,7 +120,7 @@ public class DistanceToStopView extends TextView implements LocationHelper.Liste
     public void refreshUnitsPreference() {
         preferredUnits = mSettings
                 .getString(mContext.getString(R.string.preference_key_preferred_units),
-                        AUTOMATIC);
+                        METRIC);
     }
 
     /**

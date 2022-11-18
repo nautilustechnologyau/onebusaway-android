@@ -241,7 +241,7 @@ public class PreferenceUtils {
 
         String preferredUnits = mSettings
                 .getString(context.getString(R.string.preference_key_preferred_units),
-                        AUTOMATIC);
+                        METRIC);
 
         if (preferredUnits.equalsIgnoreCase(AUTOMATIC)) {
             // If the country is set to USA, assume imperial, otherwise metric

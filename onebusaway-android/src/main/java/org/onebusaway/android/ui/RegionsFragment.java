@@ -290,7 +290,7 @@ public class RegionsFragment extends ListFragment
 
                 String preferredUnits = mSettings
                         .getString(getString(R.string.preference_key_preferred_units),
-                                AUTOMATIC);
+                                METRIC);
 
                 if (preferredUnits.equalsIgnoreCase(AUTOMATIC)) {
                     Log.d(TAG, "Setting units automatically");
