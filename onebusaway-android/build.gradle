@@ -45,7 +45,7 @@ android {
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 31
-        versionCode 132
+        versionCode 134
         versionName "2.10.2"
 
         multiDexEnabled true
@@ -469,7 +469,9 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics:21.0.0'
     // Cloud Firestore (for storing destination alert test data)
     implementation 'com.google.firebase:firebase-firestore:24.1.2'
-    implementation 'com.google.firebase:firebase-auth:21.0.5'
+    implementation ('com.google.firebase:firebase-auth:21.0.5') {
+        exclude module: "play-services-safetynet"
+    }
     implementation 'com.google.firebase:firebase-storage:20.0.1'
     // Google Play Services Location (we need this on Amazon flavor too)
     implementation 'com.google.android.gms:play-services-location:19.0.1'
