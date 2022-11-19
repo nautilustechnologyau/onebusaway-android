@@ -56,11 +56,10 @@
         android:networkSecurityConfig="@xml/network_security_config"
         android:requestLegacyExternalStorage="true">
 
-        <!--
         <meta-data
             android:name="android.app.default_searchable"
             android:value="org.onebusaway.android.ui.SearchActivity" />
-        -->
+
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="@string/admob_application_id"/>
