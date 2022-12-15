@@ -271,8 +271,8 @@ android {
             // Fixed region info that the app will use
             buildConfigField "String", "FIXED_REGION_NAME", "\"Adelaide Metro\""
             buildConfigField "String", "FIXED_REGION_OBA_BASE_URL",
-                    "\"https://nsw.mymetro.au/onebusaway-api-webapp/\""
-            buildConfigField "String", "FIXED_REGION_SIRI_BASE_URL", "\"https://nsw.mymetro.au/onebusaway-api-webapp/siri/\""
+                    "\"https://transit.nautilus-tech.com.au/onebusaway-api-webapp/\""
+            buildConfigField "String", "FIXED_REGION_SIRI_BASE_URL", "\"https://transit.nautilus-tech.com.au/onebusaway-api-webapp/siri/\""
             buildConfigField "double", "FIXED_REGION_BOUNDS_LAT", "-34.89224"
             buildConfigField "double", "FIXED_REGION_BOUNDS_LON", "138.61566499999998"
             buildConfigField "double", "FIXED_REGION_BOUNDS_LAT_SPAN", "0.5954540000000037"

@@ -1898,7 +1898,11 @@ public final class UIUtils {
             return Occupancy.FULL;
         }
 
-        if (timeOfDay <= 21) {
+        if (timeOfDay <= 20) {
+            return Occupancy.FEW_SEATS_AVAILABLE;
+        }
+
+        if (timeOfDay <= 22) {
             return Occupancy.MANY_SEATS_AVAILABLE;
         }
 
@@ -1923,12 +1927,15 @@ public final class UIUtils {
 
         // Hide the entire view group if occupancy is null
         if (occupancy1 == null) {
-            if (OccupancyState.REALTIME == occupancyState) {
+            /*if (OccupancyState.HISTORICAL == occupancyState) {
                 occupancy1 = predictOccupancy();
+                v.setVisibility(View.VISIBLE);
             } else {
                 v.setVisibility(View.GONE);
                 return;
-            }
+            }*/
+            v.setVisibility(View.GONE);
+            return;
         } else {
             v.setVisibility(View.VISIBLE);
         }
@@ -1938,7 +1945,7 @@ public final class UIUtils {
         float alpha = 0f;
         if (occupancyState == OccupancyState.HISTORICAL) {
             // Set the alpha for historical occupancy to 60%
-            alpha = 0.6f;
+            alpha = 0.7f;
             v.setAlpha(alpha);
         }
 

@@ -808,7 +808,7 @@ class ArrivalsListHeader {
                     mRealtimeView1.setVisibility(View.VISIBLE);
                 } else {
                     mRealtimeView1.setVisibility(View.GONE);
-                    UIUtils.setOccupancyVisibilityAndColor(mOccupancyView1, null, OccupancyState.HISTORICAL);
+                    UIUtils.setOccupancyVisibilityAndColor(mOccupancyView1, null, OccupancyState.HISTORICAL, R.color.header_text_color);
                     UIUtils.setOccupancyContentDescription(mOccupancyView1, null, OccupancyState.HISTORICAL);
                 }
 
@@ -819,7 +819,7 @@ class ArrivalsListHeader {
                     UIUtils.setOccupancyContentDescription(mOccupancyView1, occupancyStatus1, OccupancyState.REALTIME);
                 } else {
                     // Hide occupancy by setting null value
-                    UIUtils.setOccupancyVisibilityAndColor(mOccupancyView1, null, OccupancyState.HISTORICAL);
+                    UIUtils.setOccupancyVisibilityAndColor(mOccupancyView1, null, OccupancyState.HISTORICAL, R.color.header_text_color);
                     UIUtils.setOccupancyContentDescription(mOccupancyView1, null, OccupancyState.HISTORICAL);
                 }
 
@@ -927,7 +927,7 @@ class ArrivalsListHeader {
                         mRealtimeView2.setVisibility(View.VISIBLE);
                     } else {
                         mRealtimeView2.setVisibility(View.GONE);
-                        UIUtils.setOccupancyVisibilityAndColor(mOccupancyView2, null, OccupancyState.HISTORICAL);
+                        UIUtils.setOccupancyVisibilityAndColor(mOccupancyView2, null, OccupancyState.HISTORICAL, R.color.header_text_color);
                         UIUtils.setOccupancyContentDescription(mOccupancyView2, null, OccupancyState.HISTORICAL);
                     }
 
@@ -938,7 +938,7 @@ class ArrivalsListHeader {
                         UIUtils.setOccupancyContentDescription(mOccupancyView2, occupancyStatus2, OccupancyState.REALTIME);
                     } else {
                         // Hide occupancy by setting null value
-                        UIUtils.setOccupancyVisibilityAndColor(mOccupancyView2, null, OccupancyState.HISTORICAL);
+                        UIUtils.setOccupancyVisibilityAndColor(mOccupancyView2, null, OccupancyState.HISTORICAL, R.color.header_text_color);
                         UIUtils.setOccupancyContentDescription(mOccupancyView2, null, OccupancyState.HISTORICAL);
                     }
 

@@ -89,7 +89,7 @@
             android:id="@+id/eta_table"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/stop_details_container"
+            android:layout_above="@+id/stop_details_container"
             android:shrinkColumns="1"
             android:stretchColumns="1, 2">
 
@@ -147,85 +147,88 @@
             android:id="@+id/stop_details_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="0dp"
-            android:layout_marginTop="0dp"
-            android:layout_marginEnd="0dp"
-            android:layout_marginBottom="0dp"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:layout_alignParentBottom="true"
+            android:layout_centerInParent="true"
+            android:layout_marginLeft="@dimen/keyline_1"
+            android:layout_marginRight="@dimen/keyline_1"
+            android:paddingRight="@dimen/keyline_1"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="@dimen/arrival_header_bottom_margin">
 
             <ImageButton
                 android:id="@+id/stop_favorite"
+                android:src="@drawable/ic_toggle_star_outline"
+                android:contentDescription="@string/stop_info_favorite"
+                android:background="?attr/selectableItemBackground"
+                android:maxHeight="14dp"
+                android:maxWidth="14dp"
+                android:minHeight="14dp"
+                android:minWidth="14dp"
                 android:layout_width="25dp"
                 android:layout_height="25dp"
-                android:layout_gravity="center_vertical"
                 android:layout_marginLeft="2dp"
-                android:adjustViewBounds="true"
-                android:background="?attr/selectableItemBackground"
-                android:contentDescription="@string/stop_info_favorite"
-                android:gravity="center"
-                android:maxWidth="25dp"
-                android:maxHeight="25dp"
-                android:minWidth="25dp"
-                android:minHeight="25dp"
-                android:padding="5dp"
+                android:layout_gravity="center_vertical"
                 android:scaleType="fitCenter"
-                android:src="@drawable/ic_toggle_star_outline" />
+                android:adjustViewBounds="true"
+                android:gravity="center"
+                android:padding="5dp"/>
 
             <LinearLayout
                 android:id="@+id/stop_name_and_info_container"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerVertical="false"
+                android:layout_centerVertical="true"
                 android:layout_toRightOf="@+id/stop_favorite"
-                android:layout_weight="1"
-                android:weightSum="1">
+                android:weightSum="1"
+                android:layout_weight="1">
                 <!-- The layout_weight on this container indicates that this layout can fill
                     any space not consumed by the stop_favorite and stop_discussion images -->
 
                 <TextView
                     android:id="@+id/stop_name"
+                    android:textSize="17sp"
+                    android:text="University Area Transit Center"
+                    android:textColor="@color/header_text_color"
+                    android:ellipsize="end"
+                    android:singleLine="true"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="left|center_vertical"
-                    android:layout_marginLeft="1dp"
-                    android:layout_weight="0.75"
-                    android:ellipsize="end"
-                    android:singleLine="true"
-                    android:text="University Area Transit Center"
-                    android:textColor="@color/header_text_color"
+                    android:layout_weight=".95"
                     android:textIsSelectable="false"
-                    android:textSize="17sp" />
+                    android:layout_marginLeft="1dp"/>
 
                 <TextView
                     android:id="@+id/stop_direction"
+                    android:textSize="14sp"
+                    android:text=" (N)"
+                    android:textColor="@color/header_text_faded_color"
+                    android:ellipsize="none"
+                    android:singleLine="true"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="left|center_vertical"
                     android:layout_weight=".05"
-                    android:ellipsize="none"
-                    android:singleLine="true"
-                    android:text=" (NW)"
-                    android:textColor="@color/header_text_faded_color"
-                    android:textIsSelectable="false"
-                    android:textSize="14sp" />
+                    android:textIsSelectable="false"/>
 
                 <ImageButton
                     android:id="@+id/stop_info_button"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_gravity="center_vertical"
+                    android:background="?attr/selectableItemBackground"
+                    android:src="@drawable/ic_stop_info"
+                    android:contentDescription="@string/stop_info_button_content_description"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
                     android:layout_marginRight="2dp"
                     android:layout_weight=".05"
-                    android:adjustViewBounds="true"
-                    android:background="?attr/selectableItemBackground"
-                    android:contentDescription="@string/stop_info_button_content_description"
-                    android:maxWidth="12dp"
-                    android:maxHeight="12dp"
+                    android:layout_gravity="center_vertical"
                     android:minWidth="12dp"
+                    android:maxWidth="12dp"
                     android:minHeight="12dp"
-                    android:padding="5dp"
+                    android:maxHeight="12dp"
                     android:scaleType="fitCenter"
-                    android:src="@drawable/ic_stop_info" />
+                    android:adjustViewBounds="true"
+                    android:padding="5dp"/>
             </LinearLayout>
         </LinearLayout>
 
@@ -234,41 +237,39 @@
             style="?android:progressBarStyleLarge"
             android:layout_width="60dp"
             android:layout_height="60dp"
-            android:layout_centerInParent="true"
             android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
             android:paddingRight="8dp"
             android:paddingBottom="5dp"
-            android:visibility="visible" />
+            android:visibility="visible"
+            android:layout_marginTop="8dp"
+            android:layout_centerInParent="true"/>
 
         <TextView
-                android:id="@+id/no_arrivals"
-                android:textSize="17sp"
-                android:textColor="@color/header_text_color"
-                android:ellipsize="end"
-                android:singleLine="true"
-                android:layout_gravity="center"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:layout_below="@+id/stop_details_container"
-                android:textIsSelectable="false"
-                android:layout_centerVertical="true"
-                android:layout_centerHorizontal="true"
-                android:visibility="gone"/>
+            android:id="@+id/no_arrivals"
+            android:textSize="18sp"
+            android:textColor="@color/header_text_color"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_above="@+id/stop_details_container"
+            android:textIsSelectable="false" android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
+            android:visibility="gone"/>
 
         <ImageView
             android:id="@+id/expand_collapse"
+            android:src="@drawable/ic_chevron_up"
+            android:contentDescription="@string/stop_header_sliding_panel_collapsed"
             android:layout_width="13dp"
             android:layout_height="13dp"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="8dp"
-            android:layout_marginTop="8dp"
             android:layout_marginBottom="@dimen/arrival_header_bottom_margin_expand_collapse"
-            android:contentDescription="@string/stop_header_sliding_panel_collapsed"
-            android:src="@drawable/ic_chevron_up"
-            android:tint="@color/header_text_faded_color" />
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="@dimen/keyline_1"
+            android:tint="@color/header_text_faded_color"/>
 
         <ImageView
                 android:id="@+id/alert"

@@ -1003,8 +1003,8 @@ public class VehicleOverlay implements AmazonMap.OnInfoWindowClickListener, Mark
                 UIUtils.setOccupancyContentDescription(occupancyView, status.getOccupancyStatus(), OccupancyState.REALTIME);
             } else {
                 // Hide occupancy by setting null value
-                UIUtils.setOccupancyVisibilityAndColor(occupancyView, null, OccupancyState.REALTIME);
-                UIUtils.setOccupancyContentDescription(occupancyView, null, OccupancyState.REALTIME);
+                UIUtils.setOccupancyVisibilityAndColor(occupancyView, null, OccupancyState.HISTORICAL);
+                UIUtils.setOccupancyContentDescription(occupancyView, null, OccupancyState.HISTORICAL);
             }
 
             return view;
