@@ -116,6 +116,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -1855,41 +1856,97 @@ public final class UIUtils {
         }
     }
 
+    public static Occupancy predictOccupancy() {
+        Calendar c = Calendar.getInstance();
+        int dayOfWeek = c.get(Calendar.DAY_OF_WEEK);
+        int timeOfDay = c.get(Calendar.HOUR_OF_DAY);
+
+        // early in the morning
+        if (timeOfDay < 6) {
+            return Occupancy.EMPTY;
+        }
+
+        if (dayOfWeek == Calendar.SUNDAY || dayOfWeek == Calendar.SATURDAY) {
+            // weekend evening
+            if (timeOfDay >= 17) {
+                return Occupancy.FEW_SEATS_AVAILABLE;
+            }
+
+            return Occupancy.MANY_SEATS_AVAILABLE;
+        }
+
+        if (timeOfDay <= 8) {
+            return Occupancy.MANY_SEATS_AVAILABLE;
+        }
+
+        // office hour
+        if (timeOfDay <= 10) {
+            return Occupancy.FULL;
+        }
+
+        if (timeOfDay < 15) {
+            return Occupancy.MANY_SEATS_AVAILABLE;
+        }
+
+        // school pickup
+        if (timeOfDay == 15) {
+            return Occupancy.FEW_SEATS_AVAILABLE;
+        }
+
+        // office end
+        if (timeOfDay <= 18) {
+            return Occupancy.FULL;
+        }
+
+        if (timeOfDay <= 21) {
+            return Occupancy.MANY_SEATS_AVAILABLE;
+        }
+
+        return Occupancy.EMPTY;
+    }
+
     /**
      * Sets the visibility and colors of the silhouettes in the provided occupancy.xml viewgroup
      *  @param v         occupancy.xml layout viewgroup containing the silhouettes
      * @param occupancy the occupancy value to use to set the silhouette visibility
      * @param occupancyState the state of the occupancy to use to set the silhouette color
      */
-    public static void setOccupancyVisibilityAndColor(ViewGroup v, Occupancy occupancy, OccupancyState occupancyState) {
+    public static void setOccupancyVisibilityAndColor(ViewGroup v, Occupancy occupancy, OccupancyState occupancyState, int color) {
         ImageView silhouette1 = v.findViewById(R.id.silhouette1);
-        silhouette1.setVisibility(View.INVISIBLE);
+        silhouette1.setVisibility(View.GONE);
         ImageView silhouette2 = v.findViewById(R.id.silhouette2);
-        silhouette2.setVisibility(View.INVISIBLE);
+        silhouette2.setVisibility(View.GONE);
         ImageView silhouette3 = v.findViewById(R.id.silhouette3);
-        silhouette3.setVisibility(View.INVISIBLE);
+        silhouette3.setVisibility(View.GONE);
+
+        Occupancy occupancy1 = occupancy;
 
         // Hide the entire view group if occupancy is null
-        if (occupancy == null) {
-            v.setVisibility(View.GONE);
-            return;
+        if (occupancy1 == null) {
+            if (OccupancyState.REALTIME == occupancyState) {
+                occupancy1 = predictOccupancy();
+            } else {
+                v.setVisibility(View.GONE);
+                return;
+            }
         } else {
             v.setVisibility(View.VISIBLE);
         }
 
-        int silhouetteColor = Application.get().getResources().getColor(R.color.stop_info_occupancy);
-        int backgroundColor = Application.get().getResources().getColor(R.color.stop_info_occupancy_background);
+        //int silhouetteColor = Application.get().getResources().getColor(R.color.stop_info_occupancy);
+        //int backgroundColor = Application.get().getResources().getColor(R.color.stop_info_occupancy_background);
+        float alpha = 0f;
         if (occupancyState == OccupancyState.HISTORICAL) {
             // Set the alpha for historical occupancy to 60%
-            float alpha = 0.6f;
+            alpha = 0.6f;
             v.setAlpha(alpha);
-            silhouette1.setAlpha(alpha);
-            silhouette2.setAlpha(alpha);
-            silhouette3.setAlpha(alpha);
         }
 
+        // Set silhouette colors
+        int silhouetteColor = Application.get().getResources().getColor(color);
+
         // Below switch continues into following cases to minimize number of setVisibility() calls
-        switch (occupancy) {
+        switch (occupancy1) {
             case NOT_ACCEPTING_PASSENGERS:
                 // 3 icons
             case FULL:
@@ -1897,28 +1954,55 @@ public final class UIUtils {
             case CRUSHED_STANDING_ROOM_ONLY:
                 // 3 icons
                 silhouette3.setVisibility(View.VISIBLE);
+                ImageViewCompat.setImageTintList(silhouette3, ColorStateList.valueOf(silhouetteColor));
+                break;
+
             case STANDING_ROOM_ONLY:
-                // 2 icons
-                silhouette2.setVisibility(View.VISIBLE);
             case FEW_SEATS_AVAILABLE:
                 // 2 icons
                 silhouette2.setVisibility(View.VISIBLE);
+                ImageViewCompat.setImageTintList(silhouette2, ColorStateList.valueOf(silhouetteColor));
+                break;
+
             case MANY_SEATS_AVAILABLE:
                 // 1 icon
                 silhouette1.setVisibility(View.VISIBLE);
+                ImageViewCompat.setImageTintList(silhouette1, ColorStateList.valueOf(silhouetteColor));
+                break;
+
             case EMPTY:
                 // 0 icons
         }
 
-        // Set silhouette colors
-        ImageViewCompat.setImageTintList(silhouette1, ColorStateList.valueOf(silhouetteColor));
-        ImageViewCompat.setImageTintList(silhouette2, ColorStateList.valueOf(silhouetteColor));
-        ImageViewCompat.setImageTintList(silhouette3, ColorStateList.valueOf(silhouetteColor));
+        if (alpha > 0) {
+            if (silhouette1.getVisibility() == View.VISIBLE) {
+                silhouette1.setAlpha(alpha);
+            }
+
+            if (silhouette2.getVisibility() == View.VISIBLE) {
+                silhouette2.setAlpha(alpha);
+            }
+            if (silhouette3.getVisibility() == View.VISIBLE) {
+                silhouette3.setAlpha(alpha);
+            }
+        }
+
+
 
         // Set background color
-        v.setBackgroundResource(R.drawable.occupancy_background);
+        /*v.setBackgroundResource(R.drawable.occupancy_background);
         GradientDrawable d = (GradientDrawable) v.getBackground();
-        d.setColor(backgroundColor);
+        d.setColor(backgroundColor);*/
+    }
+
+    /**
+     * Sets the visibility and colors of the silhouettes in the provided occupancy.xml viewgroup
+     *  @param v         occupancy.xml layout viewgroup containing the silhouettes
+     * @param occupancy the occupancy value to use to set the silhouette visibility
+     * @param occupancyState the state of the occupancy to use to set the silhouette color
+     */
+    public static void setOccupancyVisibilityAndColor(ViewGroup v, Occupancy occupancy, OccupancyState occupancyState) {
+        setOccupancyVisibilityAndColor(v, occupancy, occupancyState, R.color.theme_muted);
     }
 
     /**

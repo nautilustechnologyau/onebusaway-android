@@ -891,6 +891,9 @@ public class VehicleOverlay implements GoogleMap.OnInfoWindowClickListener, Mark
             TextView routeView = (TextView) view.findViewById(R.id.route_and_destination);
             TextView statusView = (TextView) view.findViewById(R.id.status);
             TextView lastUpdatedView = (TextView) view.findViewById(R.id.last_updated);
+            ImageView airConditionerView = (ImageView) view.findViewById(R.id.air_conditioner);
+            ImageView wheelchairAccessibilityView = (ImageView) view.findViewById(R.id.wheelchair);
+            ImageView onlineView = (ImageView) view.findViewById(R.id.online);
             ImageView moreView = (ImageView) view.findViewById(R.id.trip_more_info);
             moreView.setColorFilter(r.getColor(R.color.switch_thumb_normal_material_dark));
             ViewGroup occupancyView = view.findViewById(R.id.occupancy);
@@ -899,11 +902,29 @@ public class VehicleOverlay implements GoogleMap.OnInfoWindowClickListener, Mark
             ObaTrip trip = mLastResponse.getTrip(status.getActiveTripId());
             ObaRoute route = mLastResponse.getRoute(trip.getRouteId());
 
+            if (status.getAirConditioned()) {
+                airConditionerView.setVisibility(View.VISIBLE);
+            } else {
+                airConditionerView.setVisibility(View.GONE);
+            }
+
+            if (status.getWheelchairAccessible()) {
+                wheelchairAccessibilityView.setVisibility(View.VISIBLE);
+            } else {
+                wheelchairAccessibilityView.setVisibility(View.GONE);
+            }
+
             routeView.setText(UIUtils.getRouteDisplayName(route) + " " +
                     mContext.getString(R.string.trip_info_separator) + " " + UIUtils
                     .formatDisplayText(trip.getHeadsign()));
 
             boolean isRealtime = isLocationRealtime(status);
+
+            if (isRealtime) {
+                onlineView.setVisibility(View.VISIBLE);
+            } else {
+                onlineView.setVisibility(View.GONE);
+            }
 
             statusView.setBackgroundResource(R.drawable.round_corners_style_b_status);
             GradientDrawable d = (GradientDrawable) statusView.getBackground();

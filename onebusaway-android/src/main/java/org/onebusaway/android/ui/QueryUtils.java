@@ -25,6 +25,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -38,6 +39,7 @@ import androidx.loader.content.CursorLoader;
  * @author paulw
  */
 public final class QueryUtils {
+    public static final String TAG = "QueryUtils";
 
     static protected CursorLoader newRecentQuery(
             final Context context,
@@ -241,6 +243,7 @@ public final class QueryUtils {
         }
 
         String routeId = routeUri.getLastPathSegment();
+        Log.d(TAG, routeId);
 
         // Make sure this route has been inserted into the routes table
         ObaContract.Routes.insertOrUpdate(context, routeId, routeValues, true);

@@ -28,6 +28,7 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.provider.BaseColumns;
 import android.text.format.Time;
+import android.util.Log;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 
@@ -1609,6 +1610,7 @@ public final class ObaContract {
             }
 
             final String WHERE = ROUTE_ID + "=? AND " + HEADSIGN + "=? AND " + STOP_ID + "=?";
+            Log.d(TAG, WHERE);
             final String[] selectionArgs = {routeId, headsign, stopIdInternal};
             if (favorite) {
                 if (stopIdInternal != ALL_STOPS) {
