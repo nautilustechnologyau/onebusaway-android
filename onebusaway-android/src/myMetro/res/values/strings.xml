@@ -90,10 +90,8 @@
         from this application, please go to settings and disable performance optimizations for MyMetro.
     </string>
     <string name="main_help_whatsnew">
-        <b>Initial Release</b>\n&#8226;\u0020
-        Integrated with MyMetro transit platform for Adelaide Metro region.\n&#8226;\u0020
-        Open Trip Planner added with Google search.\n&#8226;\u0020
-        Material theme.
+        <b>Bug Fix Release</b>\n&#8226;\u0020
+        Open Trip Planner crash bug fixed
     </string>
     <string name="navdrawer_item_remove_ad">Remove advertisements</string>
 </resources>
