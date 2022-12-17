@@ -62,7 +62,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="2dp"
-                android:text="H20"
+                android:text="GLNELG"
                 style="@style/ArrivalsListItemRouteName"
                 android:textColor="@color/header_text_color"/>
 
@@ -82,69 +82,16 @@
             android:textIsSelectable="false"
             android:textSize="14sp" />
 
-        <ImageView
-            android:id="@+id/wheelchair"
+        <include
+            android:id="@+id/vehicle_features"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/eta_route_name"
-            android:layout_marginStart="4dp"
-            android:layout_marginBottom="9dp"
-            android:layout_toRightOf="@+id/eta_route_name"
-            android:adjustViewBounds="true"
+            layout="@layout/vehicle_features"
+            android:layout_marginStart="2dp"
             android:gravity="bottom"
-            android:maxWidth="@dimen/other_icon"
-            android:maxHeight="@dimen/other_icon"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_access"
-            android:tint="@color/header_text_color" />
-
-        <ImageView
-            android:id="@+id/air_conditioner"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/eta_route_name"
-            android:layout_marginStart="@dimen/occupancy_margin"
             android:layout_marginBottom="9dp"
-            android:layout_toRightOf="@+id/wheelchair"
-            android:adjustViewBounds="true"
-            android:gravity="bottom"
-            android:maxWidth="@dimen/other_icon"
-            android:maxHeight="@dimen/other_icon"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_snow"
-            android:tint="@color/header_text_color" />
-
-        <ImageView
-            android:id="@+id/realtime"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/eta_route_name"
-            android:layout_marginStart="@dimen/occupancy_margin"
-            android:layout_marginBottom="9dp"
-            android:layout_toRightOf="@+id/air_conditioner"
-            android:adjustViewBounds="true"
-            android:gravity="bottom"
-            android:maxWidth="@dimen/other_icon"
-            android:maxHeight="@dimen/other_icon"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_signal"
-            android:tint="@color/header_text_color" />
-
-        <ImageView
-            android:id="@+id/speed"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/eta_route_name"
-            android:layout_marginStart="@dimen/occupancy_margin"
-            android:layout_marginBottom="9dp"
-            android:layout_toRightOf="@+id/realtime"
-            android:adjustViewBounds="true"
-            android:gravity="bottom"
-            android:maxWidth="@dimen/other_icon"
-            android:maxHeight="@dimen/other_icon"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_very_slow"
-            android:tint="@color/header_text_color" />
+            android:layout_toEndOf="@+id/eta_route_name" />
 
         <include
             android:id="@+id/occupancy"
@@ -155,7 +102,8 @@
             android:gravity="bottom"
             android:layout_alignBottom="@+id/eta_route_name"
             android:layout_marginBottom="9dp"
-            android:layout_toEndOf="@+id/realtime" />
+            android:layout_toEndOf="@+id/vehicle_features" />
+
     </RelativeLayout>
 
     <include

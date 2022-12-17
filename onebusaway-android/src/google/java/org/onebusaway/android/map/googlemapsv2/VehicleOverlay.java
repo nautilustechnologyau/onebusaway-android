@@ -841,15 +841,7 @@ public class VehicleOverlay implements GoogleMap.OnInfoWindowClickListener, Mark
      * is not
      */
     protected static boolean isLocationRealtime(ObaTripStatus status) {
-        boolean isRealtime = true;
-        Location l = status.getLastKnownLocation();
-        if (l == null) {
-            isRealtime = false;
-        }
-        if (!status.isPredicted()) {
-            isRealtime = false;
-        }
-        return isRealtime;
+        return UIUtils.isLocationRealtime(status);
     }
 
     /**
@@ -891,40 +883,20 @@ public class VehicleOverlay implements GoogleMap.OnInfoWindowClickListener, Mark
             TextView routeView = (TextView) view.findViewById(R.id.route_and_destination);
             TextView statusView = (TextView) view.findViewById(R.id.status);
             TextView lastUpdatedView = (TextView) view.findViewById(R.id.last_updated);
-            ImageView airConditionerView = (ImageView) view.findViewById(R.id.air_conditioner);
-            ImageView wheelchairAccessibilityView = (ImageView) view.findViewById(R.id.wheelchair);
-            ImageView onlineView = (ImageView) view.findViewById(R.id.online);
             ImageView moreView = (ImageView) view.findViewById(R.id.trip_more_info);
             moreView.setColorFilter(r.getColor(R.color.switch_thumb_normal_material_dark));
             ViewGroup occupancyView = view.findViewById(R.id.occupancy);
+            ViewGroup vehicleFeaturesView = view.findViewById(R.id.vehicle_features);
 
             // Get route/trip details
             ObaTrip trip = mLastResponse.getTrip(status.getActiveTripId());
             ObaRoute route = mLastResponse.getRoute(trip.getRouteId());
-
-            if (status.getAirConditioned()) {
-                airConditionerView.setVisibility(View.VISIBLE);
-            } else {
-                airConditionerView.setVisibility(View.GONE);
-            }
-
-            if (status.getWheelchairAccessible()) {
-                wheelchairAccessibilityView.setVisibility(View.VISIBLE);
-            } else {
-                wheelchairAccessibilityView.setVisibility(View.GONE);
-            }
 
             routeView.setText(UIUtils.getRouteDisplayName(route) + " " +
                     mContext.getString(R.string.trip_info_separator) + " " + UIUtils
                     .formatDisplayText(trip.getHeadsign()));
 
             boolean isRealtime = isLocationRealtime(status);
-
-            if (isRealtime) {
-                onlineView.setVisibility(View.VISIBLE);
-            } else {
-                onlineView.setVisibility(View.GONE);
-            }
 
             statusView.setBackgroundResource(R.drawable.round_corners_style_b_status);
             GradientDrawable d = (GradientDrawable) statusView.getBackground();
@@ -942,6 +914,7 @@ public class VehicleOverlay implements GoogleMap.OnInfoWindowClickListener, Mark
                 statusColor = ArrivalInfoUtils.computeColorFromDeviation(deviationMin);
                 d.setColor(r.getColor(statusColor));
                 statusView.setPadding(pSides, pTopBottom, pSides, pTopBottom);
+                UIUtils.setVehicleFeatures(vehicleFeaturesView, status, R.color.theme_muted);
             } else {
                 // Scheduled info
                 statusView.setText(r.getString(R.string.stop_info_scheduled));
@@ -953,6 +926,9 @@ public class VehicleOverlay implements GoogleMap.OnInfoWindowClickListener, Mark
                 // Hide occupancy by setting null value
                 UIUtils.setOccupancyVisibilityAndColor(occupancyView, null, OccupancyState.HISTORICAL);
                 UIUtils.setOccupancyContentDescription(occupancyView, null, OccupancyState.HISTORICAL);
+
+                // Hide vehicle features
+                UIUtils.setVehicleFeatures(vehicleFeaturesView, null, R.color.theme_muted);
 
                 return view;
             }

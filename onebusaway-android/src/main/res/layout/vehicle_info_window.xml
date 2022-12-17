@@ -39,6 +39,18 @@
         android:layout_marginBottom="2dp" />
 
     <include
+        android:id="@+id/vehicle_features"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        layout="@layout/vehicle_features"
+        android:layout_marginStart="5dp"
+        android:layout_marginLeft="5dp"
+        app:layout_constraintTop_toTopOf="@id/status"
+        app:layout_constraintBottom_toBottomOf="@id/status"
+        app:layout_constraintStart_toEndOf="@+id/status"
+        android:visibility="gone" />
+
+    <include
         android:id="@+id/occupancy"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
@@ -47,55 +59,8 @@
         android:layout_marginLeft="5dp"
         app:layout_constraintTop_toTopOf="@id/status"
         app:layout_constraintBottom_toBottomOf="@id/status"
-        app:layout_constraintStart_toEndOf="@+id/status" />
-
-    <ImageView
-        android:id="@+id/wheelchair"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
-        android:layout_marginStart="@dimen/occupancy_margin"
-        android:layout_marginLeft="@dimen/occupancy_margin"
-        app:layout_constraintTop_toTopOf="@id/status"
-        app:layout_constraintBottom_toBottomOf="@id/status"
-        app:layout_constraintStart_toEndOf="@+id/occupancy"
-        android:maxHeight="16dp"
-        android:maxWidth="16dp"
-        android:scaleType="fitCenter"
-        android:adjustViewBounds="true"
-        android:src="@drawable/ic_access"
-        android:tint="@color/theme_muted"/>
-
-    <ImageView
-        android:id="@+id/air_conditioner"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
-        android:layout_marginStart="@dimen/occupancy_margin"
-        android:layout_marginLeft="@dimen/occupancy_margin"
-        app:layout_constraintTop_toTopOf="@id/status"
-        app:layout_constraintBottom_toBottomOf="@id/status"
-        app:layout_constraintStart_toEndOf="@+id/wheelchair"
-        android:maxHeight="16dp"
-        android:maxWidth="16dp"
-        android:scaleType="fitCenter"
-        android:adjustViewBounds="true"
-        android:src="@drawable/ic_snow"
-        android:tint="@color/theme_muted"/>
-
-    <ImageView
-        android:id="@+id/online"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
-        android:layout_marginStart="@dimen/occupancy_margin"
-        android:layout_marginLeft="@dimen/occupancy_margin"
-        app:layout_constraintTop_toTopOf="@id/status"
-        app:layout_constraintBottom_toBottomOf="@id/status"
-        app:layout_constraintStart_toEndOf="@+id/air_conditioner"
-        android:maxHeight="16dp"
-        android:maxWidth="16dp"
-        android:scaleType="fitCenter"
-        android:adjustViewBounds="true"
-        android:src="@drawable/ic_signal"
-        android:tint="@color/theme_muted"/>
+        app:layout_constraintStart_toEndOf="@+id/vehicle_features"
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/last_updated"

@@ -100,6 +100,7 @@ import org.onebusaway.android.io.elements.ObaRegion;
 import org.onebusaway.android.io.elements.ObaRoute;
 import org.onebusaway.android.io.elements.ObaSituation;
 import org.onebusaway.android.io.elements.ObaStop;
+import org.onebusaway.android.io.elements.ObaTripStatus;
 import org.onebusaway.android.io.elements.Occupancy;
 import org.onebusaway.android.io.elements.OccupancyState;
 import org.onebusaway.android.io.request.ObaArrivalInfoResponse;
@@ -2087,6 +2088,75 @@ public final class UIUtils {
         }
 
         v.setContentDescription(Application.get().getString(stringId));
+    }
+
+    public static void setVehicleFeatures(ViewGroup v, ObaTripStatus tripStatus, int color) {
+        if (v == null) {
+            return;
+        }
+
+        if (tripStatus == null) {
+            v.setVisibility(View.GONE);
+            return;
+        } else {
+            v.setVisibility(View.VISIBLE);
+        }
+
+        ImageView mAirConditionerView = v.findViewById(R.id.air_conditioner);
+        ImageView mWheelchairAccessibilityView = v.findViewById(R.id.wheelchair);
+        ImageView mSpeed = v.findViewById(R.id.speed);
+        // ImageView mRealtimeView = v.findViewById(R.id.realtime);
+
+        int featureColor = Application.get().getResources().getColor(color);
+
+        if (tripStatus.getAirConditioned()) {
+            ImageViewCompat.setImageTintList(mAirConditionerView, ColorStateList.valueOf(featureColor));
+            mAirConditionerView.setVisibility(View.VISIBLE);
+        } else {
+            mAirConditionerView.setVisibility(View.GONE);
+        }
+
+        if (tripStatus.getWheelchairAccessible()) {
+            ImageViewCompat.setImageTintList(mWheelchairAccessibilityView, ColorStateList.valueOf(featureColor));
+            mWheelchairAccessibilityView.setVisibility(View.VISIBLE);
+        } else {
+            mWheelchairAccessibilityView.setVisibility(View.GONE);
+        }
+
+        /*if (isLocationRealtime(tripStatus)) {
+            ImageViewCompat.setImageTintList(mRealtimeView, ColorStateList.valueOf(featureColor));
+            mRealtimeView.setVisibility(View.VISIBLE);
+        } else {
+            mRealtimeView.setVisibility(View.GONE);
+        }*/
+
+        float speed = tripStatus.getSpeed();
+        if (speed <= 0) {
+            mSpeed.setVisibility(View.GONE);
+        } else {
+            ImageViewCompat.setImageTintList(mSpeed, ColorStateList.valueOf(featureColor));
+            mSpeed.setVisibility(View.VISIBLE);
+
+            if (speed < 10) {
+                mSpeed.setImageResource(R.drawable.ic_very_slow);
+            } else if (speed >= 10 && speed <= 40) {
+                mSpeed.setImageResource(R.drawable.ic_slow);
+            } else {
+                mSpeed.setImageResource(R.drawable.ic_fast);
+            }
+        }
+    }
+
+    public static boolean isLocationRealtime(ObaTripStatus status) {
+        boolean isRealtime = true;
+        Location l = status.getLastKnownLocation();
+        if (l == null) {
+            isRealtime = false;
+        }
+        if (!status.isPredicted()) {
+            isRealtime = false;
+        }
+        return isRealtime;
     }
 
     /**

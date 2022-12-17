@@ -267,25 +267,13 @@ class ArrivalsListHeader {
 
     private PopupWindow mPopup2;
 
-    ImageView mAirConditionerView1;
-
-    ImageView mWheelchairAccessibilityView1;
-
-    ImageView mRealtimeView1;
-
-    ImageView mAirConditionerView2;
-
-    ImageView mWheelchairAccessibilityView2;
-
-    ImageView mRealtimeView2;
-
     ViewGroup mOccupancyView1;
 
     ViewGroup mOccupancyView2;
 
-    ImageView mSpeed1;
+    ViewGroup mVehicleFeaturesView1;
 
-    ImageView mSpeed2;
+    ViewGroup mVehicleFeaturesView2;
 
     // Animations
     private static final float ANIM_PIVOT_VALUE = 0.5f;  // 50%
@@ -388,11 +376,8 @@ class ArrivalsListHeader {
         mEtaRealtime1 = (ViewGroup) mEtaContainer1.findViewById(R.id.eta_realtime_indicator);
         mEtaMoreVert1 = (ImageButton) mEtaContainer1.findViewById(R.id.eta_more_vert);
         mEtaMoreVert1.setColorFilter(mView.getResources().getColor(R.color.header_text_color));
-        mAirConditionerView1 = (ImageView) mEtaContainer1.findViewById(R.id.air_conditioner);
-        mWheelchairAccessibilityView1 = (ImageView) mEtaContainer1.findViewById(R.id.wheelchair);
-        mRealtimeView1 = (ImageView) mEtaContainer1.findViewById(R.id.realtime);
         mOccupancyView1 = mEtaContainer1.findViewById(R.id.occupancy);
-        mSpeed1 = mEtaContainer1.findViewById(R.id.speed);
+        mVehicleFeaturesView1 = mEtaContainer1.findViewById(R.id.vehicle_features);
 
         mEtaSeparator = mView.findViewById(R.id.eta_separator);
 
@@ -410,11 +395,8 @@ class ArrivalsListHeader {
         mEtaMin2 = (TextView) mEtaContainer2.findViewById(R.id.eta_min);
         mEtaRealtime2 = (ViewGroup) mEtaContainer2.findViewById(R.id.eta_realtime_indicator);
         mEtaMoreVert2 = (ImageButton) mEtaContainer2.findViewById(R.id.eta_more_vert);
-        mAirConditionerView2 = (ImageView) mEtaContainer2.findViewById(R.id.air_conditioner);
-        mWheelchairAccessibilityView2 = (ImageView) mEtaContainer2.findViewById(R.id.wheelchair);
-        mRealtimeView2 = (ImageView) mEtaContainer2.findViewById(R.id.realtime);
         mOccupancyView2 = mEtaContainer2.findViewById(R.id.occupancy);
-        mSpeed2 = mEtaContainer2.findViewById(R.id.speed);
+        mVehicleFeaturesView2 = mEtaContainer2.findViewById(R.id.vehicle_features);
 
         mEtaMoreVert2.setColorFilter(mView.getResources().getColor(R.color.header_text_color));
 
@@ -781,6 +763,7 @@ class ArrivalsListHeader {
                 if (mArrivalInfo.get(i1).getPredicted()) {
                     // We have real-time data - show the indicator
                     UIUtils.showViewWithAnimation(mEtaRealtime1, mShortAnimationDuration);
+                    UIUtils.setVehicleFeatures(mVehicleFeaturesView1, mArrivalInfo.get(i1).getInfo().getTripStatus(), R.color.header_text_color);
                 } else {
                     // We only have schedule data - hide the indicator
                     mEtaRealtime1.setVisibility(View.INVISIBLE);
@@ -790,26 +773,7 @@ class ArrivalsListHeader {
                                 mResources.getString(R.string.stop_info_frequency_approximate)
                                         + mEtaArrivalInfo1.getText());
                     }
-                }
-
-                if (mArrivalInfo.get(i1).getInfo().getTripStatus().getAirConditioned()) {
-                    mAirConditionerView1.setVisibility(View.VISIBLE);
-                } else {
-                    mAirConditionerView1.setVisibility(View.GONE);
-                }
-
-                if (mArrivalInfo.get(i1).getInfo().getTripStatus().getWheelchairAccessible()) {
-                    mWheelchairAccessibilityView1.setVisibility(View.VISIBLE);
-                } else {
-                    mWheelchairAccessibilityView1.setVisibility(View.GONE);
-                }
-
-                if (mArrivalInfo.get(i1).getPredicted()) {
-                    mRealtimeView1.setVisibility(View.VISIBLE);
-                } else {
-                    mRealtimeView1.setVisibility(View.GONE);
-                    UIUtils.setOccupancyVisibilityAndColor(mOccupancyView1, null, OccupancyState.HISTORICAL, R.color.header_text_color);
-                    UIUtils.setOccupancyContentDescription(mOccupancyView1, null, OccupancyState.HISTORICAL);
+                    UIUtils.setVehicleFeatures(mVehicleFeaturesView1, null, R.color.header_text_color);
                 }
 
                 Occupancy occupancyStatus1 = mArrivalInfo.get(i1).getInfo().getTripStatus().getOccupancyStatus();
@@ -821,21 +785,6 @@ class ArrivalsListHeader {
                     // Hide occupancy by setting null value
                     UIUtils.setOccupancyVisibilityAndColor(mOccupancyView1, null, OccupancyState.HISTORICAL, R.color.header_text_color);
                     UIUtils.setOccupancyContentDescription(mOccupancyView1, null, OccupancyState.HISTORICAL);
-                }
-
-                float speed1 = mArrivalInfo.get(i1).getInfo().getTripStatus().getSpeed();
-                if (speed1 <= 0) {
-                    mSpeed1.setVisibility(View.GONE);
-                } else {
-                    mSpeed1.setVisibility(View.VISIBLE);
-
-                    if (speed1 < 10) {
-                        mSpeed1.setImageResource(R.drawable.ic_very_slow);
-                    } else if (speed1 >= 10 && speed1 <= 40) {
-                        mSpeed1.setImageResource(R.drawable.ic_slow);
-                    } else {
-                        mSpeed1.setImageResource(R.drawable.ic_fast);
-                    }
                 }
 
                 // Save the arrival info for the options menu later
@@ -900,6 +849,7 @@ class ArrivalsListHeader {
                     if (mArrivalInfo.get(i2).getPredicted()) {
                         // We have real-time data - show the indicator
                         UIUtils.showViewWithAnimation(mEtaRealtime2, mShortAnimationDuration);
+                        UIUtils.setVehicleFeatures(mVehicleFeaturesView2, mArrivalInfo.get(i2).getInfo().getTripStatus(), R.color.header_text_color);
                     } else {
                         // We only have schedule data - hide the indicator
                         mEtaRealtime2.setVisibility(View.INVISIBLE);
@@ -909,27 +859,10 @@ class ArrivalsListHeader {
                                     mResources.getString(R.string.stop_info_frequency_approximate)
                                             + mEtaArrivalInfo2.getText());
                         }
+                        UIUtils.setVehicleFeatures(mVehicleFeaturesView2, null, R.color.header_text_color);
                     }
 
-                    if (mArrivalInfo.get(i2).getInfo().getTripStatus().getAirConditioned()) {
-                        mAirConditionerView2.setVisibility(View.VISIBLE);
-                    } else {
-                        mAirConditionerView2.setVisibility(View.GONE);
-                    }
 
-                    if (mArrivalInfo.get(i2).getInfo().getTripStatus().getWheelchairAccessible()) {
-                        mWheelchairAccessibilityView2.setVisibility(View.VISIBLE);
-                    } else {
-                        mWheelchairAccessibilityView2.setVisibility(View.GONE);
-                    }
-
-                    if (mArrivalInfo.get(i2).getPredicted()) {
-                        mRealtimeView2.setVisibility(View.VISIBLE);
-                    } else {
-                        mRealtimeView2.setVisibility(View.GONE);
-                        UIUtils.setOccupancyVisibilityAndColor(mOccupancyView2, null, OccupancyState.HISTORICAL, R.color.header_text_color);
-                        UIUtils.setOccupancyContentDescription(mOccupancyView2, null, OccupancyState.HISTORICAL);
-                    }
 
                     Occupancy occupancyStatus2 = mArrivalInfo.get(i2).getInfo().getTripStatus().getOccupancyStatus();
                     if (occupancyStatus2 != null) {
@@ -940,21 +873,6 @@ class ArrivalsListHeader {
                         // Hide occupancy by setting null value
                         UIUtils.setOccupancyVisibilityAndColor(mOccupancyView2, null, OccupancyState.HISTORICAL, R.color.header_text_color);
                         UIUtils.setOccupancyContentDescription(mOccupancyView2, null, OccupancyState.HISTORICAL);
-                    }
-
-                    float speed2 = mArrivalInfo.get(i2).getInfo().getTripStatus().getSpeed();
-                    if (speed2 <= 0) {
-                        mSpeed2.setVisibility(View.GONE);
-                    } else {
-                        mSpeed2.setVisibility(View.VISIBLE);
-
-                        if (speed2 < 10) {
-                            mSpeed2.setImageResource(R.drawable.ic_very_slow);
-                        } else if (speed2 >= 10 && speed2 <= 40) {
-                            mSpeed2.setImageResource(R.drawable.ic_slow);
-                        } else {
-                            mSpeed2.setImageResource(R.drawable.ic_fast);
-                        }
                     }
 
                     mNumHeaderArrivals = 2;

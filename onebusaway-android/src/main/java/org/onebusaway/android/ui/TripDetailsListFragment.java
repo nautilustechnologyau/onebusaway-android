@@ -389,6 +389,9 @@ public class TripDetailsListFragment extends ListFragment {
                 R.id.status_layout);
         ViewGroup occupancyView = getView().findViewById(R.id.occupancy);
 
+        ViewGroup vehicleFeaturesView = getView().findViewById(R.id.vehicle_features);
+        UIUtils.setVehicleFeatures(vehicleFeaturesView, status, R.color.header_text_color);
+
         if (status == null) {
             // Show schedule info only
             vehicleView.setText(null);

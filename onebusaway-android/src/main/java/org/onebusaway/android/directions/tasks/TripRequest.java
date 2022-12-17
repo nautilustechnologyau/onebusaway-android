@@ -104,7 +104,9 @@ public class TripRequest extends AsyncTask<Request, Integer, Long> {
             return;
         }
 
-        if (mResponse != null && mResponse.getPlan() != null
+        if (mResponse != null
+                && mResponse.getPlan() != null
+                && mResponse.getPlan().getItinerary() != null
                 && !mResponse.getPlan().getItinerary().isEmpty()
                 && mResponse.getPlan().getItinerary().get(0) != null) {
             mCallback.onTripRequestComplete(mResponse.getPlan(), mRequestUrl);

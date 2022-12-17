@@ -60,7 +60,7 @@
                     android:layout_width="80sp"
                     android:layout_column="0"
                     android:gravity="center"
-                    tools:text="5" />
+                    tools:text="GLNELG" />
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="wrap_content"
@@ -98,6 +98,18 @@
                         app:layout_constraintTop_toBottomOf="@id/destination" />
 
                     <include
+                        android:id="@+id/vehicle_features"
+                        android:layout_width="wrap_content"
+                        android:layout_height="0dp"
+                        layout="@layout/vehicle_features"
+                        android:layout_marginStart="5dp"
+                        android:layout_marginLeft="5dp"
+                        app:layout_constraintTop_toTopOf="@id/status"
+                        app:layout_constraintBottom_toBottomOf="@id/status"
+                        app:layout_constraintStart_toEndOf="@+id/status"
+                        android:visibility="gone" />
+
+                    <include
                         android:id="@+id/occupancy"
                         android:layout_width="wrap_content"
                         android:layout_height="0dp"
@@ -106,7 +118,8 @@
                         android:layout_marginLeft="5dp"
                         app:layout_constraintTop_toTopOf="@id/status"
                         app:layout_constraintBottom_toBottomOf="@id/status"
-                        app:layout_constraintStart_toEndOf="@+id/status" />
+                        app:layout_constraintStart_toEndOf="@+id/vehicle_features"
+                        android:visibility="gone" />
 
                     <TextView
                         android:id="@+id/time"
