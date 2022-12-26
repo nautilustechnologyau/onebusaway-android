@@ -201,6 +201,7 @@
                 style="@style/MaterialLayoutTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:autoLink="web"
                 android:text="@string/remove_ads_message3"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textColor="@android:color/black"
