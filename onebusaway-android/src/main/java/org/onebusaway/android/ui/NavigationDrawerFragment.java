@@ -25,6 +25,7 @@ import org.onebusaway.android.BuildConfig;
 import org.onebusaway.android.R;
 import org.onebusaway.android.app.Application;
 import org.onebusaway.android.io.elements.ObaRegion;
+import org.onebusaway.android.util.PreferenceUtils;
 import org.onebusaway.android.util.UIUtils;
 import org.onebusaway.android.view.ScrimInsetsScrollView;
 
@@ -99,9 +100,14 @@ public class NavigationDrawerFragment extends Fragment {
 
     protected static final int NAVDRAWER_ITEM_PAY_FARE = 13;
 
+    protected static final int NAVDRAWER_ITEM_RATE_APP = 14;
+
+    protected static final int NAVDRAWER_ITEM_REMOVE_ADS = 15;
+
     protected static final int NAVDRAWER_ITEM_INVALID = -1;
 
     protected static final int NAVDRAWER_ITEM_SEPARATOR = -2;
+
 
     // Currently selected navigation drawer item (must be value of one of the constants above)
     private int mCurrentSelectedPosition = NAVDRAWER_ITEM_NEARBY;
@@ -121,25 +127,29 @@ public class NavigationDrawerFragment extends Fragment {
             0, // My profile
             0, // Sign in
             R.string.navdrawer_item_open_source,
-            R.string.navdrawer_item_pay_fare
+            R.string.navdrawer_item_pay_fare,
+            R.string.navdrawer_item_rate_app,
+            R.string.navdrawer_item_remove_ads
     };
 
     // icons for navdrawer items (indices must correspond to above array)
     private static final int[] NAVDRAWER_ICON_RES_ID = new int[]{
-            R.drawable.ic_drawer_maps_place,  // Nearby
-            R.drawable.ic_drawer_star, // Starred Stops
-            R.drawable.ic_drawer_alarm, // My reminders
-            0, // Settings
-            0, // Help
-            0, // Send feedback
-            R.drawable.ic_maps_directions, // Plan a trip
+            R.drawable.ic_nearby,  // Nearby
+            R.drawable.ic_starred, // Starred Stops
+            R.drawable.ic_reminder, // My reminders
+            R.drawable.ic_settings, // Settings
+            R.drawable.ic_help, // Help
+            R.drawable.ic_feedback, // Send feedback
+            R.drawable.ic_trip, // Plan a trip
             0, // Popular discussions
             0, // Pinned discussions
             0, // Social activity feed
             0, // My profile
             0, // Sign in
             R.drawable.ic_drawer_github, // Open-source
-            R.drawable.ic_payment // Pay my fare
+            R.drawable.ic_payment, // Pay my fare
+            R.drawable.ic_rating, // Rate app
+            R.drawable.ic_remove_ads // Remove ads
     };
 
     // Secondary navdrawer item icons that appear align to right of list item layout
@@ -185,6 +195,8 @@ public class NavigationDrawerFragment extends Fragment {
 
     private boolean isSignedIn;
 
+    private boolean mAdsFreeVersion;
+
     public NavigationDrawerFragment() {
     }
 
@@ -206,6 +218,8 @@ public class NavigationDrawerFragment extends Fragment {
 
         // Select either the default item (0) or the last selected item.
         selectItem(mCurrentSelectedPosition);
+
+        mAdsFreeVersion = PreferenceUtils.getBoolean(HomeActivity.ADS_FREE_VERSION, false);
     }
 
     @Override
@@ -441,6 +455,12 @@ public class NavigationDrawerFragment extends Fragment {
         mNavDrawerItems.add(NAVDRAWER_ITEM_SETTINGS);
         mNavDrawerItems.add(NAVDRAWER_ITEM_HELP);
         mNavDrawerItems.add(NAVDRAWER_ITEM_SEND_FEEDBACK);
+        mNavDrawerItems.add(NAVDRAWER_ITEM_RATE_APP);
+
+        boolean isAdsFreeVersion = PreferenceUtils.getBoolean(HomeActivity.ADS_FREE_VERSION, false);
+        if (!isAdsFreeVersion) {
+            mNavDrawerItems.add(NAVDRAWER_ITEM_REMOVE_ADS);
+        }
 
         createNavDrawerItems();
     }
@@ -573,7 +593,10 @@ public class NavigationDrawerFragment extends Fragment {
                 itemId == NAVDRAWER_ITEM_SEND_FEEDBACK ||
                 itemId == NAVDRAWER_ITEM_PLAN_TRIP ||
                 itemId == NAVDRAWER_ITEM_PAY_FARE ||
-                itemId == NAVDRAWER_ITEM_OPEN_SOURCE;
+                itemId == NAVDRAWER_ITEM_OPEN_SOURCE ||
+                itemId == NAVDRAWER_ITEM_RATE_APP ||
+                itemId == NAVDRAWER_ITEM_REMOVE_ADS ||
+                itemId == NAVDRAWER_ITEM_STARRED_STOPS;
     }
 
     /**

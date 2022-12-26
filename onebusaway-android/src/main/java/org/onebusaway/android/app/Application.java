@@ -34,6 +34,9 @@ import android.util.Log;
 
 import androidx.multidex.MultiDexApplication;
 
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.initialization.InitializationStatus;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -57,6 +60,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import au.mymetro.android.billing.BillingClientLifecycle;
 import edu.usf.cutr.open311client.Open311Manager;
 import edu.usf.cutr.open311client.models.Open311Option;
 
@@ -99,6 +103,9 @@ public class Application extends MultiDexApplication {
         mApp = this;
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
+        // initialise mobile ad as early as possible
+        initMobileAds();
+
         initOba();
         initObaRegion();
         initOpen311(getCurrentRegion());
@@ -130,6 +137,10 @@ public class Application extends MultiDexApplication {
 
     public static SharedPreferences getPrefs() {
         return get().mPrefs;
+    }
+
+    public BillingClientLifecycle getBillingClientLifecycle() {
+        return BillingClientLifecycle.getInstance(this);
     }
 
     /**
@@ -425,6 +436,16 @@ public class Application extends MultiDexApplication {
 
     private String getAppUid() {
         return UUID.randomUUID().toString();
+    }
+
+    private void initMobileAds() {
+        // initialise mobile ad as early as possible
+        MobileAds.initialize(this, new OnInitializationCompleteListener() {
+            @Override
+            public void onInitializationComplete(InitializationStatus initializationStatus) {
+                Log.i(TAG, "MobileAds initialised");
+            }
+        });
     }
 
     private void initOba() {

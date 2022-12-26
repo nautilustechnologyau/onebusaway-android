@@ -21,7 +21,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 
-final class NavHelp {
+final public class NavHelp {
 
     //
     // Up mode. This controls whether or not the logo (Up) button

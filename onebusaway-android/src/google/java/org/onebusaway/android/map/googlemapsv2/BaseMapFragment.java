@@ -95,6 +95,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import au.mymetro.android.ui.RateItDialogFragment;
+import au.mymetro.android.ui.SingleLiveEvent;
+
 /**
  * The MapFragment class is split into two basic modes:
  * stop mode and route mode. It needs to be able to switch
@@ -191,6 +194,8 @@ public class BaseMapFragment extends SupportMapFragment
     private FirebaseAnalytics mFirebaseAnalytics;
 
     private AlertDialog locationPermissionDialog;
+
+    public SingleLiveEvent<Marker> markerClickEvent = new SingleLiveEvent<>();
 
     @Override
     public void onActivateLayer(LayerInfo layer) {
@@ -1426,6 +1431,8 @@ public class BaseMapFragment extends SupportMapFragment
 
         @Override
         public boolean onMarkerClick(Marker marker) {
+            markerClickEvent.postValue(marker);
+
             if (mStopOverlay != null) {
                 if (mStopOverlay.markerClicked(marker)) {
                     return true;

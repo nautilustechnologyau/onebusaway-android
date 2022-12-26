@@ -95,5 +95,42 @@
         Vehicle Speed\n&#8226;\u0020
         Air Condition Availability
     </string>
-    <string name="navdrawer_item_remove_ad">Remove advertisements</string>
+    <string name="navdrawer_item_rate_app">Rate MyMetro</string>
+    <string name="rate_title">Enjoying MyMetro?</string>
+    <string name="rate_message">If you are enjoying using MyMetro, please take a moment to rate it. Your rating and feedback will help us improving the app.</string>
+    <string name="rate_positive">Yes</string>
+    <string name="rate_never">Don\'t Show Again</string>
+    <string name="rate_remind_later">Remind Me Later</string>
+    <string name="analytics_label_button_press_rate_app">rate_app</string>
+    <string name="navdrawer_item_remove_ads">Remove Ads</string>
+    <string name="remove_ads_title">Remove Ads</string>
+    <string name="remove_ads_btn_label">Buy Ads Free Subscription</string>
+    <string name="remove_ads_caption">Tired of Ads? Purchase Ads Free Subscription and Remove Them Now!</string>
+    <string name="remove_ads_message1">Though we are trying to show ads at a minimal level, we understand that seeing ads sometimes can be annoying. However, ads help us covering the huge cost to keep the infrastructure running on the cloud. It also supports the on going development to improve the app.</string>
+    <string name="remove_ads_message2">Purchasing subscription is optional. By purchasing Ads Free Subscription you will enjoy ads free seamless in-app experience. Your purchase will be a great support and much appreciated.</string>
+    <string name="remove_ads_message3">Payments will be charged using your Google account. The subscription will be automatically renewed yearly unless you cancel it at least 24 hours before the anniversary of current subscription.</string>
+    <string name="remove_ads_message4">You can manage and cancel your subscription from your Google account\'s Subscriptions section. Visit https://play.google.com/store/account/subscriptions</string>
+    <string name="remove_ads_already_purchased">You already have purchased this subscription.</string>
+    <string name="remove_ads_product_not_found">The subscription is not available anymore.</string>
+    <string name="remove_ads_system_error">Something went wrong. Please try again later.</string>
+    <string name="remove_ads_purchase_successful">Thank you for purchasing the subscription. The subscription will be automatically renewed each year. Visit https://play.google.com/store/account/subscriptions to manage or cancel the subscription.</string>
+    <string name="remove_ads_dlg_btn_positive">Buy Now</string>
+    <string name="remove_ads_dlg_btn_negative">Don\'t Show Again</string>
+    <string name="remove_ads_dlg_btn_neutral">Remind Me Later</string>
+    <string name="analytics_label_button_press_remove_ads">remove_ads</string>
+    <string name="analytics_label_button_press_buy_ads_free_subscription">buy_ads_free_subscription</string>
+
+    <!-- Trip plan advanced settings -->
+    <string name="trip_plan_advanced_settings">Additional Trip Preferences</string>
+    <string name="minimize_transfers">Minimize transfers</string>
+    <string name="maximum_walk_distance">Maximum walk distance: </string>
+    <string name="wheelchair_accessible">Avoid stairs during walk</string>
+
+    <string name="my_option_clear_starred_routes">Remove all starred routes</string>
+    <string name="route_info_favorite">Favorite route</string>
+    <string name="starred_routes_shortcut">Starred Routes</string>
+    <string name="navdrawer_item_starred_stops">Starred stops/routes</string>
+    <string name="my_no_starred_routes">You have no starred routes.\n\nYou can add a star to a route on
+        the arrivals screen by tapping on the star next to the route name.
+    </string>
 </resources>

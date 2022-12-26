@@ -134,7 +134,7 @@ abstract class MyListFragmentBase extends ListFragment
             return new AlertDialog.Builder(getActivity())
                     .setMessage(R.string.my_option_clear_confirm)
                     .setTitle(R.string.my_option_clear_confirm_title)
-                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setIcon(R.drawable.ic_alert)
                     .setPositiveButton(android.R.string.yes,
                             new DialogInterface.OnClickListener() {
                                 @Override

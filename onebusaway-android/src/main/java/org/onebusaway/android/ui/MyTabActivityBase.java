@@ -33,7 +33,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 
-abstract class MyTabActivityBase extends AppCompatActivity {
+public abstract class MyTabActivityBase extends AppCompatActivity {
 
     public static final String EXTRA_SHORTCUTMODE = ".ShortcutMode";
 

@@ -807,9 +807,9 @@ public final class ObaContract {
             return result;
         }
 
-        protected static boolean markAsFavorite(Context context,
-                Uri uri,
-                boolean favorite) {
+        public static boolean markAsFavorite(Context context,
+                                             Uri uri,
+                                             boolean favorite) {
             ContentResolver cr = context.getContentResolver();
             ContentValues values = new ContentValues();
             values.put(ObaContract.Routes.FAVORITE, favorite ? 1 : 0);

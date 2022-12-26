@@ -35,7 +35,7 @@ import android.widget.TextView;
 import androidx.core.content.pm.ShortcutInfoCompat;
 import androidx.cursoradapter.widget.SimpleCursorAdapter;
 
-abstract class MyRouteListFragmentBase extends MyListFragmentBase
+public abstract class MyRouteListFragmentBase extends MyListFragmentBase
         implements QueryUtils.RouteList.Columns {
     // private static final String TAG = "MyRouteListActivity";
 

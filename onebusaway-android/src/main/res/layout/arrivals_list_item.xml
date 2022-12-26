@@ -41,7 +41,7 @@
             android:paddingLeft="10dp"
             android:paddingTop="11dp"
             android:scaleType="fitCenter"
-            android:src="@drawable/ic_toggle_star" />
+            android:src="@drawable/ic_toggle_star"/>
 
         <TableLayout
             android:layout_width="fill_parent"
@@ -59,6 +59,7 @@
                     style="@style/StopInfoRoute"
                     android:layout_width="80sp"
                     android:layout_column="0"
+                    android:layout_marginTop="4dp"
                     android:gravity="center"
                     tools:text="GLNELG" />
 
@@ -107,7 +108,7 @@
                         app:layout_constraintTop_toTopOf="@id/status"
                         app:layout_constraintBottom_toBottomOf="@id/status"
                         app:layout_constraintStart_toEndOf="@+id/status"
-                        android:visibility="gone" />
+                        android:visibility="visible" />
 
                     <include
                         android:id="@+id/occupancy"

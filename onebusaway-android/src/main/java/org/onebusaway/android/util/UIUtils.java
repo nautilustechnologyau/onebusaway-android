@@ -506,7 +506,7 @@ public final class UIUtils {
         final ShortcutInfoCompat shortcut = UIUtils.makeShortcutInfo(context,
                 shortcutName,
                 builder.getIntent(),
-                R.drawable.ic_stop_flag_triangle);
+                R.drawable.ic_bus_stop);
         ShortcutManagerCompat.requestPinShortcut(context, shortcut, null);
         return shortcut;
     }
@@ -522,7 +522,7 @@ public final class UIUtils {
         final ShortcutInfoCompat shortcut = UIUtils.makeShortcutInfo(context,
                 routeName,
                 RouteInfoActivity.makeIntent(context, routeId),
-                R.drawable.ic_trip_details);
+                R.drawable.ic_track);
         ShortcutManagerCompat.requestPinShortcut(context, shortcut, null);
         return shortcut;
     }
@@ -547,7 +547,7 @@ public final class UIUtils {
 
         Drawable drawableIcon = ResourcesCompat
                 .getDrawable(context.getResources(), icon, context.getTheme());
-        drawableIcon.setColorFilter(ContextCompat.getColor(context, R.color.shortcut_icon),
+        drawableIcon.setColorFilter(ContextCompat.getColor(context, R.color.theme_primary_dark),
                 PorterDuff.Mode.SRC_IN);
         Drawable drawableBackground = ResourcesCompat
                 .getDrawable(context.getResources(), R.drawable.launcher_background, context.getTheme());
@@ -581,6 +581,25 @@ public final class UIUtils {
         } catch (ActivityNotFoundException e) {
             Toast.makeText(context, context.getString(R.string.browser_error), Toast.LENGTH_SHORT)
                     .show();
+        }
+    }
+
+    public static void goToMarket(Context context, String packageName) {
+        Uri uri = Uri.parse("market://details?id=" + packageName);
+        Intent goToMarket = new Intent(Intent.ACTION_VIEW, uri);
+        int flags = Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
+        if (Build.VERSION.SDK_INT >= 21) {
+            flags |= Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
+        } else{
+            //noinspection deprecation
+            flags |= Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET;
+        }
+        goToMarket.addFlags(flags);
+
+        try {
+            context.startActivity(goToMarket);
+        } catch (ActivityNotFoundException e) {
+            goToUrl(context, "http://play.google.com/store/apps/details?id=" + packageName);
         }
     }
 
