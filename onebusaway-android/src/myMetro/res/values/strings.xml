@@ -94,6 +94,17 @@
         Wheelchair Accessibility\n&#8226;\u0020
         Vehicle Speed\n&#8226;\u0020
         Air Condition Availability
+        <b>Improved Starred Feature</b>\n&#8226;\u0020
+        Multiple tabbed Starred screen\n&#8226;\u0020
+        Favourite routes added\n
+        <b>Ads Free Subscription</b>\n&#8226;\u0020
+        You can now buy Ads Free Subscription\n&#8226;\u0020
+        Banner Ad location moved\n&#8226;\u0020
+        Interstitial Ad\n
+        <b>Trip Planner Bug Fix</b>\n&#8226;\u0020
+        OpenTripPlanner v2 Compatible\n
+        <b>Rate MyMetro</b>\n&#8226;\u0020
+        You can now rate MyMetro!
     </string>
     <string name="navdrawer_item_rate_app">Rate MyMetro</string>
     <string name="rate_title">Enjoying MyMetro?</string>
