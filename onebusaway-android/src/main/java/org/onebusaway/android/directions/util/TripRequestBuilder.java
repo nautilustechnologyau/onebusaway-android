@@ -267,13 +267,10 @@ public class TripRequestBuilder {
         }
         String fmtOtpBaseUrl = otpBaseUrl != null ? RegionUtils.formatOtpBaseUrl(otpBaseUrl) : null;
 
-        TripRequest tripRequest;
+        TripRequest tripRequest = new TripRequest(fmtOtpBaseUrl, mListener);
 
-        if (activity == null) {
-            tripRequest = new TripRequest(fmtOtpBaseUrl, mListener);
-        } else {
+        if (activity != null) {
             WeakReference<Activity> ref = new WeakReference<Activity>(activity);
-            tripRequest = new TripRequest(fmtOtpBaseUrl, mListener);
         }
 
         tripRequest.execute(request);

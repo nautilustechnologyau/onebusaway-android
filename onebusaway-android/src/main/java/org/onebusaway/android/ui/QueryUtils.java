@@ -25,6 +25,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -38,6 +39,7 @@ import androidx.loader.content.CursorLoader;
  * @author paulw
  */
 public final class QueryUtils {
+    public static final String TAG = "QueryUtils";
 
     static protected CursorLoader newRecentQuery(
             final Context context,
@@ -71,7 +73,7 @@ public final class QueryUtils {
         );
     }
 
-    static final class RouteList {
+    public static final class RouteList {
 
         public interface Columns {
 
@@ -79,30 +81,54 @@ public final class QueryUtils {
                     ObaContract.Routes._ID,
                     ObaContract.Routes.SHORTNAME,
                     ObaContract.Routes.LONGNAME,
-                    ObaContract.Routes.URL
+                    ObaContract.Routes.URL,
+                    ObaContract.Routes.FAVORITE
             };
             public static final int COL_ID = 0;
             public static final int COL_SHORTNAME = 1;
             // private static final int COL_LONGNAME = 2;
             public static final int COL_URL = 3;
+            public static final int COL_FAVORITE = 4;
         }
 
         public static SimpleCursorAdapter newAdapter(Context context) {
             final String[] from = {
                     ObaContract.Routes.SHORTNAME,
-                    ObaContract.Routes.LONGNAME
+                    ObaContract.Routes.LONGNAME,
+                    ObaContract.Routes.FAVORITE
             };
             final int[] to = {
                     R.id.short_name,
-                    R.id.long_name
+                    R.id.long_name,
+                    R.id.route_favorite
             };
             SimpleCursorAdapter simpleAdapter =
                     new SimpleCursorAdapter(context, R.layout.route_list_item,
                             null, from, to, 0);
+            // We need to convert the direction text (N/NW/E/etc)
+            // to user level text (North/Northwest/etc..)
+            simpleAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
+                public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
+                    if (columnIndex == RouteList.Columns.COL_FAVORITE) {
+                        ImageView favorite = (ImageView) view.findViewById(R.id.route_favorite);
+                        if (cursor.getInt(columnIndex) == 1) {
+                            favorite.setVisibility(View.VISIBLE);
+                            // Make sure the star is visible against white background
+                            favorite.setColorFilter(
+                                    favorite.getResources().getColor(R.color.navdrawer_icon_tint));
+                        } else {
+                            favorite.setVisibility(View.GONE);
+                        }
+                        return true;
+                    }
+                    return false;
+                }
+            });
+
             return simpleAdapter;
         }
 
-        static protected String getId(ListView l, int position) {
+        public static String getId(ListView l, int position) {
             // Get the cursor and fetch the route ID from that.
             SimpleCursorAdapter cursorAdapter = (SimpleCursorAdapter) l.getAdapter();
             Cursor c = cursorAdapter.getCursor();
@@ -241,6 +267,7 @@ public final class QueryUtils {
         }
 
         String routeId = routeUri.getLastPathSegment();
+        Log.d(TAG, routeId);
 
         // Make sure this route has been inserted into the routes table
         ObaContract.Routes.insertOrUpdate(context, routeId, routeValues, true);

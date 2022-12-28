@@ -101,18 +101,8 @@
                     android:layout_alignParentRight="true"
                     android:layout_alignParentBottom="true"
                     android:layout_gravity="bottom|end"
-                    android:layout_marginBottom="112dp"
+                    android:layout_marginBottom="116dp"
                     android:drawable="@drawable/ic_layers_white_24dp" />
-
-                <uk.co.markormesher.android_fab.FloatingActionButton
-                    android:id="@+id/btnZoomIn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:layout_alignParentBottom="true"
-                    android:layout_gravity="bottom|end"
-                    android:layout_marginBottom="112dp"
-                    android:drawable="@drawable/ic_zoom_in" />
 
                 <uk.co.markormesher.android_fab.FloatingActionButton
                     android:id="@+id/btnZoomOut"
@@ -121,17 +111,33 @@
                     android:layout_alignParentRight="true"
                     android:layout_alignParentBottom="true"
                     android:layout_gravity="bottom|end"
-                    android:layout_marginBottom="176dp"
-                    android:drawable="@drawable/ic_zoom_out" />
+                    android:layout_marginBottom="128dp"
+                    android:drawable="@drawable/ic_zoom_out"
+                    app:elevation="6dp"
+                    app:pressedTranslationZ="12dp"
+                    tools:ignore="ImageContrastCheck" />
+
+                <uk.co.markormesher.android_fab.FloatingActionButton
+                    android:id="@+id/btnZoomIn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_gravity="bottom|end"
+                    android:layout_marginBottom="64dp"
+                    android:drawable="@drawable/ic_zoom_in"
+                    app:elevation="6dp"
+                    app:pressedTranslationZ="12dp"
+                    tools:ignore="ImageContrastCheck" />
 
                 <com.google.android.gms.ads.AdView xmlns:ads="http://schemas.android.com/apk/res-auto"
                     android:id="@+id/adViewBottom"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_centerHorizontal="true"
-                    android:layout_alignParentBottom="true"
-                    ads:adSize="BANNER"
-                    ads:adUnitId="@string/admob_unit_id" />
+                    android:layout_alignParentTop="true"
+                    ads:adSize="SMART_BANNER"
+                    ads:adUnitId="@string/admob_banner_unit_id" />
 
                 <!-- ROUTE MODE HEADER -->
                 <include

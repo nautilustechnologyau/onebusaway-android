@@ -29,5 +29,15 @@
     <!-- Powered by OBA URL -->
     <string name="powered_by_oba_url">https://mymetro.au</string>
 
+    <string name="preference_key_default_route_sort">preference_default_route_sort</string>
+
+    <string name="analytics_label_sort_by_name_routes">Clicked sort by name from
+        MyStarredRoutesFragment
+    </string>
+    <string name="analytics_label_sort_by_mfu_routes">Clicked sort by most frequently used from
+        MyStarredRoutesFragment
+    </string>
+    <string name="analytics_label_button_press_star">starred_stops_routes</string>
+
     <!-- See src/main/res/do_not_translate.xml for more strings you can override here -->
 </resources>

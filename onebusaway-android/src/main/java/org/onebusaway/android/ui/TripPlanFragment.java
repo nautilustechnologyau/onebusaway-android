@@ -130,10 +130,12 @@ public class TripPlanFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mFirebaseAnalytics = FirebaseAnalytics.getInstance(getContext());
+        if (getContext() != null) {
+            mFirebaseAnalytics = FirebaseAnalytics.getInstance(getContext());
+        }
 
         // Init Google Play Services as early as possible in the Fragment lifecycle to give it time
-        if (GooglePlayServicesUtil.isGooglePlayServicesAvailable(getActivity())
+        if (getActivity() != null && GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getActivity())
                 == ConnectionResult.SUCCESS) {
             mGoogleApiClient = LocationUtils.getGoogleApiClientWithCallbacks(getContext());
             mGoogleApiClient.connect();
@@ -293,7 +295,7 @@ public class TripPlanFragment extends Fragment {
     }
 
     private void checkRequestAndSubmit() {
-        if (mBuilder.ready() && mListener != null) {
+        if (mBuilder.ready() && mListener != null && getContext() != null) {
             mFromAddressTextArea.dismissDropDown();
             mToAddressTextArea.dismissDropDown();
             UIUtils.closeKeyboard(getContext(), mFromAddressTextArea);
@@ -424,8 +426,9 @@ public class TripPlanFragment extends Fragment {
 
                 Dialog dialog = (Dialog) dialogInterface;
 
-                boolean optimizeTransfers = ((CheckBox) dialog.findViewById(R.id.checkbox_minimize_transfers))
-                        .isChecked();
+                // TODO: TripPlanner v2 does not has this option anymore. Setting false always
+                //boolean optimizeTransfers = ((CheckBox) dialog.findViewById(R.id.checkbox_minimize_transfers)).isChecked();
+                boolean optimizeTransfers = false;
 
                 Spinner spinnerTravelBy = (Spinner) dialog.findViewById(R.id.spinner_travel_by);
 

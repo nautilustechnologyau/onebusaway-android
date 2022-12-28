@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TableRow
         xmlns:android="http://schemas.android.com/apk/res/android"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
     <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -46,8 +48,8 @@
                 android:visibility="gone"/>
     </LinearLayout>
 
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                    android:id="@+id/route_name_and_direction"
+    <RelativeLayout
+        android:id="@+id/route_name_and_direction"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_toLeftOf="@+id/eta_and_min"
@@ -60,24 +62,48 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="2dp"
-                android:text="5"
+                android:text="GLNELG"
                 style="@style/ArrivalsListItemRouteName"
                 android:textColor="@color/header_text_color"/>
 
         <TextView
-                android:id="@+id/eta_route_direction"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="14sp"
-                android:text="Aurora Village Via Aurora Ave."
-                android:textColor="@color/header_text_faded_color"
-                android:ellipsize="end"
-                android:singleLine="true"
-                android:textIsSelectable="false"
-                android:layout_marginLeft="8dp"
-                android:layout_toRightOf="@id/eta_route_name"
-                android:layout_alignBaseline="@id/eta_route_name"
-                android:gravity="bottom"/>
+            android:id="@+id/eta_route_direction"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/eta_route_name"
+            android:layout_marginLeft="2dp"
+            android:layout_marginTop="-5dp"
+            android:ellipsize="end"
+            android:gravity="bottom"
+            android:singleLine="true"
+            android:text="Aurora Village Via Aurora Ave."
+            android:textAlignment="gravity"
+            android:textColor="@color/header_text_faded_color"
+            android:textIsSelectable="false"
+            android:textSize="14sp" />
+
+        <include
+            android:id="@+id/vehicle_features"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            layout="@layout/vehicle_features"
+            android:layout_marginStart="2dp"
+            android:gravity="bottom"
+            android:layout_alignBottom="@+id/eta_route_name"
+            android:layout_marginBottom="9dp"
+            android:layout_toEndOf="@+id/eta_route_name" />
+
+        <include
+            android:id="@+id/occupancy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            layout="@layout/occupancy"
+            android:layout_marginStart="2dp"
+            android:gravity="bottom"
+            android:layout_alignBottom="@+id/eta_route_name"
+            android:layout_marginBottom="9dp"
+            android:layout_toEndOf="@+id/vehicle_features" />
+
     </RelativeLayout>
 
     <include

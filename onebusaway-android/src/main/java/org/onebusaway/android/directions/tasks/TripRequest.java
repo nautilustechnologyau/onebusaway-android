@@ -22,6 +22,7 @@ import android.util.Log;
 import org.onebusaway.android.app.Application;
 import org.onebusaway.android.directions.util.JacksonConfig;
 import org.opentripplanner.api.model.TripPlan;
+import org.opentripplanner.api.model.error.PlannerError;
 import org.opentripplanner.api.ws.Message;
 import org.opentripplanner.api.ws.Request;
 import org.opentripplanner.api.ws.Response;
@@ -104,7 +105,10 @@ public class TripRequest extends AsyncTask<Request, Integer, Long> {
             return;
         }
 
-        if (mResponse != null && mResponse.getPlan() != null
+        if (mResponse != null
+                && mResponse.getPlan() != null
+                && mResponse.getPlan().getItinerary() != null
+                && !mResponse.getPlan().getItinerary().isEmpty()
                 && mResponse.getPlan().getItinerary().get(0) != null) {
             mCallback.onTripRequestComplete(mResponse.getPlan(), mRequestUrl);
         } else {
@@ -162,7 +166,10 @@ public class TripRequest extends AsyncTask<Request, Integer, Long> {
 
         HttpURLConnection urlConnection = null;
         URL url;
-        Response plan = null;
+        Response plan = new Response();
+        PlannerError error = new PlannerError();
+        error.setId(Message.SYSTEM_ERROR.getId());
+        plan.setError(error);
 
         try {
             url = new URL(u);

@@ -72,12 +72,21 @@
                             android:layout_height="wrap_content"
                             android:layout_alignParentLeft="true"
                             android:layout_centerVertical="true"
-                            android:layout_toLeftOf="@+id/route_star"
                             style="@style/ArrivalsListItemRouteName"
                             android:textColor="@color/theme_primary"
                             android:text="5"
                             android:singleLine="true"
                             android:ellipsize="end"/>
+
+                    <TextView
+                        android:id="@+id/routeDestination"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignBottom="@+id/routeName"
+                        android:layout_toEndOf="@+id/routeName"
+                        android:layout_marginBottom="8dp"
+                        android:text="North to University Area TC"
+                        style="@style/ArrivalsListItemDestination"/>
 
                     <ImageButton
                             android:id="@+id/route_star"
@@ -126,6 +135,7 @@
                             android:paddingRight="4dp"/>
                 </RelativeLayout>
 
+                <!--
                 <TextView
                         android:id="@+id/routeDestination"
                         android:layout_width="wrap_content"
@@ -135,6 +145,7 @@
                         android:layout_marginBottom="8dp"
                         android:text="North to University Area TC"
                         style="@style/ArrivalsListItemDestination"/>
+                        -->
             </RelativeLayout>
 
             <RelativeLayout

@@ -158,7 +158,10 @@ public class TripPlanActivity extends AppCompatActivity implements TripRequest.C
             fragment.setListener(this);
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.trip_plan_fragment_container, fragment, TripPlanFragment.TAG).commit();
+        } else {
+            fragment.setListener(this);
         }
+
 
         mPanel = (SlidingUpPanelLayout) findViewById(R.id.trip_plan_sliding_layout);
 
@@ -203,6 +206,7 @@ public class TripPlanActivity extends AppCompatActivity implements TripRequest.C
 
     @Override
     public void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
         setIntent(intent);
     }
 
@@ -439,6 +443,7 @@ public class TripPlanActivity extends AppCompatActivity implements TripRequest.C
     private void clearBundleErrors() {
         mBuilder.getBundle().remove(PLAN_ERROR_CODE);
         mBuilder.getBundle().remove(PLAN_ERROR_URL);
+        setIntent(null);
     }
 
     // Handle the sliding panel's interactions with the list view and the map view.

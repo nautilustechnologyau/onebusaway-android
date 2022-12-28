@@ -29,7 +29,7 @@
     <!-- Floating action button (FAB) dimensions -->
     <dimen name="fab_size">56dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
-    <dimen name="fab_margin1">64dp</dimen>
+    <dimen name="fab_margin1">16dp</dimen>
 
     <!-- Shadows, for FAB on platforms before Lollipop -->
     <dimen name="fab_shadow_size_1">@dimen/fab_size</dimen>
@@ -48,17 +48,19 @@
     <!-- Arrival List Header -->
     <dimen name="arrival_header_height_no_arrivals">50dp</dimen>
     <dimen name="arrival_header_height_one_arrival">106dp</dimen>
-    <dimen name="arrival_header_height_two_arrivals">146dp</dimen>
+    <dimen name="arrival_header_height_two_arrivals">170dp</dimen>
     <dimen name="arrival_header_height_offset_filter_routes">25dp</dimen>
     <dimen name="arrival_header_height_edit_name">100dp</dimen>
     <dimen name="arrival_header_left_margin">10dp</dimen>
     <dimen name="arrival_header_bottom_margin">8dp</dimen>
     <dimen name="arrival_header_bottom_margin_expand_collapse">10dp</dimen>
-    <dimen name="arrival_header_text_pad_left">10dp</dimen>
+    <dimen name="arrival_header_text_pad_left">2dp</dimen>
 
     <!-- Arrivals Style A -->
-    <dimen name="occupancy">15dp</dimen>
+    <dimen name="occupancy">20dp</dimen>
     <dimen name="occupancy_margin">2dp</dimen>
+    <dimen name="vehicle_features_margin">2dp</dimen>
+    <dimen name="vehicle_features_icon">16dp</dimen>
 
     <!-- Arrivals Style B -->
     <dimen name="arrival_style_b_status_min_width">77dp</dimen>
