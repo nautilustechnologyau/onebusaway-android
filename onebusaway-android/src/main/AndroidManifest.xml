@@ -164,6 +164,15 @@
             </intent-filter>
         </activity>
         <activity
+            android:name="au.mymetro.android.ui.MyStarredRoutesActivity"
+            android:label="@string/starred_routes_shortcut"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.CREATE_SHORTCUT"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+        <activity
                 android:name="org.onebusaway.android.ui.MyRoutesActivity"
                 android:label="@string/route_shortcut"
             android:exported="true">
@@ -218,6 +227,20 @@
                     android:value="org.onebusaway.android.ui.HomeActivity"/>
         </activity>
         <activity
+            android:name="au.mymetro.android.ui.MyStarredStopsAndRoutesActivity"
+            android:label="@string/my_starred_title"
+            android:parentActivityName="org.onebusaway.android.ui.HomeActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.CREATE_SHORTCUT"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.onebusaway.android.ui.HomeActivity"/>
+        </activity>
+        <activity
                 android:name="org.onebusaway.android.ui.NightLightActivity"
                 android:label="@string/stop_info_option_night_light"
                 android:parentActivityName="org.onebusaway.android.ui.HomeActivity"
@@ -239,6 +262,14 @@
             <meta-data
                     android:name="android.support.PARENT_ACTIVITY"
                     android:value="org.onebusaway.android.ui.HomeActivity"/>
+        </activity>
+        <activity
+            android:name="au.mymetro.android.ui.RemoveAdsActivity"
+            android:label="@string/remove_ads_title"
+            android:parentActivityName="org.onebusaway.android.ui.HomeActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.onebusaway.android.ui.HomeActivity"/>
         </activity>
         <activity
             android:name="org.onebusaway.android.ui.FeedbackActivity"
@@ -349,6 +380,8 @@
                     android:name="android.support.PARENT_ACTIVITY"
                     android:value="org.onebusaway.android.ui.PreferencesActivity"/>
         </activity>
+
+
 
         <!-- Opt-out of June 2018 Android Maps styling with pin POI icons - see #891 -->
         <meta-data android:name="com.google.android.gms.maps.API_OPTIONS" android:value="B3H9HE845CFHYG"/>

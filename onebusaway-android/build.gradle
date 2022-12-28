@@ -40,13 +40,13 @@ repositories {
 }
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 33
 
     defaultConfig {
         minSdkVersion 19
-        targetSdkVersion 31
-        versionCode 137
-        versionName "2.10.3"
+        targetSdkVersion 33
+        versionCode 139
+        versionName "3.0.0"
 
         multiDexEnabled true
 
@@ -310,7 +310,7 @@ android {
      */
     applicationVariants.all {
         variant ->
-            def authority;
+            def authority
             if (variant.productFlavors.get(0).name == "oba") {
                 authority = '"' + "com.joulespersecond.oba" + '"'
                 // Must keep the original OBA authority
@@ -330,8 +330,11 @@ android {
         def apikeyPropertiesFile = rootProject.file(filename)
         apikeyProperties.load(new FileInputStream(apikeyPropertiesFile))
         variant.resValue "string", "admob_application_id", apikeyProperties['ADMOB_APPLICATION_ID']
-        variant.resValue "string", "admob_unit_id", apikeyProperties['ADMOB_UNIT_ID']
+        variant.resValue "string", "admob_banner_unit_id", apikeyProperties['ADMOB_BANNER_UNIT_ID']
+        variant.resValue "string", "admob_interstitial_unit_id", apikeyProperties['ADMOB_INTERSTITIAL_UNIT_ID']
         variant.resValue "string", "google_maps_api_key", apikeyProperties['GOOGLE_MAPS_API_KEY']
+        buildConfigField "String", "ADMOB_BANNER_UNIT_ID", "" + apikeyProperties['ADMOB_BANNER_UNIT_ID'] + ""
+        buildConfigField "String", "ADMOB_INTERSTITIAL_UNIT_ID", "" + apikeyProperties['ADMOB_INTERSTITIAL_UNIT_ID'] + ""
     }
 
     // http://stackoverflow.com/questions/20673625/gradle-0-7-0-duplicate-files-during-packaging-of-apk
@@ -396,10 +399,10 @@ android {
         def names = variant.flavors*.name
         def brand = names.get(0)
         def platform = names.get(1)
-        def isRelease = variant.buildType.name.equals('release')
+        def isRelease = variant.buildType.name == 'release'
         if (isRelease &&
-                ((brand.equals("agencyX") && platform.equals("amazon")) ||
-                        (brand.equals("agencyY") && platform.equals("amazon")) )) {
+                ((brand == "agencyX" && platform == "amazon") ||
+                        (brand == "agencyY" && platform == "amazon") )) {
             variant.setIgnore(true)
         }
     }
@@ -446,7 +449,7 @@ task copyMapsApiV2Classes {
         copy {
             from 'src/google/java/org/onebusaway/android/map/googlemapsv2'
             into 'src/amazon/java/org/onebusaway/android/map/googlemapsv2'
-            exclude { details -> details.file.name.equals('ProprietaryMapHelpV2.java') }
+            exclude { details -> (details.file.name == 'ProprietaryMapHelpV2.java') }
             filter { line -> line.replace('com.google.android.gms.maps', 'com.amazon.geo.mapsv2') }
             filter { line -> line.replace('GoogleMap', 'AmazonMap') }
             filter(ConcatFilter, prepend: file('AmazonMapsFileHeader.txt'))
@@ -524,8 +527,12 @@ dependencies {
     implementation "androidx.concurrent:concurrent-listenablefuture-callback:1.0.0-beta01"
     implementation "androidx.core:core-ktx:1.7.0"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+
     // Google Ad
-    implementation 'com.google.android.gms:play-services-ads:21.3.0'
+    implementation 'com.google.android.gms:play-services-ads:21.4.0'
+
+    // Billing
+    implementation 'com.android.billingclient:billing:5.1.0'
 
 }
 

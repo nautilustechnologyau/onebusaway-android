@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2010 Paul Watts (paulcwatts@gmail.com)
+<?xml version="1.0" encoding="utf-8"?><!-- Copyright (C) 2010 Paul Watts (paulcwatts@gmail.com)
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -13,21 +12,49 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              style="@style/ListItem"
-              android:layout_width="fill_parent"
-              android:layout_height="wrap_content"
-              android:orientation="vertical">
-    <TextView
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/route_list_container"
+    style="@style/ListItem"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="77dp"
+    android:orientation="horizontal">
+
+    <ImageView
+        android:id="@+id/route_favorite"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="5dp"
+        android:adjustViewBounds="true"
+        android:contentDescription="@string/route_info_favorite"
+        android:maxWidth="25dp"
+        android:maxHeight="25dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_toggle_star" />
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        style="@style/ListItem"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="@dimen/keyline_2"
+        android:orientation="vertical">
+
+        <TextView
             android:id="@+id/short_name"
             style="@style/Line1Text"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-    </TextView>
-    <TextView
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:ellipsize="end"
+            android:maxLines="1"/>
+        <TextView
             android:id="@+id/long_name"
             style="@style/Line2Text"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-    </TextView>
-</LinearLayout>
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+</RelativeLayout>

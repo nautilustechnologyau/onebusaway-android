@@ -26,6 +26,8 @@ import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_
 import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_PINS;
 import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_PLAN_TRIP;
 import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_PROFILE;
+import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_RATE_APP;
+import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_REMOVE_ADS;
 import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_SEND_FEEDBACK;
 import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_SETTINGS;
 import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_SIGN_IN;
@@ -33,6 +35,7 @@ import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_
 import static org.onebusaway.android.ui.NavigationDrawerFragment.NavigationDrawerCallbacks;
 import static org.onebusaway.android.util.PermissionUtils.BACKGROUND_LOCATION_PERMISSION_REQUEST;
 import static org.onebusaway.android.util.PermissionUtils.LOCATION_PERMISSIONS;
+import static au.mymetro.android.billing.BillingClientLifecycle.ADS_FREE_PRODUCT_ID;
 import static uk.co.markormesher.android_fab.FloatingActionButton.POSITION_BOTTOM;
 import static uk.co.markormesher.android_fab.FloatingActionButton.POSITION_END;
 import static uk.co.markormesher.android_fab.FloatingActionButton.POSITION_START;
@@ -80,15 +83,21 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.Observer;
 
+import com.android.billingclient.api.Purchase;
+import com.google.android.gms.ads.AdError;
+import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.initialization.InitializationStatus;
-import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
+import com.google.android.gms.ads.FullScreenContentCallback;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.interstitial.InterstitialAd;
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
@@ -126,6 +135,13 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
+
+import au.mymetro.android.billing.BillingClientLifecycle;
+import au.mymetro.android.ui.MyStarredStopsAndRoutesActivity;
+import au.mymetro.android.ui.RateItDialogFragment;
+import au.mymetro.android.ui.RemoveAdsActivity;
+import au.mymetro.android.ui.RemoveAdsDialogFragment;
 
 public class HomeActivity extends AppCompatActivity
         implements BaseMapFragment.OnFocusChangedListener,
@@ -191,9 +207,25 @@ public class HomeActivity extends AppCompatActivity
 
     private static final int MY_LOC_BTN_ANIM_DURATION = 100;  // ms
 
+    private static boolean mInterstitialAdShowing = false;
+
+    private static long mLastInterstitialAdShowTime = 0L;
+
+    private static int mInterstitialAdShowCount = 0;
+
+    public static final String ADS_FREE_VERSION = "adsFreeVersion";
+
+    private static boolean mAdsFreeVersion = false;
+
+    private static int mMarkerClickedCount = 0;
+
+    private static final Random mRandom = new Random();
+
     Animation mMyLocationAnimation;
 
     private AdView mBottomAdView;
+
+    private InterstitialAd mInterstitialAd;
 
     /**
      * GoogleApiClient being used for Location Services
@@ -222,6 +254,7 @@ public class HomeActivity extends AppCompatActivity
      */
     MyStarredStopsFragment mMyStarredStopsFragment;
 
+
     BaseMapFragment mMapFragment;
 
     MyRemindersFragment mMyRemindersFragment;
@@ -230,6 +263,8 @@ public class HomeActivity extends AppCompatActivity
      * Control which menu options are shown per fragment menu groups
      */
     private boolean mShowStarredStopsMenu = false;
+
+    private boolean mShowStarredRoutesMenu = false;
 
     private boolean mShowArrivalsMenu = false;
 
@@ -262,6 +297,8 @@ public class HomeActivity extends AppCompatActivity
     private FirebaseAnalytics mFirebaseAnalytics;
 
     private ActivityResultLauncher<String> travelBehaviorPermissionsLauncher;
+
+    private BillingClientLifecycle mBillingClient;
 
     /**
      * Starts the MapActivity with a particular stop focused with the center of
@@ -359,7 +396,12 @@ public class HomeActivity extends AppCompatActivity
     @Override
     public void onCreate(Bundle savedInstanceState) {
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+
         super.onCreate(savedInstanceState);
+
+        mAdsFreeVersion = PreferenceUtils.getBoolean(ADS_FREE_VERSION, false);
+
+        setupBillingClient();
 
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
@@ -390,7 +432,7 @@ public class HomeActivity extends AppCompatActivity
         // To enable checkBatteryOptimizations, also uncomment the
         // REQUEST_IGNORE_BATTERY_OPTIMIZATIONS permission in AndroidManifest.xml
         // See https://github.com/OneBusAway/onebusaway-android/pull/988#discussion_r299950506
-//        checkBatteryOptimizations();
+        // checkBatteryOptimizations();
 
         new TravelBehaviorManager(this, getApplicationContext()).
                 registerTravelBehaviorParticipant();
@@ -409,21 +451,6 @@ public class HomeActivity extends AppCompatActivity
                 ShowcaseViewUtils.showTutorial(ShowcaseViewUtils.TUTORIAL_WELCOME, this, null, false);
             }
         }
-
-        // Google Ad initialisation
-        if (BuildConfig.ENABLE_ADMOB) {
-            MobileAds.initialize(this, new OnInitializationCompleteListener() {
-                @Override
-                public void onInitializationComplete(InitializationStatus initializationStatus) {
-                }
-            });
-
-            AdRequest bottomAdRequest = new AdRequest.Builder().build();
-            mBottomAdView = findViewById(R.id.adViewBottom);
-            mBottomAdView.loadAd(bottomAdRequest);
-        } else {
-            mBottomAdView.setVisibility(View.GONE);
-        }
     }
 
     @Override
@@ -434,7 +461,7 @@ public class HomeActivity extends AppCompatActivity
             mGoogleApiClient.connect();
         }
         AccessibilityManager am = (AccessibilityManager) getSystemService(ACCESSIBILITY_SERVICE);
-        Boolean isTalkBackEnabled = am.isTouchExplorationEnabled();
+        boolean isTalkBackEnabled = am.isTouchExplorationEnabled();
         ObaAnalytics.setAccessibility(mFirebaseAnalytics, isTalkBackEnabled);
     }
 
@@ -501,8 +528,9 @@ public class HomeActivity extends AppCompatActivity
         switch (item) {
             case NAVDRAWER_ITEM_STARRED_STOPS:
                 if (mCurrentNavDrawerPosition != NAVDRAWER_ITEM_STARRED_STOPS) {
-                    showStarredStopsFragment();
-                    mCurrentNavDrawerPosition = item;
+                    // showStarredStopsFragment();
+                    showStarredStopsRoutesFragment();
+                    // mCurrentNavDrawerPosition = item;
                     ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
                             getString(R.string.analytics_label_button_press_star),
                             null);
@@ -532,6 +560,7 @@ public class HomeActivity extends AppCompatActivity
                 }
                 break;
             case NAVDRAWER_ITEM_PLAN_TRIP:
+                loadInterstitialAd(false, "Plan a trip");
                 Intent planTrip = new Intent(HomeActivity.this, TripPlanActivity.class);
                 startActivity(planTrip);
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
@@ -560,6 +589,19 @@ public class HomeActivity extends AppCompatActivity
                         null);
                 goToSendFeedBack();
                 break;
+            case NAVDRAWER_ITEM_RATE_APP:
+                UIUtils.goToMarket(HomeActivity.this, getPackageName());
+                ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                        getString(R.string.analytics_label_button_press_rate_app),
+                        null);
+                break;
+            case NAVDRAWER_ITEM_REMOVE_ADS:
+                Intent removeAds = new Intent(HomeActivity.this, RemoveAdsActivity.class);
+                startActivity(removeAds);
+                ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                        getString(R.string.analytics_label_button_press_remove_ads),
+                        null);
+                break;
             case NAVDRAWER_ITEM_OPEN_SOURCE:
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
                         getString(R.string.analytics_label_button_press_open_source),
@@ -572,9 +614,6 @@ public class HomeActivity extends AppCompatActivity
         invalidateOptionsMenu();
     }
 
-    private void handleNearbySelection() {
-    }
-
     private void showMapFragment() {
         FragmentManager fm = getSupportFragmentManager();
         /**
@@ -583,6 +622,7 @@ public class HomeActivity extends AppCompatActivity
         hideStarredStopsFragment();
         hideReminderFragment();
         mShowStarredStopsMenu = false;
+        mShowStarredRoutesMenu = false;
         /**
          * Show fragment (we use show instead of replace to keep the map state)
          */
@@ -594,6 +634,12 @@ public class HomeActivity extends AppCompatActivity
                 // No existing fragment was found, so create a new one
                 Log.d(TAG, "Creating new BaseMapFragment");
                 mMapFragment = BaseMapFragment.newInstance();
+                mMapFragment.markerClickEvent.observe(this, new Observer<Marker>() {
+                    @Override
+                    public void onChanged(Marker marker) {
+                        onMarkerClicked(marker);
+                    }
+                });
                 mMapFragment.setOnLocationPermissionResultListener(result -> {
                             if (mInitialStartup) {
                                 // Whether or not the user granted permissions, check region status
@@ -642,6 +688,7 @@ public class HomeActivity extends AppCompatActivity
         hideMapFragment();
         hideReminderFragment();
         hideSlidingPanel();
+        hideBannerAds();
         mShowArrivalsMenu = false;
         showZoomControls(false);
 
@@ -649,6 +696,7 @@ public class HomeActivity extends AppCompatActivity
          * Show fragment (we use show instead of replace to keep the map state)
          */
         mShowStarredStopsMenu = true;
+        mShowStarredRoutesMenu = true;
         if (mMyStarredStopsFragment == null) {
             // First check to see if an instance of MyStarredStopsFragment already exists (see #356)
             mMyStarredStopsFragment = (MyStarredStopsFragment) fm
@@ -666,6 +714,11 @@ public class HomeActivity extends AppCompatActivity
         setTitle(getResources().getString(R.string.navdrawer_item_starred_stops));
     }
 
+    private void showStarredStopsRoutesFragment() {
+        Intent myIntent = new Intent(this, MyStarredStopsAndRoutesActivity.class);
+        startActivity(myIntent);
+    }
+
     private void showMyRemindersFragment() {
         FragmentManager fm = getSupportFragmentManager();
         /**
@@ -676,8 +729,9 @@ public class HomeActivity extends AppCompatActivity
         hideStarredStopsFragment();
         hideMapFragment();
         hideSlidingPanel();
+        hideBannerAds();
         mShowArrivalsMenu = false;
-        mShowStarredStopsMenu = false;
+        mShowStarredRoutesMenu = false;
         showZoomControls(false);
         /**
          * Show fragment (we use show instead of replace to keep the map state)
@@ -714,6 +768,7 @@ public class HomeActivity extends AppCompatActivity
         if (mMyStarredStopsFragment != null && !mMyStarredStopsFragment.isHidden()) {
             fm.beginTransaction().hide(mMyStarredStopsFragment).commit();
         }
+        showBannerAds();
     }
 
     private void hideReminderFragment() {
@@ -723,11 +778,24 @@ public class HomeActivity extends AppCompatActivity
         if (mMyRemindersFragment != null && !mMyRemindersFragment.isHidden()) {
             fm.beginTransaction().hide(mMyRemindersFragment).commit();
         }
+        showBannerAds();
     }
 
     private void hideSlidingPanel() {
         if (mSlidingPanel != null) {
             mSlidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
+        }
+    }
+
+    private void hideBannerAds() {
+        if (mBottomAdView != null) {
+            mBottomAdView.setVisibility(View.GONE);
+        }
+    }
+
+    private void showBannerAds() {
+        if (mBottomAdView != null && !mAdsFreeVersion) {
+            mBottomAdView.setVisibility(View.VISIBLE);
         }
     }
 
@@ -757,6 +825,7 @@ public class HomeActivity extends AppCompatActivity
         menu.setGroupVisible(R.id.main_options_menu_group, true);
         menu.setGroupVisible(R.id.arrival_list_menu_group, mShowArrivalsMenu);
         menu.setGroupVisible(R.id.starred_stop_menu_group, mShowStarredStopsMenu);
+        menu.setGroupVisible(R.id.starred_route_menu_group, mShowStarredRoutesMenu);
     }
 
     @Override
@@ -1383,11 +1452,6 @@ public class HomeActivity extends AppCompatActivity
         mZoomOutFab.setButtonBackgroundColour(ContextCompat.getColor(this, R.color.theme_accent));
         mZoomInFab.setOnClickListener(view -> mMapFragment.zoomIn());
         mZoomOutFab.setOnClickListener(view -> mMapFragment.zoomOut());
-
-        /*ImageButton mZoomInBtn = findViewById(R.id.btnZoomIn);
-        ImageButton mZoomOutBtn = findViewById(R.id.btnZoomOut);
-        mZoomInBtn.setOnClickListener(view -> mMapFragment.zoomIn());
-        mZoomOutBtn.setOnClickListener(view -> mMapFragment.zoomOut());*/
     }
 
     private void setupMyLocationButton() {
@@ -1418,6 +1482,189 @@ public class HomeActivity extends AppCompatActivity
         }
     }
 
+    public void setupBillingClient() {
+        mBillingClient = ((org.onebusaway.android.app.Application)getApplication()).getBillingClientLifecycle();
+        getLifecycle().removeObserver(mBillingClient);
+        getLifecycle().addObserver(mBillingClient);
+
+        // Register purchases when they change.
+        mBillingClient.purchaseUpdateEvent.observe(this, new Observer<List<Purchase>>() {
+            @Override
+            public void onChanged(List<Purchase> purchases) {
+                registerPurchases(purchases);
+            }
+        });
+    }
+
+    /**
+     * Register purchase tokens.
+     */
+    private void registerPurchases(List<Purchase> purchaseList) {
+        mAdsFreeVersion = false;
+        if (purchaseList != null) {
+            mBillingClient.acknowledgePurchases(purchaseList);
+            for (Purchase purchase : purchaseList) {
+                if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED) {
+                    for (String purchasedProductId : purchase.getProducts()) {
+                        if (ADS_FREE_PRODUCT_ID.equals(purchasedProductId)) {
+                            mAdsFreeVersion = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        PreferenceUtils.saveBoolean(ADS_FREE_VERSION, mAdsFreeVersion);
+
+        setupAds();
+    }
+
+    public void setupAds() {
+        if (mAdsFreeVersion) {
+            if (mBottomAdView != null) {
+                mBottomAdView.setVisibility(View.GONE);
+            }
+        } else {
+            loadBannerAd();
+            setBannerAdVisibility();
+        }
+    }
+
+    private void setBannerAdVisibility() {
+        if (mAdsFreeVersion) {
+            mBottomAdView.setVisibility(View.GONE);
+            return;
+        }
+        if (mMyStarredStopsFragment != null
+                && (!mMyStarredStopsFragment.isHidden() || mMyStarredStopsFragment.isVisible())) {
+            mBottomAdView.setVisibility(View.GONE);
+            return;
+        }
+        if (mMyRemindersFragment != null
+                && (!mMyRemindersFragment.isHidden() || mMyRemindersFragment.isVisible())) {
+            mBottomAdView.setVisibility(View.GONE);
+            return;
+        }
+        mBottomAdView.setVisibility(View.VISIBLE);
+    }
+
+    private void loadBannerAd() {
+        AdRequest bottomAdRequest = new AdRequest.Builder().build();
+        boolean testDevice = bottomAdRequest.isTestDevice(getApplicationContext());
+        mBottomAdView = findViewById(R.id.adViewBottom);
+        mBottomAdView.setAdListener(new AdListener() {
+            @Override
+            public void onAdLoaded() {
+                super.onAdLoaded();
+                Log.d(TAG, "onAdLoaded()");
+                // Code to be executed when an ad finishes loading.
+            }
+
+            @Override
+            public void onAdClosed() {
+                super.onAdClosed();
+                RemoveAdsDialogFragment.show(getApplicationContext(), HomeActivity.this.getSupportFragmentManager());
+            }
+        });
+        mBottomAdView.loadAd(bottomAdRequest);
+    }
+
+    public void onMarkerClicked(Marker marker) {
+        mMarkerClickedCount++;
+        if (mRandom.nextBoolean()) {
+            // show rate dialog
+            RateItDialogFragment.show(getApplicationContext(), getSupportFragmentManager());
+        } else {
+            // show interstitial ad
+            loadInterstitialAd(false, null);
+        }
+    }
+
+    private void loadInterstitialAd(boolean showAlways, String initiator) {
+        if (mAdsFreeVersion) {
+            return;
+        }
+        if (!showAlways) {
+            if (mMarkerClickedCount % 5 != 0) {
+                return;
+            }
+
+            float hitPercent = 0.7f; // 30% of the time it will show ad
+            Log.d(TAG, "Ad hit percentage: " + hitPercent);
+            if (mRandom.nextFloat() > hitPercent) {
+                return;
+            }
+
+            if (mLastInterstitialAdShowTime > 0) {
+                long now = new Date().getTime();
+                long duration = now - mLastInterstitialAdShowTime;
+                // don't show add too frequently. at least 60 secs gap.
+                if (duration < 60000) {
+                    return;
+                }
+            }
+        }
+
+        // an add is showing, don't show again
+        if (mInterstitialAdShowing) {
+            return;
+        }
+
+        // we will not show ad first time on home screen
+        if ("Nearby".equals(initiator) && mInterstitialAdShowCount == 0) {
+            mInterstitialAdShowCount++;
+            return;
+        }
+
+        AdRequest adRequest = new AdRequest.Builder().build();
+        InterstitialAd.load(this, BuildConfig.ADMOB_INTERSTITIAL_UNIT_ID, adRequest,
+                new InterstitialAdLoadCallback() {
+                    @Override
+                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+                        // The mInterstitialAd reference will be null until
+                        // an ad is loaded.
+                        mInterstitialAd = interstitialAd;
+                        // Log.i(TAG, "onAdLoaded");
+                        Log.d(TAG, "Banner adapter class name: " + interstitialAd.getResponseInfo().getMediationAdapterClassName());
+                        mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
+                            @Override
+                            public void onAdDismissedFullScreenContent() {
+                                // Called when ad is dismissed.
+                                // Set the ad reference to null so you don't show the ad a second time.
+                                Log.d(TAG, "Ad dismissed fullscreen content.");
+                                mInterstitialAd = null;
+                                mInterstitialAdShowing = false;
+                                RemoveAdsDialogFragment.show(HomeActivity.this, HomeActivity.this.getSupportFragmentManager());
+                            }
+
+                            @Override
+                            public void onAdFailedToShowFullScreenContent(AdError adError) {
+                                // Called when ad fails to show.
+                                Log.e(TAG, "Ad failed to show fullscreen content.");
+                                mInterstitialAd = null;
+                                mInterstitialAdShowing = false;
+                            }
+                        });
+                        if (!mInterstitialAdShowing) {
+                            mInterstitialAdShowing = true;
+                            mInterstitialAdShowCount++;
+                            mLastInterstitialAdShowTime = new Date().getTime();
+                            mInterstitialAd.show(HomeActivity.this);
+                        }
+                    }
+
+                    @Override
+                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                        // Handle the error
+                        Log.d(TAG, loadAdError.toString());
+                        mInterstitialAd = null;
+                        mInterstitialAdShowing = false;
+                    }
+                });
+
+    }
+
     private void checkDisplayZoomControls() {
         boolean displayZoom = Application.getPrefs().getBoolean(
                 getString(R.string.preference_key_show_zoom_controls), false);
@@ -1444,16 +1691,6 @@ public class HomeActivity extends AppCompatActivity
                 mZoomOutFab.setVisibility(LinearLayout.GONE);
             }
         }
-
-        /*
-        LinearLayout zoomLayout = findViewById(R.id.zoom_buttons_layout);
-        if (zoomLayout != null) {
-            if (showZoom) {
-                zoomLayout.setVisibility(LinearLayout.VISIBLE);
-            } else {
-                zoomLayout.setVisibility(LinearLayout.GONE);
-            }
-        }*/
     }
 
     private void checkLeftHandMode() {
@@ -1512,8 +1749,8 @@ public class HomeActivity extends AppCompatActivity
     synchronized private void moveFabsLocation() {
         moveFabLocation(mFabMyLocation, MY_LOC_DEFAULT_BOTTOM_MARGIN);
         moveFabLocation(mLayersFab, LAYERS_FAB_DEFAULT_BOTTOM_MARGIN);
-        moveFabLocation(mZoomInFab, LAYERS_FAB_DEFAULT_BOTTOM_MARGIN);
-        moveFabLocation(mZoomOutFab, LAYERS_FAB_DEFAULT_BOTTOM_MARGIN + 120);
+        moveFabLocation(mZoomInFab, MY_LOC_DEFAULT_BOTTOM_MARGIN + 88);
+        moveFabLocation(mZoomOutFab, MY_LOC_DEFAULT_BOTTOM_MARGIN + 208);
     }
 
     private void moveFabLocation(final View fab, final int initialMargin) {

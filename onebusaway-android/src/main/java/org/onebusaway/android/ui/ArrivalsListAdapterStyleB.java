@@ -24,6 +24,7 @@ import android.content.res.Resources;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
@@ -206,6 +207,7 @@ public class ArrivalsListAdapterStyleB extends ArrivalsListAdapterBase<CombinedA
             // Layout and views to inflate from XML templates
             RelativeLayout layout;
             ConstraintLayout occupancyView;
+            ConstraintLayout vehicleFeaturesView;
             TextView scheduleView, estimatedView, statusView;
             View divider;
 
@@ -232,6 +234,7 @@ public class ArrivalsListAdapterStyleB extends ArrivalsListAdapterBase<CombinedA
             }
 
             occupancyView = (ConstraintLayout) inflater.inflate(R.layout.occupancy, null);
+            vehicleFeaturesView =  (ConstraintLayout) inflater.inflate(R.layout.vehicle_features, null);
 
             // CANCELED trips
             if (Status.CANCELED.equals(stopInfo.getStatus())) {
@@ -248,6 +251,12 @@ public class ArrivalsListAdapterStyleB extends ArrivalsListAdapterBase<CombinedA
                 // Historical occupancy data
                 UIUtils.setOccupancyVisibilityAndColor(occupancyView, stopInfo.getHistoricalOccupancy(), OccupancyState.HISTORICAL);
                 UIUtils.setOccupancyContentDescription(occupancyView, stopInfo.getHistoricalOccupancy(), OccupancyState.HISTORICAL);
+            }
+
+            if (arrivalRow.getPredicted()) {
+                UIUtils.setVehicleFeatures(vehicleFeaturesView, arrivalRow.getInfo().getTripStatus(), R.color.theme_muted);
+            } else {
+                UIUtils.setVehicleFeatures(vehicleFeaturesView, null, R.color.theme_muted);
             }
 
             // Set arrival times and status in views
@@ -291,9 +300,22 @@ public class ArrivalsListAdapterStyleB extends ArrivalsListAdapterBase<CombinedA
                 ((ImageView) occupancyView.getChildAt(index)).setAlpha(alpha);
             }
 
+            // Set alpha and size for vehicle features icons
+            int vehicleFeatureIconSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16, Resources.getSystem().getDisplayMetrics());
+            if (i > 0) {
+                vehicleFeatureIconSize = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 14, Resources.getSystem().getDisplayMetrics());
+            }
+            for (int index = 0; index < vehicleFeaturesView.getChildCount(); ++index) {
+                ((ImageView) vehicleFeaturesView.getChildAt(index)).setAlpha(alpha);
+                ((ImageView) vehicleFeaturesView.getChildAt(index)).getLayoutParams().height = vehicleFeatureIconSize;
+                ((ImageView) vehicleFeaturesView.getChildAt(index)).getLayoutParams().width = vehicleFeatureIconSize;
+                ((ImageView) vehicleFeaturesView.getChildAt(index)).requestLayout();
+            }
+
             // Add TextViews to layout
             layout.addView(scheduleView);
             layout.addView(statusView);
+            layout.addView(vehicleFeaturesView);
             layout.addView(occupancyView);
             layout.addView(estimatedView);
 
@@ -322,8 +344,16 @@ public class ArrivalsListAdapterStyleB extends ArrivalsListAdapterBase<CombinedA
                     .getLayoutParams();
             params4.addRule(RelativeLayout.CENTER_HORIZONTAL);
             params4.addRule(RelativeLayout.BELOW, statusView.getId());
+            params4.addRule(RelativeLayout.END_OF, vehicleFeaturesView.getId());
             params4.setMargins(p, p, p, p);
             occupancyView.setLayoutParams(params4);
+
+            RelativeLayout.LayoutParams params5 = (RelativeLayout.LayoutParams) vehicleFeaturesView
+                    .getLayoutParams();
+            params5.addRule(RelativeLayout.CENTER_HORIZONTAL);
+            params5.addRule(RelativeLayout.BELOW, statusView.getId());
+            params5.setMargins(p, p, p, p);
+            vehicleFeaturesView.setLayoutParams(params5);
 
             // Add layout to TableRow
             tr.addView(layout);

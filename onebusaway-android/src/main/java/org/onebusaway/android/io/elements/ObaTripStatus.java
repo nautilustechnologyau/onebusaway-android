@@ -177,4 +177,29 @@ public interface ObaTripStatus {
      * @return the real-time occupancy of the vehicle
      */
     Occupancy getOccupancyStatus();
+
+    /**
+     * @return the vehicle is air conditioned
+     */
+    public boolean getAirConditioned();
+
+    /**
+     * @return the vehicle has wheelchair
+     */
+    public boolean getWheelchairAccessible();
+
+    /**
+     * @return the vehicle speed
+     */
+    public float getSpeed();
+
+    /**
+     * @return the vehicle odometer reading
+     */
+    public double getOdometer();
+
+    /**
+     * @return the vehicle bearing
+     */
+    public float getBearing();
 }

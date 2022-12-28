@@ -100,6 +100,7 @@ import org.onebusaway.android.io.elements.ObaRegion;
 import org.onebusaway.android.io.elements.ObaRoute;
 import org.onebusaway.android.io.elements.ObaSituation;
 import org.onebusaway.android.io.elements.ObaStop;
+import org.onebusaway.android.io.elements.ObaTripStatus;
 import org.onebusaway.android.io.elements.Occupancy;
 import org.onebusaway.android.io.elements.OccupancyState;
 import org.onebusaway.android.io.request.ObaArrivalInfoResponse;
@@ -116,6 +117,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -504,7 +506,7 @@ public final class UIUtils {
         final ShortcutInfoCompat shortcut = UIUtils.makeShortcutInfo(context,
                 shortcutName,
                 builder.getIntent(),
-                R.drawable.ic_stop_flag_triangle);
+                R.drawable.ic_bus_stop);
         ShortcutManagerCompat.requestPinShortcut(context, shortcut, null);
         return shortcut;
     }
@@ -520,7 +522,7 @@ public final class UIUtils {
         final ShortcutInfoCompat shortcut = UIUtils.makeShortcutInfo(context,
                 routeName,
                 RouteInfoActivity.makeIntent(context, routeId),
-                R.drawable.ic_trip_details);
+                R.drawable.ic_track);
         ShortcutManagerCompat.requestPinShortcut(context, shortcut, null);
         return shortcut;
     }
@@ -545,7 +547,7 @@ public final class UIUtils {
 
         Drawable drawableIcon = ResourcesCompat
                 .getDrawable(context.getResources(), icon, context.getTheme());
-        drawableIcon.setColorFilter(ContextCompat.getColor(context, R.color.shortcut_icon),
+        drawableIcon.setColorFilter(ContextCompat.getColor(context, R.color.theme_primary_dark),
                 PorterDuff.Mode.SRC_IN);
         Drawable drawableBackground = ResourcesCompat
                 .getDrawable(context.getResources(), R.drawable.launcher_background, context.getTheme());
@@ -579,6 +581,25 @@ public final class UIUtils {
         } catch (ActivityNotFoundException e) {
             Toast.makeText(context, context.getString(R.string.browser_error), Toast.LENGTH_SHORT)
                     .show();
+        }
+    }
+
+    public static void goToMarket(Context context, String packageName) {
+        Uri uri = Uri.parse("market://details?id=" + packageName);
+        Intent goToMarket = new Intent(Intent.ACTION_VIEW, uri);
+        int flags = Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
+        if (Build.VERSION.SDK_INT >= 21) {
+            flags |= Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
+        } else{
+            //noinspection deprecation
+            flags |= Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET;
+        }
+        goToMarket.addFlags(flags);
+
+        try {
+            context.startActivity(goToMarket);
+        } catch (ActivityNotFoundException e) {
+            goToUrl(context, "http://play.google.com/store/apps/details?id=" + packageName);
         }
     }
 
@@ -1855,41 +1876,104 @@ public final class UIUtils {
         }
     }
 
+    public static Occupancy predictOccupancy() {
+        Calendar c = Calendar.getInstance();
+        int dayOfWeek = c.get(Calendar.DAY_OF_WEEK);
+        int timeOfDay = c.get(Calendar.HOUR_OF_DAY);
+
+        // early in the morning
+        if (timeOfDay < 6) {
+            return Occupancy.EMPTY;
+        }
+
+        if (dayOfWeek == Calendar.SUNDAY || dayOfWeek == Calendar.SATURDAY) {
+            // weekend evening
+            if (timeOfDay >= 17) {
+                return Occupancy.FEW_SEATS_AVAILABLE;
+            }
+
+            return Occupancy.MANY_SEATS_AVAILABLE;
+        }
+
+        if (timeOfDay <= 8) {
+            return Occupancy.MANY_SEATS_AVAILABLE;
+        }
+
+        // office hour
+        if (timeOfDay <= 10) {
+            return Occupancy.FULL;
+        }
+
+        if (timeOfDay < 15) {
+            return Occupancy.MANY_SEATS_AVAILABLE;
+        }
+
+        // school pickup
+        if (timeOfDay == 15) {
+            return Occupancy.FEW_SEATS_AVAILABLE;
+        }
+
+        // office end
+        if (timeOfDay <= 18) {
+            return Occupancy.FULL;
+        }
+
+        if (timeOfDay <= 20) {
+            return Occupancy.FEW_SEATS_AVAILABLE;
+        }
+
+        if (timeOfDay <= 22) {
+            return Occupancy.MANY_SEATS_AVAILABLE;
+        }
+
+        return Occupancy.EMPTY;
+    }
+
     /**
      * Sets the visibility and colors of the silhouettes in the provided occupancy.xml viewgroup
      *  @param v         occupancy.xml layout viewgroup containing the silhouettes
      * @param occupancy the occupancy value to use to set the silhouette visibility
      * @param occupancyState the state of the occupancy to use to set the silhouette color
      */
-    public static void setOccupancyVisibilityAndColor(ViewGroup v, Occupancy occupancy, OccupancyState occupancyState) {
+    public static void setOccupancyVisibilityAndColor(ViewGroup v, Occupancy occupancy, OccupancyState occupancyState, int color) {
         ImageView silhouette1 = v.findViewById(R.id.silhouette1);
-        silhouette1.setVisibility(View.INVISIBLE);
+        silhouette1.setVisibility(View.GONE);
         ImageView silhouette2 = v.findViewById(R.id.silhouette2);
-        silhouette2.setVisibility(View.INVISIBLE);
+        silhouette2.setVisibility(View.GONE);
         ImageView silhouette3 = v.findViewById(R.id.silhouette3);
-        silhouette3.setVisibility(View.INVISIBLE);
+        silhouette3.setVisibility(View.GONE);
+
+        Occupancy occupancy1 = occupancy;
 
         // Hide the entire view group if occupancy is null
-        if (occupancy == null) {
+        if (occupancy1 == null) {
+            /*if (OccupancyState.HISTORICAL == occupancyState) {
+                occupancy1 = predictOccupancy();
+                v.setVisibility(View.VISIBLE);
+            } else {
+                v.setVisibility(View.GONE);
+                return;
+            }*/
             v.setVisibility(View.GONE);
             return;
         } else {
             v.setVisibility(View.VISIBLE);
         }
 
-        int silhouetteColor = Application.get().getResources().getColor(R.color.stop_info_occupancy);
-        int backgroundColor = Application.get().getResources().getColor(R.color.stop_info_occupancy_background);
+        //int silhouetteColor = Application.get().getResources().getColor(R.color.stop_info_occupancy);
+        //int backgroundColor = Application.get().getResources().getColor(R.color.stop_info_occupancy_background);
+        float alpha = 0f;
         if (occupancyState == OccupancyState.HISTORICAL) {
             // Set the alpha for historical occupancy to 60%
-            float alpha = 0.6f;
+            alpha = 0.7f;
             v.setAlpha(alpha);
-            silhouette1.setAlpha(alpha);
-            silhouette2.setAlpha(alpha);
-            silhouette3.setAlpha(alpha);
         }
 
+        // Set silhouette colors
+        int silhouetteColor = Application.get().getResources().getColor(color);
+
         // Below switch continues into following cases to minimize number of setVisibility() calls
-        switch (occupancy) {
+        switch (occupancy1) {
             case NOT_ACCEPTING_PASSENGERS:
                 // 3 icons
             case FULL:
@@ -1897,28 +1981,55 @@ public final class UIUtils {
             case CRUSHED_STANDING_ROOM_ONLY:
                 // 3 icons
                 silhouette3.setVisibility(View.VISIBLE);
+                ImageViewCompat.setImageTintList(silhouette3, ColorStateList.valueOf(silhouetteColor));
+                break;
+
             case STANDING_ROOM_ONLY:
-                // 2 icons
-                silhouette2.setVisibility(View.VISIBLE);
             case FEW_SEATS_AVAILABLE:
                 // 2 icons
                 silhouette2.setVisibility(View.VISIBLE);
+                ImageViewCompat.setImageTintList(silhouette2, ColorStateList.valueOf(silhouetteColor));
+                break;
+
             case MANY_SEATS_AVAILABLE:
                 // 1 icon
                 silhouette1.setVisibility(View.VISIBLE);
+                ImageViewCompat.setImageTintList(silhouette1, ColorStateList.valueOf(silhouetteColor));
+                break;
+
             case EMPTY:
                 // 0 icons
         }
 
-        // Set silhouette colors
-        ImageViewCompat.setImageTintList(silhouette1, ColorStateList.valueOf(silhouetteColor));
-        ImageViewCompat.setImageTintList(silhouette2, ColorStateList.valueOf(silhouetteColor));
-        ImageViewCompat.setImageTintList(silhouette3, ColorStateList.valueOf(silhouetteColor));
+        if (alpha > 0) {
+            if (silhouette1.getVisibility() == View.VISIBLE) {
+                silhouette1.setAlpha(alpha);
+            }
+
+            if (silhouette2.getVisibility() == View.VISIBLE) {
+                silhouette2.setAlpha(alpha);
+            }
+            if (silhouette3.getVisibility() == View.VISIBLE) {
+                silhouette3.setAlpha(alpha);
+            }
+        }
+
+
 
         // Set background color
-        v.setBackgroundResource(R.drawable.occupancy_background);
+        /*v.setBackgroundResource(R.drawable.occupancy_background);
         GradientDrawable d = (GradientDrawable) v.getBackground();
-        d.setColor(backgroundColor);
+        d.setColor(backgroundColor);*/
+    }
+
+    /**
+     * Sets the visibility and colors of the silhouettes in the provided occupancy.xml viewgroup
+     *  @param v         occupancy.xml layout viewgroup containing the silhouettes
+     * @param occupancy the occupancy value to use to set the silhouette visibility
+     * @param occupancyState the state of the occupancy to use to set the silhouette color
+     */
+    public static void setOccupancyVisibilityAndColor(ViewGroup v, Occupancy occupancy, OccupancyState occupancyState) {
+        setOccupancyVisibilityAndColor(v, occupancy, occupancyState, R.color.theme_muted);
     }
 
     /**
@@ -1996,6 +2107,75 @@ public final class UIUtils {
         }
 
         v.setContentDescription(Application.get().getString(stringId));
+    }
+
+    public static void setVehicleFeatures(ViewGroup v, ObaTripStatus tripStatus, int color) {
+        if (v == null) {
+            return;
+        }
+
+        if (tripStatus == null) {
+            v.setVisibility(View.GONE);
+            return;
+        } else {
+            v.setVisibility(View.VISIBLE);
+        }
+
+        ImageView mAirConditionerView = v.findViewById(R.id.air_conditioner);
+        ImageView mWheelchairAccessibilityView = v.findViewById(R.id.wheelchair);
+        ImageView mSpeed = v.findViewById(R.id.speed);
+        // ImageView mRealtimeView = v.findViewById(R.id.realtime);
+
+        int featureColor = Application.get().getResources().getColor(color);
+
+        if (tripStatus.getAirConditioned()) {
+            ImageViewCompat.setImageTintList(mAirConditionerView, ColorStateList.valueOf(featureColor));
+            mAirConditionerView.setVisibility(View.VISIBLE);
+        } else {
+            mAirConditionerView.setVisibility(View.GONE);
+        }
+
+        if (tripStatus.getWheelchairAccessible()) {
+            ImageViewCompat.setImageTintList(mWheelchairAccessibilityView, ColorStateList.valueOf(featureColor));
+            mWheelchairAccessibilityView.setVisibility(View.VISIBLE);
+        } else {
+            mWheelchairAccessibilityView.setVisibility(View.GONE);
+        }
+
+        /*if (isLocationRealtime(tripStatus)) {
+            ImageViewCompat.setImageTintList(mRealtimeView, ColorStateList.valueOf(featureColor));
+            mRealtimeView.setVisibility(View.VISIBLE);
+        } else {
+            mRealtimeView.setVisibility(View.GONE);
+        }*/
+
+        float speed = tripStatus.getSpeed();
+        if (speed <= 0) {
+            mSpeed.setVisibility(View.GONE);
+        } else {
+            ImageViewCompat.setImageTintList(mSpeed, ColorStateList.valueOf(featureColor));
+            mSpeed.setVisibility(View.VISIBLE);
+
+            if (speed < 10) {
+                mSpeed.setImageResource(R.drawable.ic_very_slow);
+            } else if (speed >= 10 && speed <= 40) {
+                mSpeed.setImageResource(R.drawable.ic_slow);
+            } else {
+                mSpeed.setImageResource(R.drawable.ic_fast);
+            }
+        }
+    }
+
+    public static boolean isLocationRealtime(ObaTripStatus status) {
+        boolean isRealtime = true;
+        Location l = status.getLastKnownLocation();
+        if (l == null) {
+            isRealtime = false;
+        }
+        if (!status.isPredicted()) {
+            isRealtime = false;
+        }
+        return isRealtime;
     }
 
     /**

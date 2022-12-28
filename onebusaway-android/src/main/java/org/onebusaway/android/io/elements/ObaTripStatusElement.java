@@ -67,6 +67,16 @@ public final class ObaTripStatusElement implements ObaTripStatus, Serializable {
 
     private final String occupancyStatus;
 
+    private final boolean airConditioned;
+
+    private final boolean wheelchairAccessible;
+
+    private float speed;
+
+    private double odometer;
+
+    private float bearing;
+
     ObaTripStatusElement() {
         serviceDate = 0;
         predicted = false;
@@ -90,6 +100,11 @@ public final class ObaTripStatusElement implements ObaTripStatus, Serializable {
         lastKnownOrientation = null;
         blockTripSequence = 0;
         occupancyStatus = "";
+        airConditioned = false;
+        wheelchairAccessible = false;
+        speed = 0;
+        odometer = 0;
+        bearing = 0;
     }
 
     @Override
@@ -206,5 +221,30 @@ public final class ObaTripStatusElement implements ObaTripStatus, Serializable {
     @Override
     public Occupancy getOccupancyStatus() {
         return Occupancy.fromString(occupancyStatus);
+    }
+
+    @Override
+    public boolean getAirConditioned() {
+        return airConditioned;
+    }
+
+    @Override
+    public boolean getWheelchairAccessible() {
+        return wheelchairAccessible;
+    }
+
+    @Override
+    public float getSpeed() {
+        return speed;
+    }
+
+    @Override
+    public double getOdometer() {
+        return odometer;
+    }
+
+    @Override
+    public float getBearing() {
+        return bearing;
     }
 }

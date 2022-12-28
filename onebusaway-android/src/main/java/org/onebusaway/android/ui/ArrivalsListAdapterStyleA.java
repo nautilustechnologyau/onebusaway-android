@@ -85,6 +85,7 @@ public class ArrivalsListAdapterStyleA extends ArrivalsListAdapterBase<ArrivalIn
         starView.setImageResource(stopInfo.isRouteAndHeadsignFavorite() ?
                 R.drawable.focus_star_on :
                 R.drawable.focus_star_off);
+        ViewGroup vehicleFeaturesView = view.findViewById(R.id.vehicle_features);
 
         // CANCELED trips
         if (Status.CANCELED.equals(stopInfo.getStatus())) {
@@ -146,6 +147,12 @@ public class ArrivalsListAdapterStyleA extends ArrivalsListAdapterBase<ArrivalIn
             // Historical occupancy data
             UIUtils.setOccupancyVisibilityAndColor(occupancyView, stopInfo.getHistoricalOccupancy(), OccupancyState.HISTORICAL);
             UIUtils.setOccupancyContentDescription(occupancyView, stopInfo.getHistoricalOccupancy(), OccupancyState.HISTORICAL);
+        }
+
+        if (stopInfo.getPredicted()) {
+            UIUtils.setVehicleFeatures(vehicleFeaturesView, stopInfo.getInfo().getTripStatus(), R.color.theme_muted);
+        } else {
+            UIUtils.setVehicleFeatures(vehicleFeaturesView, null, R.color.theme_muted);
         }
 
         ContentValues values = null;
