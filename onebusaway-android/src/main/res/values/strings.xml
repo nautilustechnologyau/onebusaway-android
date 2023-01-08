@@ -357,8 +357,8 @@
     <string name="route_info_context_get_stop_info">Show arrival information</string>
     <string name="route_info_context_showonmap">Show on map</string>
     <string name="route_info_goto_url">View schedule</string>
-    <string name="route_info_no_shape_data">Sorry, map information isn\'t available for this route
-    </string>
+    <string name="route_info_no_shape_data">Sorry, map information isn\'t available for this route</string>
+    <string name="route_info_favorite">Favorite route</string>
 
     <!-- My stops/routes -->
     <string name="my_recent_title">Recent</string>
@@ -372,14 +372,15 @@
         the arrivals screen by tapping on the star next to the stop name.
     </string>
     <string name="my_no_recent_routes">You have no recent routes.</string>
-    <!-- <string name="my_no_starred_routes">You have no starred routes.</string>-->
+    <string name="my_no_starred_routes">You have no starred routes.\n\nYou can add a star to a route on
+        the arrivals screen by tapping on the star next to the route name.</string>
     <string name="route_favorite_options_title_star">Star Route \"%s\" for:</string>
     <string name="route_favorite_options_title_unstar">Remove star from \"%s\" for:</string>
 
     <string name="my_option_clear_recent_stops">Clear recent stops</string>
     <string name="my_option_clear_recent_routes">Clear recent routes</string>
     <string name="my_option_clear_starred_stops">Remove all starred stops</string>
-    <!-- <string name="my_option_clear_starred_routes">Remove all starred routes</string>-->
+    <string name="my_option_clear_starred_routes">Remove all starred routes</string>
     <string name="my_option_clear_confirm">There\'s no going back! Go ahead?</string>
     <string name="my_option_clear_confirm_title">Sure about this?</string>
 
@@ -431,7 +432,7 @@
     <string name="recent_stops_shortcut">Recent Stops</string>
     <string name="recent_routes_shortcut">Recent Routes</string>
     <string name="starred_stops_shortcut">Starred Stops</string>
-    <!-- <string name="starred_routes_shortcut">Starred Routes</string> -->
+    <string name="starred_routes_shortcut">Starred Routes</string>
     <string name="route_name">Route %s</string>
 
     <!--  Trip info -->
@@ -736,6 +737,7 @@
 
     <string name="preferences_preferred_sound_title">Reminder sound</string>
     <string name="preferences_preferred_sound_summary">Select the OneBusAway notification tone</string>
+    <string name="preferences_category_parent_advanced">Parent Advanced</string>
 
     <!-- Navigation Drawer -->
     <string name="navigation_drawer_open">Open navigation drawer</string>
@@ -1196,4 +1198,34 @@
     <string name="travel_behavior_dialog_opt_out_title">Opt out of study?</string>
     <string name="travel_behavior_dialog_opt_out_message">If you opt out of the research study, we won\'t receive any more information about your travel behavior to help improve public transit.</string>
     <string name="cancel">Cancel</string>
+
+    <!-- Rate app -->
+    <string name="navdrawer_item_rate_app">Rate MyMetro</string>
+    <string name="rate_title">Enjoying MyMetro?</string>
+    <string name="rate_message">If you are enjoying using MyMetro, please take a moment to rate it. Your rating and feedback will help us improving the app.</string>
+    <string name="rate_positive">Yes</string>
+    <string name="rate_never">Don\'t Show Again</string>
+    <string name="rate_remind_later">Remind Me Later</string>
+    <string name="analytics_label_button_press_rate_app">rate_app</string>
+
+    <!-- Remove ads -->
+    <string name="navdrawer_item_remove_ads">Remove Ads</string>
+    <string name="remove_ads_title">Remove Ads</string>
+    <string name="remove_ads_btn_label">Buy Ads Free Subscription</string>
+    <string name="remove_ads_caption">Tired of Ads? Purchase Ads Free Subscription and Remove Them Now!</string>
+    <string name="remove_ads_message1">Though we are trying to show ads at a minimal level, we understand that seeing ads sometimes can be annoying. However, ads help us covering the huge cost to keep the infrastructure running on the cloud. It also supports the on going development to improve the app.</string>
+    <string name="remove_ads_message2">Purchasing subscription is optional. By purchasing Ads Free Subscription you will enjoy ads free seamless in-app experience. Your purchase will be a great support and much appreciated.</string>
+    <string name="remove_ads_message3">Payments will be charged using your Google account. The subscription will be automatically renewed yearly unless you cancel it at least 24 hours before the anniversary of current subscription. You can manage and cancel your subscription from your Google account\'s Subscriptions section. Visit https://play.google.com/store/account/subscriptions</string>
+    <string name="remove_ads_message4">By purchasing this subscription you are agreeing to MyMetro Terms of Use https://www.mymetro.au/terms-of-use</string>
+    <string name="remove_ads_already_purchased">You already have purchased this subscription.</string>
+    <string name="remove_ads_product_unavailable">The subscription is not available in your region.</string>
+    <string name="remove_ads_product_not_found">The subscription is not available anymore.</string>
+    <string name="remove_ads_system_error">Something went wrong. Please try again later.</string>
+    <string name="remove_ads_purchase_successful">Thank you for purchasing the subscription. The subscription will be automatically renewed each year. Visit https://play.google.com/store/account/subscriptions to manage or cancel the subscription.</string>
+    <string name="remove_ads_dlg_btn_positive">Buy Now</string>
+    <string name="remove_ads_dlg_btn_negative">Don\'t Show Again</string>
+    <string name="remove_ads_dlg_btn_neutral">Remind Me Later</string>
+    <string name="analytics_label_button_press_remove_ads">remove_ads</string>
+    <string name="analytics_label_button_press_buy_ads_free_subscription">buy_ads_free_subscription</string>
+
 </resources>

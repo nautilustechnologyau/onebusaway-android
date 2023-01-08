@@ -48,20 +48,15 @@
     <string name="preferences_preferred_sound_summary">Select the MyMetro notification tone</string>
     <string name="preferences_category_parent_advanced">Parent Advanced</string>
     <string name="preferences_restore_summary">Restores from previous save. After selecting this option you\'ll be asked to pick a file. Please select \"db.backup\" or \"MyMetro.backup\", which will be in a folder \"MyMetroBackups\", likely on your SD card or under your \"Documents\" folder.</string>
-    <!--
-    <string name="preferences_powered_by_oba_title">MyMetro Web</string>
-    <string name="preferences_powered_by_oba_summary">Go to MyMetro web (mobile version)</string>
-    -->
 
     <string name="about_text">
         "Nautilus Technology is an Australian startup technology company with the vision of"
         "creating and accelerating competitive advantages through cutting-edge technology and"
         "solutions.\n\nMyMetro has been launched to provide support to the transit riders of"
-        "Adelaide Metro. MyMetro is a free to use real-time transit platform. The real-time"
-        "transit data is provided by Adelaide Metro Real-Time Data"
-        "Feed (https://www.adelaidemetro.com.au/developer-info).\n\nVisit"
+        "Australian Cities. MyMetro is a free to use real-time transit platform. The real-time"
+        "transit data is provided by State/Government Transport Agencies.\n\nVisit"
         "https://nautilus-tech.com.au and https://mymetro.au to find out more.\n\nMyMetro"
-        "is using the OneBusAway transit platform. OneBusWay is a project of the non-profit"
+        "is using the OneBusAway transit platform. OneBusAway is a project of the non-profit"
         "Open Transit Software Foundation (OTSF). It began in 2008 as a graduate student project"
         "by Brian Ferris and Kari Watkins at the University of Washington and evolved to become"
         "the topic of both of their PhD dissertations. Find out more about the OneBusAway"

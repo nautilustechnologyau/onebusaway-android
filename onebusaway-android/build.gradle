@@ -127,6 +127,7 @@ android {
             buildConfigField "boolean", "FIXED_REGION_ENROLL_PARTICIPANTS_IN_STUDY", "false"
 
             // TODO: set the values for this fixed region
+            buildConfigField "boolean", "DISABLE_ADVANCED_PREFERENCE", "false"
             buildConfigField "double", "FIXED_REGION_MAP_CENTRE_LAT", "0.0"
             buildConfigField "double", "FIXED_REGION_MAP_CENTRE_LON", "0.0"
             buildConfigField "int", "FIXED_REGION_MAP_ZOOM_LEVEL", "10"
@@ -186,6 +187,7 @@ android {
             buildConfigField "boolean", "FIXED_REGION_ENROLL_PARTICIPANTS_IN_STUDY", "false"
 
             // TODO: set the values for this fixed region. check oba section for details
+            buildConfigField "boolean", "DISABLE_ADVANCED_PREFERENCE", "false"
             buildConfigField "double", "FIXED_REGION_MAP_CENTRE_LAT", "0.0"
             buildConfigField "double", "FIXED_REGION_MAP_CENTRE_LON", "0.0"
             buildConfigField "int", "FIXED_REGION_MAP_ZOOM_LEVEL", "10"
@@ -235,6 +237,7 @@ android {
             buildConfigField "boolean", "FIXED_REGION_ENROLL_PARTICIPANTS_IN_STUDY", "false"
 
             // TODO: set the values for this fixed region. check oba section for details
+            buildConfigField "boolean", "DISABLE_ADVANCED_PREFERENCE", "false"
             buildConfigField "double", "FIXED_REGION_MAP_CENTRE_LAT", "0.0"
             buildConfigField "double", "FIXED_REGION_MAP_CENTRE_LON", "0.0"
             buildConfigField "int", "FIXED_REGION_MAP_ZOOM_LEVEL", "10"
@@ -283,6 +286,7 @@ android {
             buildConfigField "boolean", "FIXED_REGION_ENROLL_PARTICIPANTS_IN_STUDY", "false"
 
             // TODO: set the values for this fixed region. check oba section for details
+            buildConfigField "boolean", "DISABLE_ADVANCED_PREFERENCE", "false"
             buildConfigField "double", "FIXED_REGION_MAP_CENTRE_LAT", "0.0"
             buildConfigField "double", "FIXED_REGION_MAP_CENTRE_LON", "0.0"
             buildConfigField "int", "FIXED_REGION_MAP_ZOOM_LEVEL", "10"
@@ -291,10 +295,10 @@ android {
         }
 
         /**
-         * MyMetro - Adelaide Metro Transit" rebranding
+         * MyMetro - rebranding
          */
         myMetro {
-            // "MyMetro - Adelaide Metro Transit" rebranding
+            // MyMetro - rebranding
             dimension "brand"
             applicationId "au.mymetro.android"
             manifestPlaceholders = [databaseAuthority: applicationId.toString() + '.provider']

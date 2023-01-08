@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package au.mymetro.android.ui;
+package org.onebusaway.android.ui;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -30,9 +30,6 @@ import androidx.core.content.pm.ShortcutManagerCompat;
 
 import org.onebusaway.android.R;
 import org.onebusaway.android.app.Application;
-import org.onebusaway.android.ui.MyStarredStopsFragment;
-import org.onebusaway.android.ui.MyTabActivityBase;
-import org.onebusaway.android.ui.TabListener;
 import org.onebusaway.android.util.PreferenceUtils;
 import org.onebusaway.android.util.UIUtils;
 

@@ -163,7 +163,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="au.mymetro.android.ui.MyStarredRoutesActivity"
+            android:name=".ui.MyStarredRoutesActivity"
             android:label="@string/starred_routes_shortcut"
             android:exported="true">
             <intent-filter>
@@ -226,7 +226,7 @@
                     android:value="org.onebusaway.android.ui.HomeActivity"/>
         </activity>
         <activity
-            android:name="au.mymetro.android.ui.MyStarredStopsAndRoutesActivity"
+            android:name=".ui.MyStarredStopsAndRoutesActivity"
             android:label="@string/my_starred_title"
             android:parentActivityName="org.onebusaway.android.ui.HomeActivity"
             android:exported="true">

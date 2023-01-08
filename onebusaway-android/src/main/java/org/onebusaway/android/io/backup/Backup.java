@@ -43,12 +43,22 @@ import java.io.IOException;
  */
 public final class Backup {
 
-    private static final String FILE_NAME = BuildConfig.FLAVOR_brand +  ".backup";
+    private static final String FILE_NAME;
 
-    private static final String DIRECTORY_NAME = BuildConfig.FLAVOR_brand +  "Backups";
+    private static final String DIRECTORY_NAME;
 
     private static File getDB(Context context) {
         return ObaProvider.getDatabasePath(context);
+    }
+
+    static {
+        if (BuildConfig.FLAVOR_brand == "myMetro") {
+            FILE_NAME = "MyMetro.backup";
+            DIRECTORY_NAME = "MyMetroBackups";
+        } else {
+            FILE_NAME = "OneBusAway.backup";
+            DIRECTORY_NAME = "OBABackups";
+        }
     }
 
     private static File getBackup() {

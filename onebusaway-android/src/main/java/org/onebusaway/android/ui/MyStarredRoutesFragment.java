@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package au.mymetro.android.ui;
+package org.onebusaway.android.ui;
 
 import android.content.DialogInterface;
 import android.database.Cursor;
@@ -42,8 +42,6 @@ import org.onebusaway.android.R;
 import org.onebusaway.android.app.Application;
 import org.onebusaway.android.io.ObaAnalytics;
 import org.onebusaway.android.provider.ObaContract;
-import org.onebusaway.android.ui.MyRouteListFragmentBase;
-import org.onebusaway.android.ui.QueryUtils;
 import org.onebusaway.android.util.PreferenceUtils;
 
 public class MyStarredRoutesFragment extends MyRouteListFragmentBase {

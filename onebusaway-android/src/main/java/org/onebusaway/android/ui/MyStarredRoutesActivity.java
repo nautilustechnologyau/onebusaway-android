@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package au.mymetro.android.ui;
+package org.onebusaway.android.ui;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -24,17 +24,13 @@ import androidx.core.content.pm.ShortcutInfoCompat;
 import androidx.core.content.pm.ShortcutManagerCompat;
 
 import org.onebusaway.android.R;
-import org.onebusaway.android.ui.MyRoutesActivity;
-import org.onebusaway.android.ui.MyStarredStopsFragment;
-import org.onebusaway.android.ui.MyStopsActivity;
-import org.onebusaway.android.ui.MyTabActivityBase;
 import org.onebusaway.android.util.UIUtils;
 
 public class MyStarredRoutesActivity extends AppCompatActivity {
 
     //
     // The only thing this is used for anymore is to create
-    // a shortcut to the starred stops list.
+    // a shortcut to the starred routes list.
     //
     @Override
     public void onCreate(Bundle savedInstanceState) {

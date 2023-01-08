@@ -39,6 +39,7 @@
     <string name="preference_key_show_zoom_controls">preference_show_zoom_controls</string>
     <string name="preference_key_hide_alerts">preference_hide_alerts</string>
     <string name="preference_key_default_stop_sort">preference_default_stop_sort</string>
+    <string name="preference_key_default_route_sort">preference_default_route_sort</string>
     <string name="preference_key_default_reminder_time">preference_default_reminder_time</string>
     <string name="preference_key_default_reminder_sort">preference_default_reminder_sort</string>
     <string name="preference_key_tutorial">preference_key_tutorial</string>
@@ -118,6 +119,12 @@
     </string>
     <string name="analytics_label_sort_by_mfu_stops">Clicked sort by most frequently used from
         MyStarredStopsFragment
+    </string>
+    <string name="analytics_label_sort_by_name_routes">
+        Clicked sort by name from MyStarredRoutesFragment
+    </string>
+    <string name="analytics_label_sort_by_mfu_routes">
+        Clicked sort by most frequently used from MyStarredRoutesFragment
     </string>
     <string name="analytics_label_sort_by_name_reminder">Clicked sort by name from
         MyRemindersFragment

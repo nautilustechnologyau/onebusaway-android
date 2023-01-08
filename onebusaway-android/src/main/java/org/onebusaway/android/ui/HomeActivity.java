@@ -150,7 +150,6 @@ import java.util.List;
 import java.util.Random;
 
 import au.mymetro.android.billing.BillingClientLifecycle;
-import au.mymetro.android.ui.MyStarredStopsAndRoutesActivity;
 import au.mymetro.android.ui.RateItDialogFragment;
 import au.mymetro.android.ui.RemoveAdsActivity;
 import au.mymetro.android.ui.RemoveAdsDialogFragment;
@@ -180,7 +179,7 @@ public class HomeActivity extends AppCompatActivity
         int getPanelHeightPixels();
     }
 
-    public static final String TWITTER_URL = "http://mobile.twitter.com/onebusaway";
+    public static String TWITTER_URL = "http://mobile.twitter.com/onebusaway";
 
     private static final String WHATS_NEW_VER = "whatsNewVer";
 
@@ -950,7 +949,18 @@ public class HomeActivity extends AppCompatActivity
             // Hide "Contact Us"
             options = R.array.main_help_options_no_contact_us;
         }
-        builder.setItems(options,
+
+        String[] optionItems = getResources().getStringArray(options);
+
+        if (BuildConfig.FLAVOR_brand == "myMetro" && (Application.get().getCurrentRegion() == null ||
+                TextUtils.isEmpty(Application.get().getCurrentRegion()
+                        .getTwitterUrl()))) {
+            // MyMetro does not use Twitter, rather it will redirect to application landing page
+            optionItems[4] = "Visit MyMetro";
+            TWITTER_URL = "https://mymetro.au";
+        }
+
+        builder.setItems(optionItems,
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         switch (which) {
