@@ -32,6 +32,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.cursoradapter.widget.SimpleCursorAdapter;
 import androidx.loader.content.CursorLoader;
 import androidx.loader.content.Loader;
 
@@ -53,6 +54,11 @@ public class MyStarredRoutesFragment extends MyRouteListFragmentBase {
     private static String sortBy;
 
     private FirebaseAnalytics mFirebaseAnalytics;
+
+    @Override
+    protected SimpleCursorAdapter newAdapter() {
+        return QueryUtils.RouteList.newFavoriteAdapter(getActivity());
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

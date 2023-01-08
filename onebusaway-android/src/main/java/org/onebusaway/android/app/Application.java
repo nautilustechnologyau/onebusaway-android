@@ -104,7 +104,9 @@ public class Application extends MultiDexApplication {
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         // initialise mobile ad as early as possible
-        initMobileAds();
+        if (BuildConfig.ENABLE_ADMOB) {
+            initMobileAds();
+        }
 
         initOba();
         initObaRegion();

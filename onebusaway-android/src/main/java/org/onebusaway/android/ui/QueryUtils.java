@@ -94,6 +94,21 @@ public final class QueryUtils {
         public static SimpleCursorAdapter newAdapter(Context context) {
             final String[] from = {
                     ObaContract.Routes.SHORTNAME,
+                    ObaContract.Routes.LONGNAME
+            };
+            final int[] to = {
+                    R.id.short_name,
+                    R.id.long_name
+            };
+            SimpleCursorAdapter simpleAdapter =
+                    new SimpleCursorAdapter(context, R.layout.route_list_item,
+                            null, from, to, 0);
+            return simpleAdapter;
+        }
+
+        public static SimpleCursorAdapter newFavoriteAdapter(Context context) {
+            final String[] from = {
+                    ObaContract.Routes.SHORTNAME,
                     ObaContract.Routes.LONGNAME,
                     ObaContract.Routes.FAVORITE
             };
@@ -267,7 +282,6 @@ public final class QueryUtils {
         }
 
         String routeId = routeUri.getLastPathSegment();
-        Log.d(TAG, routeId);
 
         // Make sure this route has been inserted into the routes table
         ObaContract.Routes.insertOrUpdate(context, routeId, routeValues, true);

@@ -161,14 +161,25 @@ public class SituationDialogFragment extends DialogFragment {
 
         // Set the title, description, and URL (if provided)
         TextView title = (TextView) dialog.findViewById(R.id.alert_title);
-        title.setText(args.getString(TITLE));
+
+        // alert with empty title/description is filtered out already
+        // but it is safe to check the null to avoid crash
+        String strTitle = args.getString(TITLE);
+        if (strTitle == null || strTitle.trim().isEmpty()) {
+            strTitle = "Service Alert";
+        }
+        title.setText(strTitle);
 
         TextView desc = (TextView) dialog.findViewById(R.id.alert_description);
 
+        String strDesc = args.getString(DESCRIPTION);
+        if (strDesc == null || strDesc.trim().isEmpty()) {
+            strDesc = "Please check the agency website to view details.";
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            desc.setText(Html.fromHtml(args.getString(DESCRIPTION), Html.FROM_HTML_MODE_COMPACT));
+            desc.setText(Html.fromHtml(strDesc, Html.FROM_HTML_MODE_COMPACT));
         } else {
-            desc.setText(Html.fromHtml(args.getString(DESCRIPTION)));
+            desc.setText(Html.fromHtml(strDesc));
         }
 
         TextView urlView = (TextView) dialog.findViewById(R.id.alert_url);

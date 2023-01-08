@@ -1705,6 +1705,15 @@ public class ArrivalsListFragment extends ListFragment
         for (ObaSituation situation : situations) {
             values.clear();
 
+            // check null to prevent occasional crash reported by Google Play
+            if (situation.getSummary() == null || situation.getSummary().isEmpty()) {
+                continue;
+            }
+
+            if (situation.getDescription() == null || situation.getDescription().isEmpty()) {
+                continue;
+            }
+
             // Make sure this situation is added to the database
             ObaContract.ServiceAlerts.insertOrUpdate(situation.getId(), values, false, null);
 

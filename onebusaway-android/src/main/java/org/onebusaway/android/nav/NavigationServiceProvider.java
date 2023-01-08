@@ -19,6 +19,7 @@ import static android.app.PendingIntent.*;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 
+import org.onebusaway.android.BuildConfig;
 import org.onebusaway.android.R;
 import org.onebusaway.android.app.Application;
 import org.onebusaway.android.io.ObaAnalytics;
@@ -621,7 +622,11 @@ public class NavigationServiceProvider implements TextToSpeech.OnInitListener {
             String METRIC = app.getString(R.string.preferences_preferred_units_option_metric);
             String AUTOMATIC = app.getString(R.string.preferences_preferred_units_option_automatic);
             String preferredUnits = mSettings
-                    .getString(app.getString(R.string.preference_key_preferred_units), METRIC);
+                    .getString(app.getString(R.string.preference_key_preferred_units), AUTOMATIC);
+            if (BuildConfig.FLAVOR_brand == "myMetro") {
+                preferredUnits = mSettings
+                        .getString(app.getString(R.string.preference_key_preferred_units), METRIC);
+            }
             double distance = mProxCalculator.endDistance;
             double miles = distance * RegionUtils.METERS_TO_MILES;  // Get miles.
             distance /= 1000;                                       // Get kilometers.

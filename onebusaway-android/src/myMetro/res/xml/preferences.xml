@@ -36,7 +36,7 @@
             android:summary="@string/preferences_show_negative_arrivals_summary"
             android:title="@string/preferences_show_negative_arrivals_title" />
         <CheckBoxPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:key="@string/preference_key_hide_alerts"
             android:summary="@string/preferences_hide_alerts_summary"
             android:title="@string/preferences_hide_alerts_title" />

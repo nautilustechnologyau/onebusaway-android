@@ -5,6 +5,5 @@
     <domain-config cleartextTrafficPermitted="true">
         <!-- San Diego OTP server -->
         <domain includeSubdomains="true">realtime.sdmts.com</domain>
-        <domain includeSubdomains="true">nautilus-tech.com.au</domain>
     </domain-config>
 </network-security-config>

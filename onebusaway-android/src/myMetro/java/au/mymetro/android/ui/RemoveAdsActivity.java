@@ -75,9 +75,9 @@ public class RemoveAdsActivity extends AppCompatActivity {
         TextView productDetailsPriceTextView = findViewById(R.id.productDetailsPrice);
 
         ProductDetails productDetails = mBillingClient.getAdsFreeProductDetails();
-        if (productDetails == null) {
-            layout.setVisibility(View.GONE);
-        } else {
+        if (productDetails != null
+                && productDetails.getSubscriptionOfferDetails() != null
+                && !productDetails.getSubscriptionOfferDetails().isEmpty()) {
             productDetailsTitleTextView.setText(productDetails.getTitle());
             productDetailsDescTextView.setText(productDetails.getDescription());
 
@@ -98,6 +98,15 @@ public class RemoveAdsActivity extends AppCompatActivity {
         if (isAdsFreeVersion) {
             purchaseStatusView.setVisibility(View.VISIBLE);
             purchaseButton.setEnabled(false);
+            purchaseStatusView.setText(R.string.remove_ads_already_purchased);
+            return;
+        }
+
+        ProductDetails productDetails = mBillingClient.getAdsFreeProductDetails();
+        if ( productDetails == null) {
+            purchaseStatusView.setVisibility(View.VISIBLE);
+            purchaseButton.setEnabled(false);
+            purchaseStatusView.setText(R.string.remove_ads_product_unavailable);
         }
     }
 

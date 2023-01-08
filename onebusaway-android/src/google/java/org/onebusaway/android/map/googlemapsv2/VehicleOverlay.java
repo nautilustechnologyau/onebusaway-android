@@ -557,6 +557,14 @@ public class VehicleOverlay implements GoogleMap.OnInfoWindowClickListener, Mark
 
     @Override
     public boolean markerClicked(Marker marker) {
+        if (marker == null) {
+            return false;
+        }
+
+        if (mMarkerData == null) {
+            return false;
+        }
+
         ObaTripStatus status = mMarkerData.getStatusFromMarker(marker);
         if (status != null) {
             setupInfoWindow();
@@ -800,6 +808,9 @@ public class VehicleOverlay implements GoogleMap.OnInfoWindowClickListener, Mark
         }
 
         synchronized ObaTripStatus getStatusFromMarker(Marker marker) {
+            if (marker == null || mVehicles == null) {
+                return null;
+            }
             return mVehicles.get(marker);
         }
 

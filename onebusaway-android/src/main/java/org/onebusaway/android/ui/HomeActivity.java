@@ -17,6 +17,8 @@
  */
 package org.onebusaway.android.ui;
 
+import static com.google.android.play.core.install.model.AppUpdateType.FLEXIBLE;
+import static com.google.android.play.core.install.model.AppUpdateType.IMMEDIATE;
 import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_ACTIVITY_FEED;
 import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_HELP;
 import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_MY_REMINDERS;
@@ -45,6 +47,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -98,7 +101,16 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.android.play.core.appupdate.AppUpdateInfo;
+import com.google.android.play.core.appupdate.AppUpdateManager;
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory;
+import com.google.android.play.core.install.InstallStateUpdatedListener;
+import com.google.android.play.core.install.model.AppUpdateType;
+import com.google.android.play.core.install.model.InstallStatus;
+import com.google.android.play.core.install.model.UpdateAvailability;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
@@ -223,7 +235,7 @@ public class HomeActivity extends AppCompatActivity
 
     Animation mMyLocationAnimation;
 
-    private AdView mBottomAdView;
+    private AdView mBannerAdView;
 
     private InterstitialAd mInterstitialAd;
 
@@ -236,6 +248,11 @@ public class HomeActivity extends AppCompatActivity
     SlidingUpPanelLayout mSlidingPanel;
 
     public static final int BATTERY_OPTIMIZATIONS_PERMISSION_REQUEST = 111;
+
+    // in-app update
+    public static final int DAYS_FOR_FLEXIBLE_UPDATE = 3;
+    public static int UPDATE_REQUEST_CODE = 1000001;
+    private static AppUpdateManager mAppUpdateManager = null;
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -396,12 +413,15 @@ public class HomeActivity extends AppCompatActivity
     @Override
     public void onCreate(Bundle savedInstanceState) {
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-
         super.onCreate(savedInstanceState);
 
-        mAdsFreeVersion = PreferenceUtils.getBoolean(ADS_FREE_VERSION, false);
-
-        setupBillingClient();
+        // this flag will control the ads/subscription feature
+        if (!BuildConfig.ENABLE_ADMOB) {
+            mAdsFreeVersion = true;
+        } else {
+            mAdsFreeVersion = PreferenceUtils.getBoolean(ADS_FREE_VERSION, false);
+            setupBillingClient();
+        }
 
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
@@ -432,7 +452,7 @@ public class HomeActivity extends AppCompatActivity
         // To enable checkBatteryOptimizations, also uncomment the
         // REQUEST_IGNORE_BATTERY_OPTIMIZATIONS permission in AndroidManifest.xml
         // See https://github.com/OneBusAway/onebusaway-android/pull/988#discussion_r299950506
-        // checkBatteryOptimizations();
+//        checkBatteryOptimizations();
 
         new TravelBehaviorManager(this, getApplicationContext()).
                 registerTravelBehaviorParticipant();
@@ -451,6 +471,9 @@ public class HomeActivity extends AppCompatActivity
                 ShowcaseViewUtils.showTutorial(ShowcaseViewUtils.TUTORIAL_WELCOME, this, null, false);
             }
         }
+
+        // check if update available
+        checkUpdate();
     }
 
     @Override
@@ -461,13 +484,38 @@ public class HomeActivity extends AppCompatActivity
             mGoogleApiClient.connect();
         }
         AccessibilityManager am = (AccessibilityManager) getSystemService(ACCESSIBILITY_SERVICE);
-        boolean isTalkBackEnabled = am.isTouchExplorationEnabled();
+        Boolean isTalkBackEnabled = am.isTouchExplorationEnabled();
         ObaAnalytics.setAccessibility(mFirebaseAnalytics, isTalkBackEnabled);
     }
 
     @Override
     public void onResume() {
         super.onResume();
+
+        // in-apps update status check
+        if (mAppUpdateManager != null) {
+            mAppUpdateManager.getAppUpdateInfo().addOnSuccessListener(appUpdateInfo -> {
+                // If the update is downloaded but not installed,
+                // notify the user to complete the update.
+                Log.d(TAG, "App Update Status " + appUpdateInfo.installStatus());
+                if (appUpdateInfo.installStatus() == InstallStatus.DOWNLOADED) {
+                    popupSnackbarForCompleteUpdate();
+                }
+
+                if (appUpdateInfo.updateAvailability() == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS) {
+                    try {
+                        // If an in-app update is already running, resume the update.
+                        mAppUpdateManager.startUpdateFlowForResult(
+                                appUpdateInfo,
+                                IMMEDIATE,
+                                this,
+                                UPDATE_REQUEST_CODE);
+                    } catch (Exception ex) {
+                        Log.e(TAG, "Error updating app: " + ex.getMessage());
+                    }
+                }
+            });
+        }
 
         // Make sure header has sliding panel state
         if (mArrivalsListHeader != null && mSlidingPanel != null) {
@@ -528,9 +576,7 @@ public class HomeActivity extends AppCompatActivity
         switch (item) {
             case NAVDRAWER_ITEM_STARRED_STOPS:
                 if (mCurrentNavDrawerPosition != NAVDRAWER_ITEM_STARRED_STOPS) {
-                    // showStarredStopsFragment();
                     showStarredStopsRoutesFragment();
-                    // mCurrentNavDrawerPosition = item;
                     ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
                             getString(R.string.analytics_label_button_press_star),
                             null);
@@ -560,7 +606,9 @@ public class HomeActivity extends AppCompatActivity
                 }
                 break;
             case NAVDRAWER_ITEM_PLAN_TRIP:
-                loadInterstitialAd(false, "Plan a trip");
+                if (BuildConfig.ENABLE_ADMOB) {
+                    loadInterstitialAd(false, "Plan a trip");
+                }
                 Intent planTrip = new Intent(HomeActivity.this, TripPlanActivity.class);
                 startActivity(planTrip);
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
@@ -648,8 +696,10 @@ public class HomeActivity extends AppCompatActivity
                                 PreferenceUtils.saveBoolean(INITIAL_STARTUP, false);
                                 checkRegionStatus();
 
-                                // forcefully invoke location button onclick to go to the location
-                                mFabMyLocation.callOnClick();
+                                if (BuildConfig.FLAVOR_brand == "myMetro") {
+                                    // forcefully invoke location button onclick to go to the location
+                                    mFabMyLocation.callOnClick();
+                                }
                             }
                         });
                 fm.beginTransaction()
@@ -676,6 +726,10 @@ public class HomeActivity extends AppCompatActivity
         setTitle(getResources().getString(R.string.navdrawer_item_nearby));
 
         checkDisplayZoomControls();
+
+        if (BuildConfig.ENABLE_ADMOB) {
+            setupAds();
+        }
     }
 
     private void showStarredStopsFragment() {
@@ -688,7 +742,11 @@ public class HomeActivity extends AppCompatActivity
         hideMapFragment();
         hideReminderFragment();
         hideSlidingPanel();
-        hideBannerAds();
+
+        if (BuildConfig.ENABLE_ADMOB) {
+            hideBannerAds();
+        }
+
         mShowArrivalsMenu = false;
         showZoomControls(false);
 
@@ -729,7 +787,11 @@ public class HomeActivity extends AppCompatActivity
         hideStarredStopsFragment();
         hideMapFragment();
         hideSlidingPanel();
-        hideBannerAds();
+
+        if (BuildConfig.ENABLE_ADMOB) {
+            hideBannerAds();
+        }
+
         mShowArrivalsMenu = false;
         mShowStarredRoutesMenu = false;
         showZoomControls(false);
@@ -768,7 +830,10 @@ public class HomeActivity extends AppCompatActivity
         if (mMyStarredStopsFragment != null && !mMyStarredStopsFragment.isHidden()) {
             fm.beginTransaction().hide(mMyStarredStopsFragment).commit();
         }
-        showBannerAds();
+
+        if (BuildConfig.ENABLE_ADMOB) {
+            showBannerAds();
+        }
     }
 
     private void hideReminderFragment() {
@@ -778,7 +843,9 @@ public class HomeActivity extends AppCompatActivity
         if (mMyRemindersFragment != null && !mMyRemindersFragment.isHidden()) {
             fm.beginTransaction().hide(mMyRemindersFragment).commit();
         }
-        showBannerAds();
+        if (BuildConfig.ENABLE_ADMOB) {
+            showBannerAds();
+        }
     }
 
     private void hideSlidingPanel() {
@@ -788,14 +855,22 @@ public class HomeActivity extends AppCompatActivity
     }
 
     private void hideBannerAds() {
-        if (mBottomAdView != null) {
-            mBottomAdView.setVisibility(View.GONE);
+        if (!BuildConfig.ENABLE_ADMOB) {
+            return;
+        }
+
+        if (mBannerAdView != null) {
+            mBannerAdView.setVisibility(View.GONE);
         }
     }
 
     private void showBannerAds() {
-        if (mBottomAdView != null && !mAdsFreeVersion) {
-            mBottomAdView.setVisibility(View.VISIBLE);
+        if (!BuildConfig.ENABLE_ADMOB) {
+            return;
+        }
+
+        if (mBannerAdView != null && !mAdsFreeVersion) {
+            mBannerAdView.setVisibility(View.VISIBLE);
         }
     }
 
@@ -892,8 +967,6 @@ public class HomeActivity extends AppCompatActivity
                             case 3:
                                 AgenciesActivity.start(HomeActivity.this);
                                 break;
-// TODO: MyMetro
-                                /*
                             case 4:
                                 String twitterUrl = TWITTER_URL;
                                 if (Application.get().getCurrentRegion() != null &&
@@ -907,9 +980,7 @@ public class HomeActivity extends AppCompatActivity
                                         getString(R.string.analytics_label_twitter),
                                         null);
                                 break;
-
- */
-                            case 4:
+                            case 5:
                                 // Contact us
                                 goToSendFeedBack();
                                 break;
@@ -1482,6 +1553,96 @@ public class HomeActivity extends AppCompatActivity
         }
     }
 
+    public void checkUpdate() {
+        if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            Log.d(TAG, "This version does not support in-app updates");
+            return;
+        }
+
+        // already displayed?
+        if (mAppUpdateManager != null) {
+            return;
+        }
+
+        mAppUpdateManager = AppUpdateManagerFactory.create(this);
+
+        // Returns an intent object that you use to check for an update.
+        Task<AppUpdateInfo> appUpdateInfoTask = mAppUpdateManager.getAppUpdateInfo();
+
+        // Checks that the platform will allow the specified type of update.
+        appUpdateInfoTask.addOnSuccessListener(appUpdateInfo -> {
+            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE) {
+                // Request the update.
+                Integer stalenessDays = appUpdateInfo.clientVersionStalenessDays();
+                int appUpdateType = FLEXIBLE;
+                if (stalenessDays != null && stalenessDays >= DAYS_FOR_FLEXIBLE_UPDATE) {
+                    appUpdateType = IMMEDIATE;
+                }
+
+                startUpdate(appUpdateInfo, appUpdateType);
+            }
+        });
+    }
+
+    private void startUpdate(AppUpdateInfo appUpdateInfo, int appUpdateType) {
+
+        if (appUpdateType == AppUpdateType.FLEXIBLE) {
+            // Create a listener to track request state updates.
+            InstallStateUpdatedListener appUpdateListener = state -> {
+                if (state.installStatus() == InstallStatus.DOWNLOADED) {
+                    // After the update is downloaded, show a notification
+                    // and request user confirmation to restart the app.
+                    popupSnackbarForCompleteUpdate();
+                    // appUpdateManager.unregisterListener(listener);
+                }
+            };
+
+            mAppUpdateManager.registerListener(appUpdateListener);
+        }
+
+        try {
+            int updateType = AppUpdateType.FLEXIBLE;
+            if (appUpdateType == 1) {
+                updateType = IMMEDIATE;
+            }
+            mAppUpdateManager.startUpdateFlowForResult(
+                    // Pass the intent that is returned by 'getAppUpdateInfo()'.
+                    appUpdateInfo,
+                    // Or 'AppUpdateType.FLEXIBLE' for flexible updates.
+                    updateType,
+                    // The current activity making the update request.
+                    this,
+                    // Include a request code to later monitor this update request.
+                    UPDATE_REQUEST_CODE);
+        } catch (IntentSender.SendIntentException e) {
+            Log.e(TAG, e.getMessage());
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == UPDATE_REQUEST_CODE) {
+            if (resultCode != RESULT_OK) {
+                Log.d(TAG, "Update flow failed! Result code: " + resultCode);
+                // If the update is cancelled or fails,
+                // you can request to start the update again.
+            }
+        }
+    }
+
+    // Displays the snackbar notification and call to action.
+    private void popupSnackbarForCompleteUpdate() {
+        Snackbar snackbar =
+                Snackbar.make(
+                        findViewById(R.id.mainlayout),
+                        "An update has just been downloaded.",
+                        Snackbar.LENGTH_INDEFINITE);
+        snackbar.setAction("RESTART", view -> mAppUpdateManager.completeUpdate());
+        snackbar.setActionTextColor(getResources().getColor(R.color.theme_primary));
+        snackbar.show();
+    }
+
     public void setupBillingClient() {
         mBillingClient = ((org.onebusaway.android.app.Application)getApplication()).getBillingClientLifecycle();
         getLifecycle().removeObserver(mBillingClient);
@@ -1521,9 +1682,13 @@ public class HomeActivity extends AppCompatActivity
     }
 
     public void setupAds() {
+        if (!BuildConfig.ENABLE_ADMOB) {
+            return;
+        }
+
         if (mAdsFreeVersion) {
-            if (mBottomAdView != null) {
-                mBottomAdView.setVisibility(View.GONE);
+            if (mBannerAdView != null) {
+                mBannerAdView.setVisibility(View.GONE);
             }
         } else {
             loadBannerAd();
@@ -1532,28 +1697,39 @@ public class HomeActivity extends AppCompatActivity
     }
 
     private void setBannerAdVisibility() {
+        if (!BuildConfig.ENABLE_ADMOB) {
+            return;
+        }
+
+        if (mBannerAdView == null) {
+            return;
+        }
+
         if (mAdsFreeVersion) {
-            mBottomAdView.setVisibility(View.GONE);
+            mBannerAdView.setVisibility(View.GONE);
             return;
         }
-        if (mMyStarredStopsFragment != null
-                && (!mMyStarredStopsFragment.isHidden() || mMyStarredStopsFragment.isVisible())) {
-            mBottomAdView.setVisibility(View.GONE);
-            return;
-        }
+
         if (mMyRemindersFragment != null
                 && (!mMyRemindersFragment.isHidden() || mMyRemindersFragment.isVisible())) {
-            mBottomAdView.setVisibility(View.GONE);
+            mBannerAdView.setVisibility(View.GONE);
             return;
         }
-        mBottomAdView.setVisibility(View.VISIBLE);
+        mBannerAdView.setVisibility(View.VISIBLE);
     }
 
     private void loadBannerAd() {
-        AdRequest bottomAdRequest = new AdRequest.Builder().build();
-        boolean testDevice = bottomAdRequest.isTestDevice(getApplicationContext());
-        mBottomAdView = findViewById(R.id.adViewBottom);
-        mBottomAdView.setAdListener(new AdListener() {
+        if (!BuildConfig.ENABLE_ADMOB) {
+            return;
+        }
+
+        mBannerAdView = findViewById(R.id.adViewBottom);
+        if (mBannerAdView == null) {
+            return;
+        }
+
+        AdRequest bannerAdRequest = new AdRequest.Builder().build();
+        mBannerAdView.setAdListener(new AdListener() {
             @Override
             public void onAdLoaded() {
                 super.onAdLoaded();
@@ -1567,7 +1743,7 @@ public class HomeActivity extends AppCompatActivity
                 RemoveAdsDialogFragment.show(getApplicationContext(), HomeActivity.this.getSupportFragmentManager());
             }
         });
-        mBottomAdView.loadAd(bottomAdRequest);
+        mBannerAdView.loadAd(bannerAdRequest);
     }
 
     public void onMarkerClicked(Marker marker) {
@@ -1577,16 +1753,30 @@ public class HomeActivity extends AppCompatActivity
             RateItDialogFragment.show(getApplicationContext(), getSupportFragmentManager());
         } else {
             // show interstitial ad
-            loadInterstitialAd(false, null);
+            if (BuildConfig.ENABLE_ADMOB) {
+                loadInterstitialAd(false, null);
+            }
         }
     }
 
     private void loadInterstitialAd(boolean showAlways, String initiator) {
+        if (!BuildConfig.ENABLE_ADMOB) {
+            return;
+        }
+
         if (mAdsFreeVersion) {
             return;
         }
-        if (!showAlways) {
-            if (mMarkerClickedCount % 5 != 0) {
+
+        if (BuildConfig.DEBUG) {
+            Random rand = new Random(System.currentTimeMillis());
+            if (rand.nextInt(100) % 10 != 0) {
+                return;
+            }
+        }
+
+        if (!showAlways && !BuildConfig.DEBUG) {
+            if ((initiator == null) && (mMarkerClickedCount % 5 != 0)) {
                 return;
             }
 
@@ -1618,7 +1808,7 @@ public class HomeActivity extends AppCompatActivity
         }
 
         AdRequest adRequest = new AdRequest.Builder().build();
-        InterstitialAd.load(this, BuildConfig.ADMOB_INTERSTITIAL_UNIT_ID, adRequest,
+        InterstitialAd.load(this, getResources().getString(R.string.admob_interstitial_unit_id), adRequest,
                 new InterstitialAdLoadCallback() {
                     @Override
                     public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {

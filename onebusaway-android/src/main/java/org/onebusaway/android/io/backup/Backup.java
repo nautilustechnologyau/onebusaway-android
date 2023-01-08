@@ -24,6 +24,7 @@ import android.os.Build;
 import android.os.Environment;
 
 import org.apache.commons.io.FileUtils;
+import org.onebusaway.android.BuildConfig;
 import org.onebusaway.android.provider.ObaContract;
 import org.onebusaway.android.provider.ObaProvider;
 
@@ -42,9 +43,9 @@ import java.io.IOException;
  */
 public final class Backup {
 
-    private static final String FILE_NAME = "MyMetro.backup";
+    private static final String FILE_NAME = BuildConfig.FLAVOR_brand +  ".backup";
 
-    private static final String DIRECTORY_NAME = "MyMetroBackups";
+    private static final String DIRECTORY_NAME = BuildConfig.FLAVOR_brand +  "Backups";
 
     private static File getDB(Context context) {
         return ObaProvider.getDatabasePath(context);

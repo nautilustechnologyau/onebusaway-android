@@ -108,7 +108,6 @@ public class NavigationDrawerFragment extends Fragment {
 
     protected static final int NAVDRAWER_ITEM_SEPARATOR = -2;
 
-
     // Currently selected navigation drawer item (must be value of one of the constants above)
     private int mCurrentSelectedPosition = NAVDRAWER_ITEM_NEARBY;
 
@@ -445,10 +444,9 @@ public class NavigationDrawerFragment extends Fragment {
             }
         }
 
-        if (!BuildConfig.USE_FIXED_REGION) {
-            mNavDrawerItems.add(NAVDRAWER_ITEM_SEPARATOR);
-            mNavDrawerItems.add(NAVDRAWER_ITEM_OPEN_SOURCE);
-        }
+        mNavDrawerItems.add(NAVDRAWER_ITEM_SEPARATOR);
+
+        mNavDrawerItems.add(NAVDRAWER_ITEM_OPEN_SOURCE);
 
         mNavDrawerItems.add(NAVDRAWER_ITEM_SEPARATOR);
 
@@ -457,7 +455,12 @@ public class NavigationDrawerFragment extends Fragment {
         mNavDrawerItems.add(NAVDRAWER_ITEM_SEND_FEEDBACK);
         mNavDrawerItems.add(NAVDRAWER_ITEM_RATE_APP);
 
-        boolean isAdsFreeVersion = PreferenceUtils.getBoolean(HomeActivity.ADS_FREE_VERSION, false);
+        boolean isAdsFreeVersion = false;
+        if (!BuildConfig.ENABLE_ADMOB) {
+            isAdsFreeVersion = true;
+        } else {
+            isAdsFreeVersion = PreferenceUtils.getBoolean(HomeActivity.ADS_FREE_VERSION, false);
+        }
         if (!isAdsFreeVersion) {
             mNavDrawerItems.add(NAVDRAWER_ITEM_REMOVE_ADS);
         }

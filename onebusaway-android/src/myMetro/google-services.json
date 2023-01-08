@@ -1,0 +1,41 @@
+{
+  "project_info": {
+    "project_number": "560171504794",
+    "firebase_url": "https://nautilus-tech-mymetro-default-rtdb.firebaseio.com",
+    "project_id": "nautilus-tech-mymetro",
+    "storage_bucket": "nautilus-tech-mymetro.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:560171504794:android:84e966e8aa717a19683b23",
+        "android_client_info": {
+          "package_name": "au.mymetro.android"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "560171504794-mvsu191jamb7at75pc630uh09v27gd1t.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKbG0qiQiQt79lLc8Ei-0f9fyyMRtfbDk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "560171504794-mvsu191jamb7at75pc630uh09v27gd1t.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      },
+      "admob_app_id": "ca-app-pub-2389737821879720~8413255257"
+    }
+  ],
+  "configuration_version": "1"
+}

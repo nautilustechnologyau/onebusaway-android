@@ -481,7 +481,7 @@ public class TripDetailsListFragment extends ListFragment {
 
         if (status.getOccupancyStatus() != null) {
             // Real-time occupancy data
-            UIUtils.setOccupancyVisibilityAndColor(occupancyView, status.getOccupancyStatus(), OccupancyState.REALTIME);
+            UIUtils.setOccupancyVisibilityAndColor(occupancyView, status.getOccupancyStatus(), OccupancyState.REALTIME, R.color.header_text_color);
             UIUtils.setOccupancyContentDescription(occupancyView, status.getOccupancyStatus(), OccupancyState.REALTIME);
         } else {
             // Hide occupancy by setting null value

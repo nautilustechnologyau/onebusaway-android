@@ -15,6 +15,7 @@
  */
 package org.onebusaway.android.view;
 
+import org.onebusaway.android.BuildConfig;
 import org.onebusaway.android.R;
 import org.onebusaway.android.app.Application;
 import org.onebusaway.android.util.LocationHelper;
@@ -87,9 +88,16 @@ public class DistanceToStopView extends TextView implements LocationHelper.Liste
         AUTOMATIC = mContext.getString(R.string.preferences_preferred_units_option_automatic);
 
         mSettings = Application.getPrefs();
-        preferredUnits = mSettings
-                .getString(mContext.getString(R.string.preference_key_preferred_units),
-                        METRIC);
+        if (BuildConfig.FLAVOR_brand == "myMetro") {
+            preferredUnits = mSettings
+                    .getString(mContext.getString(R.string.preference_key_preferred_units),
+                            METRIC);
+        } else {
+            preferredUnits = mSettings
+                    .getString(mContext.getString(R.string.preference_key_preferred_units),
+                            AUTOMATIC);
+
+        }
     }
 
     public synchronized void registerListener(Listener listener) {

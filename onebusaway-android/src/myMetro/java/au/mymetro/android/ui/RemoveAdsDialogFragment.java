@@ -11,23 +11,29 @@ import android.os.Bundle;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentManager;
 
+import org.onebusaway.android.BuildConfig;
 import org.onebusaway.android.R;
 
+import java.util.Random;
+
 public class RemoveAdsDialogFragment extends DialogFragment {
-    private static final int LAUNCHES_UNTIL_PROMPT = 5;
+    private static final int LAUNCHES_UNTIL_PROMPT = 0;
     private static final int DAYS_UNTIL_PROMPT = 3;
     private static final int MILLIS_UNTIL_PROMPT = DAYS_UNTIL_PROMPT * 24 * 60 * 60 * 1000;
     private static final String PREF_NAME = "REMOVE_ADS";
     private static final String LAST_PROMPT = "LAST_PROMPT";
     private static final String LAUNCHES = "LAUNCHES";
     private static final String DISABLED = "DISABLED";
-    private static final boolean debug = false;
 
     private Context parentContext;
 
     public static void show(Context context, FragmentManager fragmentManager) {
-        if (debug) {
-            showRemoveAdsDialog(context, fragmentManager);
+        if (BuildConfig.DEBUG) {
+            Random rand = new Random(System.currentTimeMillis());
+            if (rand.nextInt(100) % 10 == 0) {
+                showRemoveAdsDialog(context, fragmentManager);
+            }
+
             return;
         }
         boolean shouldShow = false;

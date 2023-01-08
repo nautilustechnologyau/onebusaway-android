@@ -38,6 +38,7 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
+import org.onebusaway.android.BuildConfig;
 import org.onebusaway.android.R;
 import org.onebusaway.android.app.Application;
 import org.onebusaway.android.io.ObaAnalytics;
@@ -290,7 +291,12 @@ public class RegionsFragment extends ListFragment
 
                 String preferredUnits = mSettings
                         .getString(getString(R.string.preference_key_preferred_units),
-                                METRIC);
+                                AUTOMATIC);
+                if (BuildConfig.FLAVOR_brand == "myMetro") {
+                    preferredUnits = mSettings
+                            .getString(getString(R.string.preference_key_preferred_units),
+                                    METRIC);
+                }
 
                 if (preferredUnits.equalsIgnoreCase(AUTOMATIC)) {
                     Log.d(TAG, "Setting units automatically");

@@ -10,8 +10,11 @@ import android.os.Bundle;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentManager;
 
+import org.onebusaway.android.BuildConfig;
 import org.onebusaway.android.R;
 import org.onebusaway.android.util.UIUtils;
+
+import java.util.Random;
 
 public class RateItDialogFragment extends DialogFragment {
     private static final int LAUNCHES_UNTIL_PROMPT = 10;
@@ -21,11 +24,13 @@ public class RateItDialogFragment extends DialogFragment {
     private static final String LAST_PROMPT = "LAST_PROMPT";
     private static final String LAUNCHES = "LAUNCHES";
     private static final String DISABLED = "DISABLED";
-    private static final boolean debug = false;
 
     public static void show(Context context, FragmentManager fragmentManager) {
-        if (debug) {
-            new RateItDialogFragment().show(fragmentManager, null);
+        if (BuildConfig.DEBUG) {
+            Random rand = new Random(System.currentTimeMillis());
+            if (rand.nextInt(100) % 10 == 0) {
+                new RateItDialogFragment().show(fragmentManager, null);
+            }
             return;
         }
 

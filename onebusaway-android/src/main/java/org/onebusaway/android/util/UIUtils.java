@@ -117,7 +117,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -280,6 +279,9 @@ public final class UIUtils {
     public static void setRouteView(View view, ObaRoute route) {
         TextView shortNameText = (TextView) view.findViewById(R.id.short_name);
         TextView longNameText = (TextView) view.findViewById(R.id.long_name);
+        ImageView favoriteIcon = (ImageView) view.findViewById(R.id.route_favorite);
+
+        favoriteIcon.setVisibility(View.GONE);
 
         String shortName = route.getShortName();
         String longName = UIUtils.formatDisplayText(route.getLongName());
@@ -1876,59 +1878,6 @@ public final class UIUtils {
         }
     }
 
-    public static Occupancy predictOccupancy() {
-        Calendar c = Calendar.getInstance();
-        int dayOfWeek = c.get(Calendar.DAY_OF_WEEK);
-        int timeOfDay = c.get(Calendar.HOUR_OF_DAY);
-
-        // early in the morning
-        if (timeOfDay < 6) {
-            return Occupancy.EMPTY;
-        }
-
-        if (dayOfWeek == Calendar.SUNDAY || dayOfWeek == Calendar.SATURDAY) {
-            // weekend evening
-            if (timeOfDay >= 17) {
-                return Occupancy.FEW_SEATS_AVAILABLE;
-            }
-
-            return Occupancy.MANY_SEATS_AVAILABLE;
-        }
-
-        if (timeOfDay <= 8) {
-            return Occupancy.MANY_SEATS_AVAILABLE;
-        }
-
-        // office hour
-        if (timeOfDay <= 10) {
-            return Occupancy.FULL;
-        }
-
-        if (timeOfDay < 15) {
-            return Occupancy.MANY_SEATS_AVAILABLE;
-        }
-
-        // school pickup
-        if (timeOfDay == 15) {
-            return Occupancy.FEW_SEATS_AVAILABLE;
-        }
-
-        // office end
-        if (timeOfDay <= 18) {
-            return Occupancy.FULL;
-        }
-
-        if (timeOfDay <= 20) {
-            return Occupancy.FEW_SEATS_AVAILABLE;
-        }
-
-        if (timeOfDay <= 22) {
-            return Occupancy.MANY_SEATS_AVAILABLE;
-        }
-
-        return Occupancy.EMPTY;
-    }
-
     /**
      * Sets the visibility and colors of the silhouettes in the provided occupancy.xml viewgroup
      *  @param v         occupancy.xml layout viewgroup containing the silhouettes
@@ -1943,25 +1892,14 @@ public final class UIUtils {
         ImageView silhouette3 = v.findViewById(R.id.silhouette3);
         silhouette3.setVisibility(View.GONE);
 
-        Occupancy occupancy1 = occupancy;
-
         // Hide the entire view group if occupancy is null
-        if (occupancy1 == null) {
-            /*if (OccupancyState.HISTORICAL == occupancyState) {
-                occupancy1 = predictOccupancy();
-                v.setVisibility(View.VISIBLE);
-            } else {
-                v.setVisibility(View.GONE);
-                return;
-            }*/
+        if (occupancy == null) {
             v.setVisibility(View.GONE);
             return;
         } else {
             v.setVisibility(View.VISIBLE);
         }
 
-        //int silhouetteColor = Application.get().getResources().getColor(R.color.stop_info_occupancy);
-        //int backgroundColor = Application.get().getResources().getColor(R.color.stop_info_occupancy_background);
         float alpha = 0f;
         if (occupancyState == OccupancyState.HISTORICAL) {
             // Set the alpha for historical occupancy to 60%
@@ -1973,7 +1911,7 @@ public final class UIUtils {
         int silhouetteColor = Application.get().getResources().getColor(color);
 
         // Below switch continues into following cases to minimize number of setVisibility() calls
-        switch (occupancy1) {
+        switch (occupancy) {
             case NOT_ACCEPTING_PASSENGERS:
                 // 3 icons
             case FULL:
@@ -2005,7 +1943,6 @@ public final class UIUtils {
             if (silhouette1.getVisibility() == View.VISIBLE) {
                 silhouette1.setAlpha(alpha);
             }
-
             if (silhouette2.getVisibility() == View.VISIBLE) {
                 silhouette2.setAlpha(alpha);
             }
@@ -2013,13 +1950,6 @@ public final class UIUtils {
                 silhouette3.setAlpha(alpha);
             }
         }
-
-
-
-        // Set background color
-        /*v.setBackgroundResource(R.drawable.occupancy_background);
-        GradientDrawable d = (GradientDrawable) v.getBackground();
-        d.setColor(backgroundColor);*/
     }
 
     /**

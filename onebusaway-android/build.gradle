@@ -45,7 +45,7 @@ android {
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 33
-        versionCode 139
+        versionCode 142
         versionName "3.0.0"
 
         multiDexEnabled true
@@ -125,6 +125,19 @@ android {
             buildConfigField "String", "FIXED_REGION_PAYMENT_WARNING_BODY", "null"
             buildConfigField "boolean", "FIXED_REGION_TRAVEL_BEHAVIOR_DATA_COLLECTION", "false"
             buildConfigField "boolean", "FIXED_REGION_ENROLL_PARTICIPANTS_IN_STUDY", "false"
+
+            // TODO: set the values for this fixed region
+            buildConfigField "double", "FIXED_REGION_MAP_CENTRE_LAT", "0.0"
+            buildConfigField "double", "FIXED_REGION_MAP_CENTRE_LON", "0.0"
+            buildConfigField "int", "FIXED_REGION_MAP_ZOOM_LEVEL", "10"
+
+            // Turn on if you want to serve ads. also ads-free subscription will be enabled automatically
+            // to use this feature, make sure that you have secrets-debug.properties
+            // and secrets-release.properties file on the app root (same directory as this build.gradle file)
+            // Sample content can look like. Don't put production ads id in debug. your ads may be blocked by google.
+            // ADMOB_APPLICATION_ID="your admob application id"
+            // ADMOB_BANNER_UNIT_ID="your admob banner ads unit id"
+            // ADMOB_INTERSTITIAL_UNIT_ID="your interstitial ads unit id"
             buildConfigField "boolean", "ENABLE_ADMOB", "false"
         }
 
@@ -171,6 +184,13 @@ android {
             buildConfigField "String", "FIXED_REGION_PAYMENT_WARNING_BODY", "null"
             buildConfigField "boolean", "FIXED_REGION_TRAVEL_BEHAVIOR_DATA_COLLECTION", "false"
             buildConfigField "boolean", "FIXED_REGION_ENROLL_PARTICIPANTS_IN_STUDY", "false"
+
+            // TODO: set the values for this fixed region. check oba section for details
+            buildConfigField "double", "FIXED_REGION_MAP_CENTRE_LAT", "0.0"
+            buildConfigField "double", "FIXED_REGION_MAP_CENTRE_LON", "0.0"
+            buildConfigField "int", "FIXED_REGION_MAP_ZOOM_LEVEL", "10"
+
+            buildConfigField "boolean", "ENABLE_ADMOB", "false"
         }
 
         agencyY {
@@ -213,6 +233,13 @@ android {
             buildConfigField "String", "FIXED_REGION_PAYMENT_WARNING_BODY", "null"
             buildConfigField "boolean", "FIXED_REGION_TRAVEL_BEHAVIOR_DATA_COLLECTION", "false"
             buildConfigField "boolean", "FIXED_REGION_ENROLL_PARTICIPANTS_IN_STUDY", "false"
+
+            // TODO: set the values for this fixed region. check oba section for details
+            buildConfigField "double", "FIXED_REGION_MAP_CENTRE_LAT", "0.0"
+            buildConfigField "double", "FIXED_REGION_MAP_CENTRE_LON", "0.0"
+            buildConfigField "int", "FIXED_REGION_MAP_ZOOM_LEVEL", "10"
+
+            buildConfigField "boolean", "ENABLE_ADMOB", "false"
         }
 
         yrt {
@@ -254,6 +281,13 @@ android {
             buildConfigField "String", "FIXED_REGION_PAYMENT_WARNING_BODY", "null"
             buildConfigField "boolean", "FIXED_REGION_TRAVEL_BEHAVIOR_DATA_COLLECTION", "false"
             buildConfigField "boolean", "FIXED_REGION_ENROLL_PARTICIPANTS_IN_STUDY", "false"
+
+            // TODO: set the values for this fixed region. check oba section for details
+            buildConfigField "double", "FIXED_REGION_MAP_CENTRE_LAT", "0.0"
+            buildConfigField "double", "FIXED_REGION_MAP_CENTRE_LON", "0.0"
+            buildConfigField "int", "FIXED_REGION_MAP_ZOOM_LEVEL", "10"
+
+            buildConfigField "boolean", "ENABLE_ADMOB", "false"
         }
 
         /**
@@ -265,7 +299,7 @@ android {
             applicationId "au.mymetro.android"
             manifestPlaceholders = [databaseAuthority: applicationId.toString() + '.provider']
             buildConfigField "int", "ARRIVAL_INFO_STYLE", "0" // Defined in BuildFlavorConstants
-            buildConfigField "boolean", "USE_FIXED_REGION", "true" // Supports multi-region
+            buildConfigField "boolean", "USE_FIXED_REGION", "false" // Supports multi-region
             buildConfigField "boolean", "USE_PELIAS_GEOCODING", "false"
             buildConfigField "String", "PELIAS_API_KEY", "\"" + getPeliasKey(name) + "\""
             // Fixed region info that the app will use
@@ -297,6 +331,8 @@ android {
             buildConfigField "String", "FIXED_REGION_PAYMENT_WARNING_BODY", "null"
             buildConfigField "boolean", "FIXED_REGION_TRAVEL_BEHAVIOR_DATA_COLLECTION", "false"
             buildConfigField "boolean", "FIXED_REGION_ENROLL_PARTICIPANTS_IN_STUDY", "false"
+
+            // MyMetro specific settings
             buildConfigField "boolean", "ENABLE_ADMOB", "true"
             buildConfigField "boolean", "DISABLE_ADVANCED_PREFERENCE", "true"
             buildConfigField "double", "FIXED_REGION_MAP_CENTRE_LAT", "-34.921230"
@@ -310,7 +346,7 @@ android {
      */
     applicationVariants.all {
         variant ->
-            def authority
+            def authority;
             if (variant.productFlavors.get(0).name == "oba") {
                 authority = '"' + "com.joulespersecond.oba" + '"'
                 // Must keep the original OBA authority
@@ -332,9 +368,6 @@ android {
         variant.resValue "string", "admob_application_id", apikeyProperties['ADMOB_APPLICATION_ID']
         variant.resValue "string", "admob_banner_unit_id", apikeyProperties['ADMOB_BANNER_UNIT_ID']
         variant.resValue "string", "admob_interstitial_unit_id", apikeyProperties['ADMOB_INTERSTITIAL_UNIT_ID']
-        variant.resValue "string", "google_maps_api_key", apikeyProperties['GOOGLE_MAPS_API_KEY']
-        buildConfigField "String", "ADMOB_BANNER_UNIT_ID", "" + apikeyProperties['ADMOB_BANNER_UNIT_ID'] + ""
-        buildConfigField "String", "ADMOB_INTERSTITIAL_UNIT_ID", "" + apikeyProperties['ADMOB_INTERSTITIAL_UNIT_ID'] + ""
     }
 
     // http://stackoverflow.com/questions/20673625/gradle-0-7-0-duplicate-files-during-packaging-of-apk
@@ -350,7 +383,6 @@ android {
     if (project.hasProperty("secure.properties")
             && new File(project.property("secure.properties")).exists()) {
 
-        project.logger.lifecycle('secure.properties exists')
         Properties props = new Properties()
         props.load(new FileInputStream(file(project.property("secure.properties"))))
 
@@ -373,6 +405,7 @@ android {
             }
 
             release {
+                // Nothing here
             }
         }
     }
@@ -472,6 +505,8 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics:21.0.0'
     // Cloud Firestore (for storing destination alert test data)
     implementation 'com.google.firebase:firebase-firestore:24.1.2'
+
+    // to fix Google Play warning
     implementation ('com.google.firebase:firebase-auth:21.0.5') {
         exclude module: "play-services-safetynet"
     }
@@ -534,6 +569,8 @@ dependencies {
     // Billing
     implementation 'com.android.billingclient:billing:5.1.0'
 
+    // App update
+    implementation 'com.google.android.play:app-update:2.0.1'
 }
 
 apply plugin:'com.google.gms.google-services'

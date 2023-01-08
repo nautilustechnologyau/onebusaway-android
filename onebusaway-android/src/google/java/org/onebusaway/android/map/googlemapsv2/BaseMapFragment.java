@@ -95,7 +95,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import au.mymetro.android.ui.RateItDialogFragment;
 import au.mymetro.android.ui.SingleLiveEvent;
 
 /**
@@ -328,8 +327,12 @@ public class BaseMapFragment extends SupportMapFragment
         mMap.setOnMarkerClickListener(mapClickListeners);
         mMap.setOnMapClickListener(mapClickListeners);
 
-        LatLng latLng = new LatLng(BuildConfig.FIXED_REGION_MAP_CENTRE_LAT, BuildConfig.FIXED_REGION_MAP_CENTRE_LON);
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, BuildConfig.FIXED_REGION_MAP_ZOOM_LEVEL));
+        // for fixed region we may need to set the map camera to the centre
+        // this is useful if the user choose not to enable location service
+        if (BuildConfig.USE_FIXED_REGION) {
+            LatLng latLng = new LatLng(BuildConfig.FIXED_REGION_MAP_CENTRE_LAT, BuildConfig.FIXED_REGION_MAP_CENTRE_LON);
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, BuildConfig.FIXED_REGION_MAP_ZOOM_LEVEL));
+        }
 
         initMap(mLastSavedInstanceState);
     }

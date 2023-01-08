@@ -427,8 +427,10 @@ public class TripPlanFragment extends Fragment {
                 Dialog dialog = (Dialog) dialogInterface;
 
                 // TODO: TripPlanner v2 does not has this option anymore. Setting false always
-                //boolean optimizeTransfers = ((CheckBox) dialog.findViewById(R.id.checkbox_minimize_transfers)).isChecked();
                 boolean optimizeTransfers = false;
+                if (BuildConfig.FLAVOR_brand != "myMetro") {
+                    optimizeTransfers = ((CheckBox) dialog.findViewById(R.id.checkbox_minimize_transfers)).isChecked();
+                }
 
                 Spinner spinnerTravelBy = (Spinner) dialog.findViewById(R.id.spinner_travel_by);
 

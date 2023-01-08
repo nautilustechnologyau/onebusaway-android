@@ -54,6 +54,7 @@ import androidx.fragment.app.FragmentManager;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 
+import org.onebusaway.android.BuildConfig;
 import org.onebusaway.android.R;
 import org.onebusaway.android.app.Application;
 import org.onebusaway.android.io.ObaAnalytics;
@@ -381,7 +382,6 @@ class ArrivalsListHeader {
 
         mEtaSeparator = mView.findViewById(R.id.eta_separator);
 
-
         // Second ETA row
         mEtaContainer2 = mView.findViewById(R.id.eta_container2);
         mEtaRouteFavorite2 = (ImageButton) mEtaContainer2.findViewById(R.id.eta_route_favorite);
@@ -457,12 +457,14 @@ class ArrivalsListHeader {
             }
         });
 
-        /*mNameView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                beginNameEdit(null);
-            }
-        });*/
+        if (BuildConfig.FLAVOR_brand != "myMetro") {
+            mNameView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    beginNameEdit(null);
+                }
+            });
+        }
 
         // Implement the "Save" and "Clear" buttons
         View save = mView.findViewById(R.id.edit_name_save);
@@ -776,7 +778,10 @@ class ArrivalsListHeader {
                     UIUtils.setVehicleFeatures(mVehicleFeaturesView1, null, R.color.header_text_color);
                 }
 
-                Occupancy occupancyStatus1 = mArrivalInfo.get(i1).getInfo().getTripStatus().getOccupancyStatus();
+                Occupancy occupancyStatus1 = null;
+                if (mArrivalInfo.get(i1).getInfo().getTripStatus() != null) {
+                    occupancyStatus1 = mArrivalInfo.get(i1).getInfo().getTripStatus().getOccupancyStatus();
+                }
                 if (occupancyStatus1 != null) {
                     // Real-time occupancy data
                     UIUtils.setOccupancyVisibilityAndColor(mOccupancyView1, occupancyStatus1, OccupancyState.REALTIME, R.color.header_text_color);
@@ -862,9 +867,11 @@ class ArrivalsListHeader {
                         UIUtils.setVehicleFeatures(mVehicleFeaturesView2, null, R.color.header_text_color);
                     }
 
+                    Occupancy occupancyStatus2 = null;
+                    if (mArrivalInfo.get(i2).getInfo().getTripStatus() != null) {
+                        occupancyStatus2 = mArrivalInfo.get(i2).getInfo().getTripStatus().getOccupancyStatus();
+                    }
 
-
-                    Occupancy occupancyStatus2 = mArrivalInfo.get(i2).getInfo().getTripStatus().getOccupancyStatus();
                     if (occupancyStatus2 != null) {
                         // Real-time occupancy data
                         UIUtils.setOccupancyVisibilityAndColor(mOccupancyView2, occupancyStatus2, OccupancyState.REALTIME, R.color.header_text_color);

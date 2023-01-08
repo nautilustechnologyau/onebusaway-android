@@ -159,9 +159,9 @@ public class TripPlanActivity extends AppCompatActivity implements TripRequest.C
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.trip_plan_fragment_container, fragment, TripPlanFragment.TAG).commit();
         } else {
+            // trying to fix issue when user gets no trip possible error repeatedly
             fragment.setListener(this);
         }
-
 
         mPanel = (SlidingUpPanelLayout) findViewById(R.id.trip_plan_sliding_layout);
 

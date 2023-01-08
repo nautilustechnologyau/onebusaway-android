@@ -21,6 +21,7 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
 
+import org.onebusaway.android.BuildConfig;
 import org.onebusaway.android.R;
 import org.onebusaway.android.app.Application;
 import org.onebusaway.android.map.MapParams;
@@ -260,7 +261,12 @@ public class PreferenceUtils {
 
         String preferredUnits = mSettings
                 .getString(context.getString(R.string.preference_key_preferred_units),
+                        AUTOMATIC);
+        if (BuildConfig.FLAVOR_brand == "myMetro") {
+            preferredUnits = mSettings
+                .getString(context.getString(R.string.preference_key_preferred_units),
                         METRIC);
+        }
 
         if (preferredUnits.equalsIgnoreCase(AUTOMATIC)) {
             // If the country is set to USA, assume imperial, otherwise metric

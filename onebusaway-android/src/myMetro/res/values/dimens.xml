@@ -58,7 +58,7 @@
 
     <!-- Arrivals Style A -->
     <dimen name="occupancy">20dp</dimen>
-    <dimen name="occupancy_margin">2dp</dimen>
+    <dimen name="occupancy_margin">0dp</dimen>
     <dimen name="vehicle_features_margin">2dp</dimen>
     <dimen name="vehicle_features_icon">16dp</dimen>
 
