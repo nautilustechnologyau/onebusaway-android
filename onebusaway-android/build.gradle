@@ -569,6 +569,8 @@ dependencies {
 
     // Google Ad
     implementation 'com.google.android.gms:play-services-ads:21.4.0'
+    implementation 'com.google.ads.mediation:facebook:6.12.0.0'
+    implementation 'com.google.ads.mediation:inmobi:10.1.2.1'
 
     // Billing
     implementation 'com.android.billingclient:billing:5.1.0'

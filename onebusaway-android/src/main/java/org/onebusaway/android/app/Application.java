@@ -35,6 +35,8 @@ import android.util.Log;
 import androidx.multidex.MultiDexApplication;
 
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.RequestConfiguration;
+import com.google.android.gms.ads.initialization.AdapterStatus;
 import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.android.gms.common.ConnectionResult;
@@ -56,8 +58,10 @@ import org.onebusaway.android.util.LocationUtils;
 import org.onebusaway.android.util.PreferenceUtils;
 
 import java.security.MessageDigest;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import au.mymetro.android.billing.BillingClientLifecycle;
@@ -445,9 +449,22 @@ public class Application extends MultiDexApplication {
         MobileAds.initialize(this, new OnInitializationCompleteListener() {
             @Override
             public void onInitializationComplete(InitializationStatus initializationStatus) {
-                Log.i(TAG, "MobileAds initialised");
+                Map<String, AdapterStatus> statusMap = initializationStatus.getAdapterStatusMap();
+                for (String adapterClass : statusMap.keySet()) {
+                    AdapterStatus status = statusMap.get(adapterClass);
+                    Log.d(TAG, String.format(
+                            "Adapter name: %s, Description: %s, Latency: %d, State: %s",
+                            adapterClass, status.getDescription(), status.getLatency(), status.getInitializationState()));
+                }
             }
         });
+
+        if (BuildConfig.DEBUG) {
+            List<String> testDeviceIds = Arrays.asList("24E3970FAC1966244916786F2AA3A93E");
+            RequestConfiguration reqConfig = new RequestConfiguration.Builder()
+                    .setTestDeviceIds(testDeviceIds).build();
+            MobileAds.setRequestConfiguration(reqConfig);
+        }
     }
 
     private void initOba() {
