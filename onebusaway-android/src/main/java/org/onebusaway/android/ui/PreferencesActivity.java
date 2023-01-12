@@ -63,8 +63,10 @@ import org.onebusaway.android.travelbehavior.io.coroutines.FirebaseDataPusher;
 import org.onebusaway.android.travelbehavior.utils.TravelBehaviorUtils;
 import org.onebusaway.android.util.BackupUtils;
 import org.onebusaway.android.util.BuildFlavorUtils;
+import org.onebusaway.android.util.LocationUtils;
 import org.onebusaway.android.util.PermissionUtils;
 import org.onebusaway.android.util.PreferenceUtils;
+import org.onebusaway.android.util.RegionUtils;
 import org.onebusaway.android.util.ShowcaseViewUtils;
 
 import java.net.MalformedURLException;
@@ -163,8 +165,11 @@ public class PreferencesActivity extends PreferenceActivity
             mTravelBehaviorPref.setChecked(TravelBehaviorUtils.isUserParticipatingInStudy());
         }
 
-        pushFirebaseData = findPreference(getString(R.string.preference_key_push_firebase_data));
-        pushFirebaseData.setOnPreferenceClickListener(this);
+        ObaRegion region = Application.get().getCurrentRegion();
+        if (region != null && region.isTravelBehaviorDataCollectionEnabled()) {
+            pushFirebaseData = findPreference(getString(R.string.preference_key_push_firebase_data));
+            pushFirebaseData.setOnPreferenceClickListener(this);
+        }
 
         mHideAlertsPref = findPreference(getString(R.string.preference_key_hide_alerts));
         mHideAlertsPref.setOnPreferenceChangeListener(this);
@@ -208,6 +213,14 @@ public class PreferencesActivity extends PreferenceActivity
                         getString(R.string.preferences_category_parent_advanced));
                 getPreferenceScreen().removePreference(category);
             }
+        }
+
+        if (region == null || !region.isTravelBehaviorDataCollectionEnabled()) {
+            PreferenceCategory advancedCategory = (PreferenceCategory)
+                    findPreference(getString(R.string.preferences_category_advanced));
+            Preference pushFirebase = findPreference(
+                    getString(R.string.preference_key_push_firebase_data));
+            advancedCategory.removePreference(pushFirebase);
         }
 
         // If the Android version is Oreo (8.0) hide "Notification" preference
