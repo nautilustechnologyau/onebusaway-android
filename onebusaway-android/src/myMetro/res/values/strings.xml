@@ -52,9 +52,10 @@
     <string name="about_text">
         "Nautilus Technology is an Australian startup technology company with the vision of"
         "creating and accelerating competitive advantages through cutting-edge technology and"
-        "solutions.\n\nMyMetro has been launched to provide support to the transit riders of"
-        "Australian Cities. MyMetro is a free to use real-time transit platform. The real-time"
-        "transit data is provided by State/Government Transport Agencies.\n\nVisit"
+        "solutions.\n\nMyMetro was initially launched to provide support to the transit riders of"
+        "Australian Cities. Over the time it has extended it's service to other parts of the world."
+        "MyMetro is a free to use real-time transit platform. The real-time"
+        "transit data is provided by corresponding State/Government Transport Agencies.\n\nVisit"
         "https://nautilus-tech.com.au and https://mymetro.au to find out more.\n\nMyMetro"
         "is using the OneBusAway transit platform. OneBusAway is a project of the non-profit"
         "Open Transit Software Foundation (OTSF). It began in 2008 as a graduate student project"
@@ -87,21 +88,14 @@
         from this application, please go to settings and disable performance optimizations for MyMetro.
     </string>
     <string name="main_help_whatsnew">
-        <b>Vehicle Feature Icons</b>\n&#8226;\u0020
-        Wheelchair Accessibility\n&#8226;\u0020
-        Vehicle Speed\n&#8226;\u0020
-        Air Condition Availability
-        <b>Improved Starred Feature</b>\n&#8226;\u0020
-        Multiple tabbed Starred screen\n&#8226;\u0020
-        Favourite routes added\n
-        <b>Ads Free Subscription</b>\n&#8226;\u0020
-        You can now buy Ads Free Subscription\n&#8226;\u0020
-        Banner Ad location moved\n&#8226;\u0020
-        Interstitial Ad\n
-        <b>Trip Planner Bug Fix</b>\n&#8226;\u0020
-        OpenTripPlanner v2 Compatible\n
-        <b>Rate MyMetro</b>\n&#8226;\u0020
-        You can now rate MyMetro!
+        <b>Multi-region support</b>\n&#8226;\u0020
+        South Australia\n&#8226;\u0020
+        Queensland\n&#8226;\u0020
+        Victoria\n&#8226;\u0020
+        UAE (Beta)\n
+        <b>Other features and fix</b>\n&#8226;\u0020
+        Crash bug fix\n&#8226;\u0020
+        In-app update
     </string>
     <string name="navdrawer_item_rate_app">Rate MyMetro</string>
     <string name="rate_title">Enjoying MyMetro?</string>
@@ -142,15 +136,4 @@
     <string name="my_no_starred_routes">You have no starred routes.\n\nYou can add a star to a route on
         the arrivals screen by tapping on the star next to the route name.
     </string>
-
-    <!-- Occupancy -->
-    <string name="historically_full">Historically full</string>
-    <string name="historically_standing_room">Historically standing room</string>
-    <string name="historically_many_seats_available">Historically many seats available</string>
-    <string name="historically_few_seats_available">Historically few seats available</string>
-    <string name="historically_empty">Historically empty</string>
-    <string name="menu_title_about_historical_occupancy">About historical occupancy</string>
-    <string name="menu_title_about_occupancy">About occupancy</string>
-    <string name="menu_text_about_historical_occupancy">Historical occupancy (faded icon) is an average of trip ridership at this stop over the last 6 months.</string>
-    <string name="menu_text_about_realtime_occupancy">Real-time occupancy is shown as one, or two person icons when there are many seats available, few seats available, and is shown as three person icons when the vehicle is full.</string>
 </resources>

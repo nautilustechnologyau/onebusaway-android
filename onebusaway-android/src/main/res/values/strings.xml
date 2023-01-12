@@ -1200,9 +1200,9 @@
     <string name="cancel">Cancel</string>
 
     <!-- Rate app -->
-    <string name="navdrawer_item_rate_app">Rate MyMetro</string>
-    <string name="rate_title">Enjoying MyMetro?</string>
-    <string name="rate_message">If you are enjoying using MyMetro, please take a moment to rate it. Your rating and feedback will help us improving the app.</string>
+    <string name="navdrawer_item_rate_app">Rate OneBusAway</string>
+    <string name="rate_title">Enjoying OneBusAway?</string>
+    <string name="rate_message">If you are enjoying using OneBusAway, please take a moment to rate it. Your rating and feedback will help us improving the app.</string>
     <string name="rate_positive">Yes</string>
     <string name="rate_never">Don\'t Show Again</string>
     <string name="rate_remind_later">Remind Me Later</string>
@@ -1216,7 +1216,7 @@
     <string name="remove_ads_message1">Though we are trying to show ads at a minimal level, we understand that seeing ads sometimes can be annoying. However, ads help us covering the huge cost to keep the infrastructure running on the cloud. It also supports the on going development to improve the app.</string>
     <string name="remove_ads_message2">Purchasing subscription is optional. By purchasing Ads Free Subscription you will enjoy ads free seamless in-app experience. Your purchase will be a great support and much appreciated.</string>
     <string name="remove_ads_message3">Payments will be charged using your Google account. The subscription will be automatically renewed yearly unless you cancel it at least 24 hours before the anniversary of current subscription. You can manage and cancel your subscription from your Google account\'s Subscriptions section. Visit https://play.google.com/store/account/subscriptions</string>
-    <string name="remove_ads_message4">By purchasing this subscription you are agreeing to MyMetro Terms of Use https://www.mymetro.au/terms-of-use</string>
+    <string name="remove_ads_message4">By purchasing this subscription you are agreeing to OneBusAway Terms of Use https://onebusaway.org/terms-of-use</string>
     <string name="remove_ads_already_purchased">You already have purchased this subscription.</string>
     <string name="remove_ads_product_unavailable">The subscription is not available in your region.</string>
     <string name="remove_ads_product_not_found">The subscription is not available anymore.</string>
