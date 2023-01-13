@@ -236,11 +236,17 @@ public class PreferencesActivity extends PreferenceActivity
         // If its the OBA brand flavor, then show the "Donate" preference and hide "Powered by OBA"
         PreferenceCategory aboutCategory = (PreferenceCategory)
                 findPreference(getString(R.string.preferences_category_about));
-        if (BuildConfig.FLAVOR_brand.equalsIgnoreCase(BuildFlavorUtils.OBA_FLAVOR_BRAND)) {
-            aboutCategory.removePreference(mPoweredByObaPref);
+        if (BuildConfig.FLAVOR_brand == "myMetro") {
+            // TODO: Decide whether we should show these options
+            // aboutCategory.removePreference(mPoweredByObaPref);
+            // aboutCategory.removePreference(mDonatePref);
         } else {
-            // Its not the OBA brand flavor, then hide the "Donate" preference and show "Powered by OBA"
-            aboutCategory.removePreference(mDonatePref);
+            if (BuildConfig.FLAVOR_brand.equalsIgnoreCase(BuildFlavorUtils.OBA_FLAVOR_BRAND)) {
+                aboutCategory.removePreference(mPoweredByObaPref);
+            } else {
+                // Its not the OBA brand flavor, then hide the "Donate" preference and show "Powered by OBA"
+                aboutCategory.removePreference(mDonatePref);
+            }
         }
 
         boolean showCheckRegionDialog = getIntent().getBooleanExtra(SHOW_CHECK_REGION_DIALOG, false);
@@ -409,7 +415,9 @@ public class PreferencesActivity extends PreferenceActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_RESTORE_BACKUP) {
-            BackupUtils.restore(this, data.getData());
+            if (data != null) {
+                BackupUtils.restore(this, data.getData());
+            }
         }
     }
 

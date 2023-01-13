@@ -34,6 +34,7 @@ import android.util.Log;
 
 import androidx.multidex.MultiDexApplication;
 
+import com.facebook.ads.AudienceNetworkAds;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.RequestConfiguration;
 import com.google.android.gms.ads.initialization.AdapterStatus;
@@ -64,6 +65,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import au.mymetro.android.ads.AudienceNetworkInitializeHelper;
 import au.mymetro.android.billing.BillingClientLifecycle;
 import edu.usf.cutr.open311client.Open311Manager;
 import edu.usf.cutr.open311client.models.Open311Option;
@@ -445,6 +447,7 @@ public class Application extends MultiDexApplication {
     }
 
     private void initMobileAds() {
+        AudienceNetworkInitializeHelper.initialize(this);
         // initialise mobile ad as early as possible
         MobileAds.initialize(this, new OnInitializationCompleteListener() {
             @Override

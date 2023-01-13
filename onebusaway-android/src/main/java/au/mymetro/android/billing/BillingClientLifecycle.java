@@ -493,7 +493,7 @@ public class BillingClientLifecycle implements DefaultLifecycleObserver, Purchas
 
     private ProductDetails getProductDetails(String productId) {
         Map<String, ProductDetails> productList = this.productsWithProductDetails.getValue();
-        if (productList.containsKey(productId)) {
+        if (productList != null && productList.containsKey(productId)) {
             return productList.get(productId);
         }
 

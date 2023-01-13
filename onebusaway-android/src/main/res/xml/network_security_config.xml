@@ -5,5 +5,6 @@
     <domain-config cleartextTrafficPermitted="true">
         <!-- San Diego OTP server -->
         <domain includeSubdomains="true">realtime.sdmts.com</domain>
+        <domain includeSubdomains="true">127.0.0.1</domain>
     </domain-config>
 </network-security-config>

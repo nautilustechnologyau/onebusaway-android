@@ -89,9 +89,12 @@ import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Observer;
 
 import com.android.billingclient.api.Purchase;
+import com.facebook.ads.Ad;
+import com.facebook.ads.InterstitialAdListener;
 import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.FullScreenContentCallback;
 import com.google.android.gms.ads.LoadAdError;
@@ -234,9 +237,9 @@ public class HomeActivity extends AppCompatActivity
 
     Animation mMyLocationAnimation;
 
-    private AdView mBannerAdView;
-
-    private InterstitialAd mInterstitialAd;
+    // Ad views
+    private InterstitialAd mAdMobInterstitialAd;
+    private com.facebook.ads.InterstitialAd mAnInterstitialAd;
 
     /**
      * GoogleApiClient being used for Location Services
@@ -499,6 +502,7 @@ public class HomeActivity extends AppCompatActivity
                 Log.d(TAG, "App Update Status " + appUpdateInfo.installStatus());
                 if (appUpdateInfo.installStatus() == InstallStatus.DOWNLOADED) {
                     popupSnackbarForCompleteUpdate();
+                    return;
                 }
 
                 if (appUpdateInfo.updateAvailability() == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS) {
@@ -858,6 +862,7 @@ public class HomeActivity extends AppCompatActivity
             return;
         }
 
+        LinearLayout mBannerAdView = findViewById(R.id.adViewBottom);
         if (mBannerAdView != null) {
             mBannerAdView.setVisibility(View.GONE);
         }
@@ -868,6 +873,7 @@ public class HomeActivity extends AppCompatActivity
             return;
         }
 
+        LinearLayout mBannerAdView = findViewById(R.id.adViewBottom);
         if (mBannerAdView != null && !mAdsFreeVersion) {
             mBannerAdView.setVisibility(View.VISIBLE);
         }
@@ -1697,6 +1703,7 @@ public class HomeActivity extends AppCompatActivity
         }
 
         if (mAdsFreeVersion) {
+            LinearLayout mBannerAdView = findViewById(R.id.adViewBottom);
             if (mBannerAdView != null) {
                 mBannerAdView.setVisibility(View.GONE);
             }
@@ -1711,6 +1718,7 @@ public class HomeActivity extends AppCompatActivity
             return;
         }
 
+        LinearLayout mBannerAdView = findViewById(R.id.adViewBottom);
         if (mBannerAdView == null) {
             return;
         }
@@ -1720,11 +1728,6 @@ public class HomeActivity extends AppCompatActivity
             return;
         }
 
-        if (mMyRemindersFragment != null
-                && (!mMyRemindersFragment.isHidden() || mMyRemindersFragment.isVisible())) {
-            mBannerAdView.setVisibility(View.GONE);
-            return;
-        }
         mBannerAdView.setVisibility(View.VISIBLE);
     }
 
@@ -1733,13 +1736,30 @@ public class HomeActivity extends AppCompatActivity
             return;
         }
 
-        mBannerAdView = findViewById(R.id.adViewBottom);
+        LinearLayout mBannerAdView = findViewById(R.id.adViewBottom);
         if (mBannerAdView == null) {
             return;
         }
 
+        loadAdmobBannerAds();
+    }
+
+    void loadAdmobBannerAds() {
+        LinearLayout bannerAdLayoutView = findViewById(R.id.adViewBottom);
+        if (bannerAdLayoutView == null) {
+            return;
+        }
+
         AdRequest bannerAdRequest = new AdRequest.Builder().build();
-        mBannerAdView.setAdListener(new AdListener() {
+        AdView admobAdView = new AdView(this);
+        if (admobAdView.getParent() != null) {
+            ((ViewGroup)admobAdView.getParent()).removeView(admobAdView);
+        }
+        bannerAdLayoutView.removeAllViews();
+        bannerAdLayoutView.addView(admobAdView);
+        admobAdView.setAdSize(AdSize.SMART_BANNER);
+        admobAdView.setAdUnitId(getResources().getString(R.string.admob_banner_unit_id));
+        admobAdView.setAdListener(new AdListener() {
             @Override
             public void onAdLoaded() {
                 super.onAdLoaded();
@@ -1752,21 +1772,61 @@ public class HomeActivity extends AppCompatActivity
                 super.onAdClosed();
                 RemoveAdsDialogFragment.show(getApplicationContext(), HomeActivity.this.getSupportFragmentManager());
             }
+
+            @Override
+            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                super.onAdFailedToLoad(loadAdError);
+                Log.d(TAG, "AdMob onAdFailedToLoad(): " + loadAdError.getMessage());
+                loadAudienceNetworkBannerAds();
+            }
         });
-        mBannerAdView.loadAd(bannerAdRequest);
+        admobAdView.loadAd(bannerAdRequest);
     }
 
-    public void onMarkerClicked(Marker marker) {
-        mMarkerClickedCount++;
-        if (mRandom.nextBoolean()) {
-            // show rate dialog
-            RateItDialogFragment.show(getApplicationContext(), getSupportFragmentManager());
-        } else {
-            // show interstitial ad
-            if (BuildConfig.ENABLE_ADMOB) {
-                loadInterstitialAd(false, null);
-            }
+    void loadAudienceNetworkBannerAds() {
+        LinearLayout bannerAdLayoutView = findViewById(R.id.adViewBottom);
+        if (bannerAdLayoutView == null) {
+            return;
         }
+        com.facebook.ads.AdView anAdView =
+                new com.facebook.ads.AdView(HomeActivity.this,
+                        getResources().getString(R.string.an_banner_placement_id),
+                        com.facebook.ads.AdSize.BANNER_HEIGHT_50);
+        bannerAdLayoutView.removeAllViews();
+        bannerAdLayoutView.addView(anAdView);
+
+        com.facebook.ads.AdListener adListener = new com.facebook.ads.AdListener() {
+            @Override
+            public void onError(Ad ad, com.facebook.ads.AdError adError) {
+                // Ad error callback
+                Log.d(TAG, "Error: " + adError.getErrorMessage());
+                if (BuildConfig.DEBUG) {
+                    Toast.makeText(HomeActivity.this,
+                            "Error: " + adError.getErrorMessage(),
+                            Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onAdLoaded(Ad ad) {
+                // Ad loaded callback
+                Log.d(TAG, "Audience Network onAdLoaded: " + ad.toString());
+            }
+
+            @Override
+            public void onAdClicked(Ad ad) {
+                // Ad clicked callback
+                Log.d(TAG, "Audience Network onAdClicked: " + ad.toString());
+            }
+
+            @Override
+            public void onLoggingImpression(Ad ad) {
+                // Ad impression logged callback
+                Log.d(TAG, "Audience Network onLoggingImpression: " + ad.toString());
+            }
+        };
+
+        anAdView.loadAd(anAdView.buildLoadAdConfig().withAdListener(adListener).build());
     }
 
     private void loadInterstitialAd(boolean showAlways, String initiator) {
@@ -1806,14 +1866,18 @@ public class HomeActivity extends AppCompatActivity
             }
         }
 
-        // an add is showing, don't show again
-        if (mInterstitialAdShowing) {
-            return;
-        }
-
         // we will not show ad first time on home screen
         if ("Nearby".equals(initiator) && mInterstitialAdShowCount == 0) {
             mInterstitialAdShowCount++;
+            return;
+        }
+
+        loadAdMobInterstitialAd();
+    }
+
+    private void loadAdMobInterstitialAd() {
+        // an add is showing, don't show again
+        if (mInterstitialAdShowing) {
             return;
         }
 
@@ -1824,16 +1888,16 @@ public class HomeActivity extends AppCompatActivity
                     public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
                         // The mInterstitialAd reference will be null until
                         // an ad is loaded.
-                        mInterstitialAd = interstitialAd;
+                        mAdMobInterstitialAd = interstitialAd;
                         // Log.i(TAG, "onAdLoaded");
                         Log.d(TAG, "Banner adapter class name: " + interstitialAd.getResponseInfo().getMediationAdapterClassName());
-                        mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
+                        mAdMobInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
                             @Override
                             public void onAdDismissedFullScreenContent() {
                                 // Called when ad is dismissed.
                                 // Set the ad reference to null so you don't show the ad a second time.
                                 Log.d(TAG, "Ad dismissed fullscreen content.");
-                                mInterstitialAd = null;
+                                mAdMobInterstitialAd = null;
                                 mInterstitialAdShowing = false;
                                 RemoveAdsDialogFragment.show(HomeActivity.this, HomeActivity.this.getSupportFragmentManager());
                             }
@@ -1841,28 +1905,106 @@ public class HomeActivity extends AppCompatActivity
                             @Override
                             public void onAdFailedToShowFullScreenContent(AdError adError) {
                                 // Called when ad fails to show.
-                                Log.e(TAG, "Ad failed to show fullscreen content.");
-                                mInterstitialAd = null;
+                                Log.e(TAG, "AdMob onAdFailedToShowFullScreenContent(): " + adError.getMessage());
+                                mAdMobInterstitialAd = null;
                                 mInterstitialAdShowing = false;
+                                loadAudienceNetworkInterstitialAds();
                             }
                         });
                         if (!mInterstitialAdShowing) {
                             mInterstitialAdShowing = true;
                             mInterstitialAdShowCount++;
                             mLastInterstitialAdShowTime = new Date().getTime();
-                            mInterstitialAd.show(HomeActivity.this);
+                            mAdMobInterstitialAd.show(HomeActivity.this);
                         }
                     }
 
                     @Override
                     public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                         // Handle the error
-                        Log.d(TAG, loadAdError.toString());
-                        mInterstitialAd = null;
+                        Log.d(TAG, "AdMob onAdFailedToLoad: " + loadAdError.toString());
+                        mAdMobInterstitialAd = null;
                         mInterstitialAdShowing = false;
+                        loadAudienceNetworkInterstitialAds();
                     }
                 });
 
+    }
+
+    void loadAudienceNetworkInterstitialAds() {
+        // an add is showing, don't show again
+        if (mInterstitialAdShowing) {
+            return;
+        }
+        mAnInterstitialAd = new com.facebook.ads.InterstitialAd(
+                this, getResources().getString(R.string.an_interstitial_placement_id));
+        // Create listeners for the Interstitial Ad
+        InterstitialAdListener interstitialAdListener = new InterstitialAdListener() {
+            @Override
+            public void onInterstitialDisplayed(Ad ad) {
+                // Interstitial ad displayed callback
+                mInterstitialAdShowing = true;
+                mInterstitialAdShowCount++;
+                Log.e(TAG, "Interstitial ad displayed.");
+            }
+
+            @Override
+            public void onInterstitialDismissed(Ad ad) {
+                // Interstitial dismissed callback
+                Log.e(TAG, "Interstitial ad dismissed.");
+                mAnInterstitialAd = null;
+                mInterstitialAdShowing = false;
+            }
+
+            @Override
+            public void onError(Ad ad, com.facebook.ads.AdError adError) {
+                // Ad error callback
+                Log.e(TAG, "Interstitial ad failed to load: " + adError.getErrorMessage());
+                mAnInterstitialAd = null;
+                mInterstitialAdShowing = false;
+            }
+
+            @Override
+            public void onAdLoaded(Ad ad) {
+                // Interstitial ad is loaded and ready to be displayed
+                Log.d(TAG, "Interstitial ad is loaded and ready to be displayed!");
+                // Show the ad
+                mInterstitialAdShowing = true;
+                mAnInterstitialAd.show();
+            }
+
+            @Override
+            public void onAdClicked(Ad ad) {
+                // Ad clicked callback
+                Log.d(TAG, "Interstitial ad clicked!");
+            }
+
+            @Override
+            public void onLoggingImpression(Ad ad) {
+                // Ad impression logged callback
+                Log.d(TAG, "Interstitial ad impression logged!");
+            }
+        };
+
+        // For auto play video ads, it's recommended to load the ad
+        // at least 30 seconds before it is shown
+        mAnInterstitialAd.loadAd(
+                mAnInterstitialAd.buildLoadAdConfig()
+                        .withAdListener(interstitialAdListener)
+                        .build());
+    }
+
+    public void onMarkerClicked(Marker marker) {
+        mMarkerClickedCount++;
+        if (mRandom.nextBoolean()) {
+            // show rate dialog
+            RateItDialogFragment.show(getApplicationContext(), getSupportFragmentManager());
+        } else {
+            // show interstitial ad
+            if (BuildConfig.ENABLE_ADMOB) {
+                loadInterstitialAd(false, null);
+            }
+        }
     }
 
     private void checkDisplayZoomControls() {
@@ -2416,5 +2558,14 @@ public class HomeActivity extends AppCompatActivity
                                     true);
                         })
                 .create().show();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (mAnInterstitialAd != null) {
+            mAnInterstitialAd.destroy();
+        }
+
+        super.onDestroy();
     }
 }

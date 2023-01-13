@@ -194,8 +194,6 @@ public class NavigationDrawerFragment extends Fragment {
 
     private boolean isSignedIn;
 
-    private boolean mAdsFreeVersion;
-
     public NavigationDrawerFragment() {
     }
 
@@ -217,8 +215,6 @@ public class NavigationDrawerFragment extends Fragment {
 
         // Select either the default item (0) or the last selected item.
         selectItem(mCurrentSelectedPosition);
-
-        mAdsFreeVersion = PreferenceUtils.getBoolean(HomeActivity.ADS_FREE_VERSION, false);
     }
 
     @Override
