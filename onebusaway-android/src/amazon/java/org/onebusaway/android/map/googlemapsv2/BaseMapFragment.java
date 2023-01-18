@@ -329,6 +329,14 @@ public class BaseMapFragment extends SupportMapFragment
         mMap.animateCamera(CameraUpdateFactory.zoomOut());
     }
 
+    public LatLng getMapCentre() {
+        if (mMap != null) {
+            return mMap.getCameraPosition().target;
+        } else {
+            return null;
+        }
+    }
+
     @Override
     public void onMapReady(com.amazon.geo.mapsv2.AmazonMap map) {
         mMap = map;
@@ -1144,6 +1152,15 @@ public class BaseMapFragment extends SupportMapFragment
         }
     }
 
+    @Override
+    public void removeRouteOverlay() {
+        for (Polyline p : mLineOverlay) {
+            p.remove();
+        }
+
+        mLineOverlay.clear();
+    }
+
     /**
      * Zoom to include the current map bounds plus the location of the nearest vehicle
      *
@@ -1179,15 +1196,6 @@ public class BaseMapFragment extends SupportMapFragment
             int padding = UIUtils.dpToPixels(a, DEFAULT_MAP_PADDING_DP);
             mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), padding));
         }
-    }
-
-    @Override
-    public void removeRouteOverlay() {
-        for (Polyline p : mLineOverlay) {
-            p.remove();
-        }
-
-        mLineOverlay.clear();
     }
 
     /**

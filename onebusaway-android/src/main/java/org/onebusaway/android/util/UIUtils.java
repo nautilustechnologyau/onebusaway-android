@@ -2097,7 +2097,13 @@ public final class UIUtils {
     }
 
     public static boolean isLocationRealtime(ObaTripStatus status) {
-        boolean isRealtime = true;
+        if (status == null) {
+            return false;
+        }
+
+        return status.isPredicted();
+
+        /*boolean isRealtime = true;
         Location l = status.getLastKnownLocation();
         if (l == null) {
             isRealtime = false;
@@ -2105,7 +2111,7 @@ public final class UIUtils {
         if (!status.isPredicted()) {
             isRealtime = false;
         }
-        return isRealtime;
+        return isRealtime;*/
     }
 
     /**

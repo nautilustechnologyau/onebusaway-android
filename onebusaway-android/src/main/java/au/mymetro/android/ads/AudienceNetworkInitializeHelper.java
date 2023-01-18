@@ -23,13 +23,15 @@ public class AudienceNetworkInitializeHelper implements AudienceNetworkAds.InitL
         if (!AudienceNetworkAds.isInitialized(context)) {
             if (BuildConfig.DEBUG) {
                 AdSettings.turnOnSDKDebugger(context);
+                AdSettings.setIntegrationErrorMode(INTEGRATION_ERROR_CALLBACK_MODE);
+                AdSettings.addTestDevice("d2de8850-e804-439d-96cc-1755a201484d");
             }
 
             AudienceNetworkAds
                     .buildInitSettings(context)
                     .withInitListener(new AudienceNetworkInitializeHelper())
                     .initialize();
-            AdSettings.setIntegrationErrorMode(INTEGRATION_ERROR_CALLBACK_MODE );
+
         }
     }
 

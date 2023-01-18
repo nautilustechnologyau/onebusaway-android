@@ -650,7 +650,7 @@ public class VehicleOverlay implements AmazonMap.OnInfoWindowClickListener, Mark
                         if (l == null) {
                             // If a potentially extrapolated location isn't available, use last position
                             l = status.getPosition();
-                            isRealtime = false;
+                            // isRealtime = false;
                         }
                         if (!status.isPredicted()) {
                             isRealtime = false;

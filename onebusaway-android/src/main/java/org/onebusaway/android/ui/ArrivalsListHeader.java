@@ -1328,14 +1328,15 @@ class ArrivalsListHeader {
         }
 
         // If there is a warning or error alert, and show the alert icon in the header
-
-        for (int i = 0; i < alerts.getCount(); i++) {
-            AlertList.Alert a = alerts.getItem(i);
-            if (a.getType() == AlertList.Alert.TYPE_WARNING) {
-                mHasWarning = true;
-            }
-            if (a.getType() == AlertList.Alert.TYPE_ERROR) {
-                mHasError = true;
+        if (alerts != null) {
+            for (int i = 0; i < alerts.getCount(); i++) {
+                AlertList.Alert a = alerts.getItem(i);
+                if (a.getType() == AlertList.Alert.TYPE_WARNING) {
+                    mHasWarning = true;
+                }
+                if (a.getType() == AlertList.Alert.TYPE_ERROR) {
+                    mHasError = true;
+                }
             }
         }
 

@@ -1788,9 +1788,13 @@ public class HomeActivity extends AppCompatActivity
         if (bannerAdLayoutView == null) {
             return;
         }
+        String placementId = getResources().getString(R.string.an_banner_placement_id);
+        if (BuildConfig.DEBUG) {
+            placementId = "IMG_16_9_APP_INSTALL#" + placementId;
+        }
         com.facebook.ads.AdView anAdView =
                 new com.facebook.ads.AdView(HomeActivity.this,
-                        getResources().getString(R.string.an_banner_placement_id),
+                        placementId,
                         com.facebook.ads.AdSize.BANNER_HEIGHT_50);
         bannerAdLayoutView.removeAllViews();
         bannerAdLayoutView.addView(anAdView);
@@ -1799,7 +1803,7 @@ public class HomeActivity extends AppCompatActivity
             @Override
             public void onError(Ad ad, com.facebook.ads.AdError adError) {
                 // Ad error callback
-                Log.d(TAG, "Error: " + adError.getErrorMessage());
+                Log.d(TAG, "Audience Network onError: " + adError.getErrorCode() + " - " + adError.getErrorMessage());
                 if (BuildConfig.DEBUG) {
                     Toast.makeText(HomeActivity.this,
                             "Error: " + adError.getErrorMessage(),
@@ -1936,8 +1940,12 @@ public class HomeActivity extends AppCompatActivity
         if (mInterstitialAdShowing) {
             return;
         }
+        String placementId = getResources().getString(R.string.an_interstitial_placement_id);
+        if (BuildConfig.DEBUG) {
+            placementId = "CAROUSEL_IMG_SQUARE_APP_INSTALL#" + placementId;
+        }
         mAnInterstitialAd = new com.facebook.ads.InterstitialAd(
-                this, getResources().getString(R.string.an_interstitial_placement_id));
+                this, placementId);
         // Create listeners for the Interstitial Ad
         InterstitialAdListener interstitialAdListener = new InterstitialAdListener() {
             @Override
@@ -1951,7 +1959,7 @@ public class HomeActivity extends AppCompatActivity
             @Override
             public void onInterstitialDismissed(Ad ad) {
                 // Interstitial dismissed callback
-                Log.e(TAG, "Interstitial ad dismissed.");
+                Log.e(TAG, "Audience Network Interstitial ad dismissed.");
                 mAnInterstitialAd = null;
                 mInterstitialAdShowing = false;
             }
@@ -1959,7 +1967,12 @@ public class HomeActivity extends AppCompatActivity
             @Override
             public void onError(Ad ad, com.facebook.ads.AdError adError) {
                 // Ad error callback
-                Log.e(TAG, "Interstitial ad failed to load: " + adError.getErrorMessage());
+                Log.e(TAG, "Audience Network Interstitial ad failed to load: " + adError.getErrorCode() + " - "  + adError.getErrorMessage());
+                if (BuildConfig.DEBUG) {
+                    Toast.makeText(HomeActivity.this,
+                            "Error: " + adError.getErrorMessage(),
+                            Toast.LENGTH_LONG).show();
+                }
                 mAnInterstitialAd = null;
                 mInterstitialAdShowing = false;
             }
@@ -1967,7 +1980,7 @@ public class HomeActivity extends AppCompatActivity
             @Override
             public void onAdLoaded(Ad ad) {
                 // Interstitial ad is loaded and ready to be displayed
-                Log.d(TAG, "Interstitial ad is loaded and ready to be displayed!");
+                Log.d(TAG, "Audience Network Interstitial ad is loaded and ready to be displayed!");
                 // Show the ad
                 mInterstitialAdShowing = true;
                 mAnInterstitialAd.show();
@@ -1976,13 +1989,13 @@ public class HomeActivity extends AppCompatActivity
             @Override
             public void onAdClicked(Ad ad) {
                 // Ad clicked callback
-                Log.d(TAG, "Interstitial ad clicked!");
+                Log.d(TAG, "Audience Network Interstitial ad clicked!");
             }
 
             @Override
             public void onLoggingImpression(Ad ad) {
                 // Ad impression logged callback
-                Log.d(TAG, "Interstitial ad impression logged!");
+                Log.d(TAG, "Audience Network Interstitial ad impression logged!");
             }
         };
 
