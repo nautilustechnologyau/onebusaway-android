@@ -634,15 +634,14 @@ public class VehicleOverlay implements GoogleMap.OnInfoWindowClickListener, Mark
                     String activeRoute = response.getTrip(status.getActiveTripId()).getRouteId();
                     if (routeIds.contains(activeRoute) && !Status.CANCELED.equals(status.getStatus())) {
                         Location l = status.getLastKnownLocation();
-                        boolean isRealtime = true;
+                        boolean isRealtime = false;
 
-                        if (l == null) {
+                        if (l != null) {
                             // If a potentially extrapolated location isn't available, use last position
+                            isRealtime = true;
+                        } else {
                             l = status.getPosition();
-                            // isRealtime = false;
-                        }
-                        if (!status.isPredicted()) {
-                            isRealtime = false;
+                            isRealtime = status.isPredicted();
                         }
 
                         Marker m = mVehicleMarkers.get(status.getActiveTripId());

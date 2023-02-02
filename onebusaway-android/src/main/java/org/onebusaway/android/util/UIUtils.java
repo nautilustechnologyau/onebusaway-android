@@ -2101,6 +2101,11 @@ public final class UIUtils {
             return false;
         }
 
+        Location l = status.getLastKnownLocation();
+        if (l != null) {
+            return true;
+        }
+
         return status.isPredicted();
 
         /*boolean isRealtime = true;
