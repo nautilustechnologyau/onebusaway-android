@@ -61,7 +61,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -1744,6 +1746,16 @@ public class HomeActivity extends AppCompatActivity
         loadAdmobBannerAds();
     }
 
+    private AdSize getAdSize() {
+        Display display = getWindowManager().getDefaultDisplay();
+        DisplayMetrics outMetrics = new DisplayMetrics();
+        display.getMetrics(outMetrics);
+        float widthPixels = outMetrics.widthPixels;
+        float density = outMetrics.density; int adWidth = (int) (widthPixels / density);
+
+        return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(this, adWidth);
+    }
+
     void loadAdmobBannerAds() {
         LinearLayout bannerAdLayoutView = findViewById(R.id.adViewBottom);
         if (bannerAdLayoutView == null) {
@@ -1757,8 +1769,13 @@ public class HomeActivity extends AppCompatActivity
         }
         bannerAdLayoutView.removeAllViews();
         bannerAdLayoutView.addView(admobAdView);
-        admobAdView.setAdSize(AdSize.SMART_BANNER);
-        admobAdView.setAdUnitId(getResources().getString(R.string.admob_banner_unit_id));
+        AdSize adSize = getAdSize();
+        admobAdView.setAdSize(adSize);
+        //if (BuildConfig.DEBUG) {
+        //    admobAdView.setAdUnitId("ca-app-pub-3940256099942544/6300978111");
+        //} else {
+            admobAdView.setAdUnitId(getResources().getString(R.string.admob_banner_unit_id));
+        //}
         admobAdView.setAdListener(new AdListener() {
             @Override
             public void onAdLoaded() {

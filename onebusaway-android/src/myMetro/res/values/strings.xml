@@ -89,13 +89,11 @@
     </string>
     <string name="main_help_whatsnew">
         <b>Multi-region support</b>\n&#8226;\u0020
-        South Australia\n&#8226;\u0020
-        Queensland\n&#8226;\u0020
-        Victoria\n&#8226;\u0020
-        UAE (Beta)\n
+        PTV Victoria\n
+        Transport NSW\n
         <b>Other features and fix</b>\n&#8226;\u0020
         Crash bug fix\n&#8226;\u0020
-        In-app update
+        Real-time status determination improved
     </string>
     <string name="navdrawer_item_rate_app">Rate MyMetro</string>
     <string name="rate_title">Enjoying MyMetro?</string>

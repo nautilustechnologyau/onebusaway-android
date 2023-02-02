@@ -45,7 +45,7 @@ android {
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 33
-        versionCode 144
+        versionCode 146
         versionName "3.0.1"
 
         multiDexEnabled true
@@ -572,9 +572,7 @@ dependencies {
     // Google Ad
     implementation 'com.google.android.gms:play-services-ads:21.4.0'
     implementation 'com.google.ads.mediation:facebook:6.12.0.0'
-    implementation 'com.facebook.infer.annotation:infer-annotation:0.18.0'
     implementation 'com.google.ads.mediation:inmobi:10.1.2.1'
-    implementation 'androidx.annotation:annotation:1.5.0'
     implementation 'com.facebook.android:audience-network-sdk:6.12.0'
 
     // Billing
