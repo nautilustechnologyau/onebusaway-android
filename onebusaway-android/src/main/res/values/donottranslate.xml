@@ -107,6 +107,7 @@
 
     <!-- The below region name value needs to match existing iOS Firebase User Property -->
     <string name="analytics_label_region_name">RegionName</string>
+    <string name="analytics_label_region_select">Clicked select region</string>
     <string name="analytics_label_load_more_arrivals">Clicked load more arrivals button</string>
     <string name="analytics_label_sort_by_eta_arrival">Clicked sort by ETA from
         ArrivalsListFragment

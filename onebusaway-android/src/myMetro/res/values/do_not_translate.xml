@@ -35,6 +35,8 @@
     <!-- Open-source link for Github project -->
     <string name="open_source_github">https://github.com/nautilustechnologyau/onebusaway-android</string>
 
+    <string name="powered_by_oba_url">https://nautilus-tech.com.au</string>
+
 
     <!-- See src/main/res/do_not_translate.xml for more strings you can override here -->
 </resources>

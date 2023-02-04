@@ -30,6 +30,7 @@
     <string name="navdrawer_item_open_source">Visit us on GitHub</string>
     <string name="navdrawer_item_plan_trip">Plan a trip (beta)</string>
     <string name="navdrawer_item_pay_fare">Pay my fare</string>
+    <string name="navdrawer_item_region">Your region</string>
 
     <!-- Permissions -->
     <string name="trip_service_perm_label">start the trip service</string>

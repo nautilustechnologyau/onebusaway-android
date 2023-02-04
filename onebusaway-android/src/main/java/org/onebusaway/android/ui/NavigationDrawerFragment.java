@@ -26,6 +26,7 @@ import org.onebusaway.android.R;
 import org.onebusaway.android.app.Application;
 import org.onebusaway.android.io.elements.ObaRegion;
 import org.onebusaway.android.util.PreferenceUtils;
+import org.onebusaway.android.util.RegionUtils;
 import org.onebusaway.android.util.UIUtils;
 import org.onebusaway.android.view.ScrimInsetsScrollView;
 
@@ -69,40 +70,44 @@ public class NavigationDrawerFragment extends Fragment {
     // symbols for navdrawer items (indices must correspond to array below). This is
     // not a list of items that are necessarily *present* in the Nav Drawer; rather,
     // it's a list of all possible items.
-    protected static final int NAVDRAWER_ITEM_NEARBY = 0;
+    protected static final int NAVDRAWER_ITEM_REGION = 0;
 
-    protected static final int NAVDRAWER_ITEM_STARRED_STOPS = 1;
+    protected static final int NAVDRAWER_ITEM_NEARBY = 1;
 
-    protected static final int NAVDRAWER_ITEM_MY_REMINDERS = 2;
+    protected static final int NAVDRAWER_ITEM_STARRED_STOPS = 2;
 
-    protected static final int NAVDRAWER_ITEM_SETTINGS = 3;
+    protected static final int NAVDRAWER_ITEM_MY_REMINDERS = 3;
 
-    protected static final int NAVDRAWER_ITEM_HELP = 4;
+    protected static final int NAVDRAWER_ITEM_SETTINGS = 4;
 
-    protected static final int NAVDRAWER_ITEM_SEND_FEEDBACK = 5;
+    protected static final int NAVDRAWER_ITEM_HELP = 5;
 
-    protected static final int NAVDRAWER_ITEM_PLAN_TRIP = 6;
+    protected static final int NAVDRAWER_ITEM_SEND_FEEDBACK = 6;
 
-    //protected static final int NAVDRAWER_ITEM_POPULAR = 7;
-    @Deprecated
-    protected static final int NAVDRAWER_ITEM_PINS = 8;
+    protected static final int NAVDRAWER_ITEM_PLAN_TRIP = 7;
 
     @Deprecated
-    protected static final int NAVDRAWER_ITEM_ACTIVITY_FEED = 9;
+    protected static final int NAVDRAWER_ITEM_POPULAR = 8;
 
     @Deprecated
-    protected static final int NAVDRAWER_ITEM_PROFILE = 10;
+    protected static final int NAVDRAWER_ITEM_PINS = 9;
 
     @Deprecated
-    protected static final int NAVDRAWER_ITEM_SIGN_IN = 11;
+    protected static final int NAVDRAWER_ITEM_ACTIVITY_FEED = 10;
 
-    protected static final int NAVDRAWER_ITEM_OPEN_SOURCE = 12;
+    @Deprecated
+    protected static final int NAVDRAWER_ITEM_PROFILE = 11;
 
-    protected static final int NAVDRAWER_ITEM_PAY_FARE = 13;
+    @Deprecated
+    protected static final int NAVDRAWER_ITEM_SIGN_IN = 12;
 
-    protected static final int NAVDRAWER_ITEM_RATE_APP = 14;
+    protected static final int NAVDRAWER_ITEM_OPEN_SOURCE = 13;
 
-    protected static final int NAVDRAWER_ITEM_REMOVE_ADS = 15;
+    protected static final int NAVDRAWER_ITEM_PAY_FARE = 14;
+
+    protected static final int NAVDRAWER_ITEM_RATE_APP = 15;
+
+    protected static final int NAVDRAWER_ITEM_REMOVE_ADS = 16;
 
     protected static final int NAVDRAWER_ITEM_INVALID = -1;
 
@@ -113,6 +118,7 @@ public class NavigationDrawerFragment extends Fragment {
 
     // titles for navdrawer items (indices must correspond to the above)
     private static final int[] NAVDRAWER_TITLE_RES_ID = new int[]{
+            R.string.navdrawer_item_region,
             R.string.navdrawer_item_nearby,
             R.string.navdrawer_item_starred_stops,
             R.string.navdrawer_item_my_reminders,
@@ -133,7 +139,8 @@ public class NavigationDrawerFragment extends Fragment {
 
     // icons for navdrawer items (indices must correspond to above array)
     private static final int[] NAVDRAWER_ICON_RES_ID = new int[]{
-            R.drawable.ic_nearby,  // Nearby
+            R.drawable.ic_nearby, // Your region
+            R.drawable.ic_drawer_maps_place,  // Nearby
             R.drawable.ic_starred, // Starred Stops
             R.drawable.ic_reminder, // My reminders
             R.drawable.ic_settings, // Settings
@@ -153,7 +160,8 @@ public class NavigationDrawerFragment extends Fragment {
 
     // Secondary navdrawer item icons that appear align to right of list item layout
     private static final int[] NAVDRAWER_ICON_SECONDARY_RES_ID = new int[]{
-            0,  // Nearby
+            0, // Your region
+            0, // Nearby
             0, // Starred Stops
             0, // My reminders
             0, // Settings
@@ -166,7 +174,8 @@ public class NavigationDrawerFragment extends Fragment {
             0, // My profile
             0, // Sign in
             R.drawable.ic_drawer_link, // Open-source
-            R.drawable.ic_drawer_link // Pay my fare
+            R.drawable.ic_drawer_link, // Pay my fare
+
     };
 
     // list of navdrawer items that were actually added to the navdrawer, in order
@@ -206,6 +215,9 @@ public class NavigationDrawerFragment extends Fragment {
 
         if (savedInstanceState != null) {
             mCurrentSelectedPosition = savedInstanceState.getInt(STATE_SELECTED_POSITION);
+            if (mCurrentSelectedPosition == NAVDRAWER_ITEM_REGION) {
+                mCurrentSelectedPosition = NAVDRAWER_ITEM_NEARBY;
+            }
             Log.d(TAG, "Using position from savedInstanceState = " + mCurrentSelectedPosition);
         } else {
             // Try to get the saved position from preferences
@@ -374,6 +386,9 @@ public class NavigationDrawerFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        if (mCurrentSelectedPosition == NAVDRAWER_ITEM_REGION) {
+            mCurrentSelectedPosition = NAVDRAWER_ITEM_NEARBY;
+        }
         Log.d(TAG, "Saving position = " + mCurrentSelectedPosition);
         outState.putInt(STATE_SELECTED_POSITION, mCurrentSelectedPosition);
     }
@@ -426,6 +441,7 @@ public class NavigationDrawerFragment extends Fragment {
         ObaRegion currentRegion = Application.get().getCurrentRegion();
         mNavDrawerItems.clear();
 
+        mNavDrawerItems.add(NAVDRAWER_ITEM_REGION);
         mNavDrawerItems.add(NAVDRAWER_ITEM_NEARBY);
         mNavDrawerItems.add(NAVDRAWER_ITEM_STARRED_STOPS);
         mNavDrawerItems.add(NAVDRAWER_ITEM_MY_REMINDERS);
@@ -442,9 +458,10 @@ public class NavigationDrawerFragment extends Fragment {
 
         mNavDrawerItems.add(NAVDRAWER_ITEM_SEPARATOR);
 
-        mNavDrawerItems.add(NAVDRAWER_ITEM_OPEN_SOURCE);
-
-        mNavDrawerItems.add(NAVDRAWER_ITEM_SEPARATOR);
+        if (BuildConfig.FLAVOR_brand != "myMetro") {
+            mNavDrawerItems.add(NAVDRAWER_ITEM_OPEN_SOURCE);
+            mNavDrawerItems.add(NAVDRAWER_ITEM_SEPARATOR);
+        }
 
         mNavDrawerItems.add(NAVDRAWER_ITEM_SETTINGS);
         mNavDrawerItems.add(NAVDRAWER_ITEM_HELP);
@@ -501,6 +518,7 @@ public class NavigationDrawerFragment extends Fragment {
 
         ImageView iconView = (ImageView) view.findViewById(R.id.icon);
         TextView titleView = (TextView) view.findViewById(R.id.title);
+        TextView subtitleView = (TextView) view.findViewById(R.id.subtitle);
         ImageView secondaryIconView = view.findViewById(R.id.secondary_icon);
         int iconId = itemId >= 0 && itemId < NAVDRAWER_ICON_RES_ID.length ?
                 NAVDRAWER_ICON_RES_ID[itemId] : 0;
@@ -514,7 +532,15 @@ public class NavigationDrawerFragment extends Fragment {
         if (iconId > 0) {
             iconView.setImageResource(iconId);
         }
+
         titleView.setText(getString(titleId));
+
+        // handle region name
+        if (titleId == R.string.navdrawer_item_region) {
+            String subtitle = RegionUtils.getObaRegionName();
+            subtitleView.setText(subtitle);
+            subtitleView.setVisibility(View.VISIBLE);
+        }
 
         // Secondary icon
         secondaryIconView.setVisibility(secondaryIconId > 0 ? View.VISIBLE : View.GONE);
@@ -595,7 +621,8 @@ public class NavigationDrawerFragment extends Fragment {
                 itemId == NAVDRAWER_ITEM_OPEN_SOURCE ||
                 itemId == NAVDRAWER_ITEM_RATE_APP ||
                 itemId == NAVDRAWER_ITEM_REMOVE_ADS ||
-                itemId == NAVDRAWER_ITEM_STARRED_STOPS;
+                itemId == NAVDRAWER_ITEM_STARRED_STOPS ||
+                itemId == NAVDRAWER_ITEM_REGION;
     }
 
     /**
@@ -604,6 +631,6 @@ public class NavigationDrawerFragment extends Fragment {
      * @return true if the item has been deprecated, false if the item is a valid selection.
      */
     public boolean isItemDeprecated(int itemId) {
-        return itemId >= 7 && itemId <= 11;
+        return itemId >= 8 && itemId <= 12;
     }
 }

@@ -238,8 +238,8 @@ public class PreferencesActivity extends PreferenceActivity
                 findPreference(getString(R.string.preferences_category_about));
         if (BuildConfig.FLAVOR_brand == "myMetro") {
             // TODO: Decide whether we should show these options
-            // aboutCategory.removePreference(mPoweredByObaPref);
-            // aboutCategory.removePreference(mDonatePref);
+            aboutCategory.removePreference(mPoweredByObaPref);
+            aboutCategory.removePreference(mDonatePref);
         } else {
             if (BuildConfig.FLAVOR_brand.equalsIgnoreCase(BuildFlavorUtils.OBA_FLAVOR_BRAND)) {
                 aboutCategory.removePreference(mPoweredByObaPref);

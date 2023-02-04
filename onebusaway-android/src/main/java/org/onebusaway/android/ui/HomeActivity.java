@@ -29,6 +29,7 @@ import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_
 import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_PLAN_TRIP;
 import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_PROFILE;
 import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_RATE_APP;
+import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_REGION;
 import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_REMOVE_ADS;
 import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_SEND_FEEDBACK;
 import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_SETTINGS;
@@ -579,12 +580,22 @@ public class HomeActivity extends AppCompatActivity
     private void goToNavDrawerItem(int item) {
         // Update the main content by replacing fragments
         switch (item) {
+            case NAVDRAWER_ITEM_REGION:
+                if (!BuildConfig.USE_FIXED_REGION) {
+                    mCurrentNavDrawerPosition = NAVDRAWER_ITEM_NEARBY;
+                    RegionsActivity.start(this);
+                    // Intent selectRegion = new Intent(HomeActivity.this, RegionsActivity.class);
+                    // startActivity(selectRegion);
+                    ObaAnalytics.reportUiEvent(mFirebaseAnalytics, getString(R.string.analytics_label_region_select), null);
+                }
+                break;
             case NAVDRAWER_ITEM_STARRED_STOPS:
                 if (mCurrentNavDrawerPosition != NAVDRAWER_ITEM_STARRED_STOPS) {
                     showStarredStopsRoutesFragment();
                     ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
                             getString(R.string.analytics_label_button_press_star),
                             null);
+                    mCurrentNavDrawerPosition = NAVDRAWER_ITEM_NEARBY;
                 }
                 break;
             // below values are deprecated; fall through to NAVDRAWER_ITEM_NEARBY
@@ -2040,6 +2051,9 @@ public class HomeActivity extends AppCompatActivity
     private void checkDisplayZoomControls() {
         boolean displayZoom = Application.getPrefs().getBoolean(
                 getString(R.string.preference_key_show_zoom_controls), false);
+        if (BuildConfig.FLAVOR_brand == "myMetro") {
+            displayZoom = false;
+        }
         showZoomControls(displayZoom);
     }
 
@@ -2251,7 +2265,12 @@ public class HomeActivity extends AppCompatActivity
             String routeId = bundle.getString(MapParams.ROUTE_ID);
             String stopId = bundle.getString(MapParams.STOP_ID);
             if (routeId != null || stopId != null) {
-                mNavigationDrawerFragment.selectItem(NAVDRAWER_ITEM_NEARBY);
+                // mNavigationDrawerFragment.selectItem(NAVDRAWER_ITEM_NEARBY);
+                if (BuildConfig.USE_FIXED_REGION) {
+                    mNavigationDrawerFragment.selectItem(0);
+                } else {
+                    mNavigationDrawerFragment.selectItem(1);
+                }
             }
         }
     }

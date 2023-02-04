@@ -13,6 +13,7 @@
      limitations under the License.
 -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/route_list_container"
     style="@style/ListItem"
     android:layout_width="fill_parent"
@@ -33,7 +34,8 @@
         android:maxHeight="25dp"
         android:scaleType="fitCenter"
         android:src="@drawable/ic_toggle_star"
-        android:visibility="gone"/>
+        android:visibility="visible"
+        app:tint="@color/navdrawer_icon_tint" />
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         style="@style/ListItem"

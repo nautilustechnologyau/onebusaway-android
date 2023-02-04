@@ -35,6 +35,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -217,6 +218,10 @@ public class MySearchStopsFragment extends MySearchFragmentBase
         @Override
         protected void initView(View view, ObaStop stop) {
             mStopUserMap.setView(view, stop.getId(), stop.getName());
+            ImageView starredView = (ImageView) view.findViewById(R.id.stop_favorite);
+            if (starredView != null) {
+                starredView.setVisibility(View.GONE);
+            }
             UIUtils.setStopDirection(view.findViewById(R.id.direction),
                     stop.getDirection(),
                     true);

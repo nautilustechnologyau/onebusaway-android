@@ -41,7 +41,7 @@ public abstract class MyRouteListFragmentBase extends MyListFragmentBase
 
     @Override
     protected SimpleCursorAdapter newAdapter() {
-        return QueryUtils.RouteList.newAdapter(getActivity());
+        return QueryUtils.RouteList.newFavoriteAdapter(getActivity());
     }
 
     @Override

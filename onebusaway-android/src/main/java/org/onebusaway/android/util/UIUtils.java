@@ -280,8 +280,8 @@ public final class UIUtils {
         TextView shortNameText = (TextView) view.findViewById(R.id.short_name);
         TextView longNameText = (TextView) view.findViewById(R.id.long_name);
         ImageView favoriteIcon = (ImageView) view.findViewById(R.id.route_favorite);
-
-        favoriteIcon.setVisibility(View.GONE);
+        favoriteIcon.setImageResource(R.drawable.ic_track);
+        // favoriteIcon.setColorFilter(R.color.navdrawer_icon_tint);
 
         String shortName = route.getShortName();
         String longName = UIUtils.formatDisplayText(route.getLongName());

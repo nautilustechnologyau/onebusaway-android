@@ -25,6 +25,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -270,6 +271,10 @@ public class SearchResultsFragment extends ListFragment
         private void initStop(View view, ObaStop stop) {
             TextView nameView = (TextView) view.findViewById(R.id.stop_name);
             nameView.setText(UIUtils.formatDisplayText(stop.getName()));
+
+            ImageView favoriteIcon = (ImageView) view.findViewById(R.id.stop_favorite);
+            favoriteIcon.setImageResource(R.drawable.ic_bus_stop);
+            // favoriteIcon.setColorFilter(getContext().getResources().getColor(R.color.navdrawer_icon_tint));
 
             UIUtils.setStopDirection(view.findViewById(R.id.direction),
                     stop.getDirection(),
