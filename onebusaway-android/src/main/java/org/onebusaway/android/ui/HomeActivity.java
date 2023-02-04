@@ -582,8 +582,8 @@ public class HomeActivity extends AppCompatActivity
         switch (item) {
             case NAVDRAWER_ITEM_REGION:
                 if (!BuildConfig.USE_FIXED_REGION) {
-                    mCurrentNavDrawerPosition = NAVDRAWER_ITEM_NEARBY;
                     RegionsActivity.start(this);
+                    mCurrentNavDrawerPosition = NAVDRAWER_ITEM_NEARBY;
                     // Intent selectRegion = new Intent(HomeActivity.this, RegionsActivity.class);
                     // startActivity(selectRegion);
                     ObaAnalytics.reportUiEvent(mFirebaseAnalytics, getString(R.string.analytics_label_region_select), null);
@@ -2265,12 +2265,12 @@ public class HomeActivity extends AppCompatActivity
             String routeId = bundle.getString(MapParams.ROUTE_ID);
             String stopId = bundle.getString(MapParams.STOP_ID);
             if (routeId != null || stopId != null) {
-                // mNavigationDrawerFragment.selectItem(NAVDRAWER_ITEM_NEARBY);
-                if (BuildConfig.USE_FIXED_REGION) {
+                mNavigationDrawerFragment.selectItem(NAVDRAWER_ITEM_NEARBY);
+                /*if (BuildConfig.USE_FIXED_REGION) {
                     mNavigationDrawerFragment.selectItem(0);
                 } else {
                     mNavigationDrawerFragment.selectItem(1);
-                }
+                }*/
             }
         }
     }

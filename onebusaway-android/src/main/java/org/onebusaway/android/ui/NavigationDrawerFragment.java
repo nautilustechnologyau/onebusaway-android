@@ -65,14 +65,14 @@ public class NavigationDrawerFragment extends Fragment {
     /**
      * Remember the position of the selected item.
      */
-    private static final String STATE_SELECTED_POSITION = "selected_navigation_drawer_position";
+    public static final String STATE_SELECTED_POSITION = "selected_navigation_drawer_position";
 
     // symbols for navdrawer items (indices must correspond to array below). This is
     // not a list of items that are necessarily *present* in the Nav Drawer; rather,
     // it's a list of all possible items.
-    protected static final int NAVDRAWER_ITEM_REGION = 0;
+    public static final int NAVDRAWER_ITEM_REGION = 0;
 
-    protected static final int NAVDRAWER_ITEM_NEARBY = 1;
+    public static final int NAVDRAWER_ITEM_NEARBY = 1;
 
     protected static final int NAVDRAWER_ITEM_STARRED_STOPS = 2;
 

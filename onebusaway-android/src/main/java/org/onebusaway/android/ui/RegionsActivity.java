@@ -65,8 +65,10 @@ public class RegionsActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
             NavHelp.goHome(this, false);
+            //onBackPressed();
             return true;
         }
         return false;
+        //return super.onOptionsItemSelected(item);
     }
 }

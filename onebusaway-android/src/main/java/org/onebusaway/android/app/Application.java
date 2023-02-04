@@ -54,6 +54,7 @@ import org.onebusaway.android.io.ObaApi;
 import org.onebusaway.android.io.elements.ObaRegion;
 import org.onebusaway.android.provider.ObaContract;
 import org.onebusaway.android.travelbehavior.TravelBehaviorManager;
+import org.onebusaway.android.ui.NavigationDrawerFragment;
 import org.onebusaway.android.util.BuildFlavorUtils;
 import org.onebusaway.android.util.LocationUtils;
 import org.onebusaway.android.util.PreferenceUtils;
@@ -108,6 +109,12 @@ public class Application extends MultiDexApplication {
 
         mApp = this;
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+        // Nearby should be selected on first load if previously the app has region select selected item
+        int position = mPrefs.getInt(NavigationDrawerFragment.STATE_SELECTED_POSITION, NavigationDrawerFragment.NAVDRAWER_ITEM_NEARBY);
+        if (position == NavigationDrawerFragment.NAVDRAWER_ITEM_REGION) {
+            mPrefs.edit().putInt(NavigationDrawerFragment.STATE_SELECTED_POSITION, NavigationDrawerFragment.NAVDRAWER_ITEM_NEARBY).apply();
+        }
 
         // initialise mobile ad as early as possible
         if (BuildConfig.ENABLE_ADMOB) {
