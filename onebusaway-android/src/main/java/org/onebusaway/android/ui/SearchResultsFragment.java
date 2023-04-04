@@ -149,6 +149,7 @@ public class SearchResultsFragment extends ListFragment
         if (location == null) {
             location = LocationUtils.getDefaultSearchCenter();
         }
+
         return new MyLoader(getActivity(), query, location);
     }
 

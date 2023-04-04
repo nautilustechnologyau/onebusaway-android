@@ -772,8 +772,7 @@ class ArrivalsListHeader {
                     // If this is frequency-based data, indicate that arrival is approximate
                     if (mArrivalInfo.get(i1).getInfo().getFrequency() != null) {
                         mEtaArrivalInfo1.setText(
-                                mResources.getString(R.string.stop_info_frequency_approximate)
-                                        + mEtaArrivalInfo1.getText());
+                            mResources.getString(R.string.stop_info_frequency_approximate) + mEtaArrivalInfo1.getText());
                     }
                     UIUtils.setVehicleFeatures(mVehicleFeaturesView1, null, R.color.header_text_color);
                 }

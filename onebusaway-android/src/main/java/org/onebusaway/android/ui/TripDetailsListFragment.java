@@ -1220,7 +1220,9 @@ public class TripDetailsListFragment extends ListFragment {
                 mAdapter.notifyDataSetChanged();
 
                 // Unregister this receiver now
-                getActivity().unregisterReceiver(this);
+                if (getActivity() != null) {
+                    getActivity().unregisterReceiver(this);
+                }
             }
         }
     }
