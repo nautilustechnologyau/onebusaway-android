@@ -55,7 +55,7 @@ public class GeocoderTask extends AsyncTask<Void, Integer, String> {
             Geocoder geo = new Geocoder(mContext, Locale.getDefault());
             List<Address> addresses = geo.getFromLocation(mLocation.getLatitude(),
                     mLocation.getLongitude(), 1);
-            if (!addresses.isEmpty() && addresses.size() > 0) {
+            if (!addresses.isEmpty() && addresses.get(0).getMaxAddressLineIndex() > 0) {
                 StringBuilder sb = new StringBuilder();
                 int addressLine = addresses.get(0).getMaxAddressLineIndex();
                 for (int i = 0; i < addressLine - 1; i++) {

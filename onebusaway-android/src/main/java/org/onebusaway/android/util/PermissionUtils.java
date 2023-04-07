@@ -42,6 +42,11 @@ public class PermissionUtils {
             Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
 
+    @SuppressLint("InlinedApi")
+    public static final String[] CAMERA_PERMISSIONS = {
+            Manifest.permission.CAMERA
+    };
+
     /**
      * Returns true if all of the provided permissions in requiredPermissions have been granted, or false if they have not
      * @param context

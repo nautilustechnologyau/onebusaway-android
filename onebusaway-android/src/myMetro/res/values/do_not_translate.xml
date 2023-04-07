@@ -21,6 +21,9 @@
 
     <!-- Problem reporting additions -->
     <string name="ri_static_user_name">MyMetro</string>
+    <string name="ri_static_user_last_name">User</string>
+    <string name="ri_static_user_email">mymetro@nautilus-tech.com.au</string>
+    <string name="ri_static_user_phone">N/A</string>
     <string name="ri_app_feedback_email">mymetro@nautilus-tech.com.au</string>
 
     <string name="preference_key_default_route_sort">preference_default_route_sort</string>

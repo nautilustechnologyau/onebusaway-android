@@ -16,11 +16,18 @@
 
 package org.onebusaway.android.report.ui;
 
+import static org.onebusaway.android.util.PermissionUtils.CAMERA_PERMISSIONS;
+import static org.onebusaway.android.util.PermissionUtils.RESTORE_BACKUP_PERMISSION_REQUEST;
+import static org.onebusaway.android.util.PermissionUtils.SAVE_BACKUP_PERMISSION_REQUEST;
+import static org.onebusaway.android.util.PermissionUtils.STORAGE_PERMISSIONS;
+
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -56,6 +63,7 @@ import android.widget.TextView;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 
+import org.onebusaway.android.BuildConfig;
 import org.onebusaway.android.R;
 import org.onebusaway.android.app.Application;
 import org.onebusaway.android.io.ObaAnalytics;
@@ -68,7 +76,9 @@ import org.onebusaway.android.report.constants.ReportConstants;
 import org.onebusaway.android.report.ui.model.AttributeValue;
 import org.onebusaway.android.report.ui.util.IssueLocationHelper;
 import org.onebusaway.android.report.ui.util.ServiceUtils;
+import org.onebusaway.android.util.BackupUtils;
 import org.onebusaway.android.util.MyTextUtils;
+import org.onebusaway.android.util.PermissionUtils;
 import org.onebusaway.android.util.PreferenceUtils;
 import org.onebusaway.android.util.UIUtils;
 
@@ -83,12 +93,15 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import edu.usf.cutr.open311client.Open311;
@@ -332,10 +345,10 @@ public class Open311ProblemFragment extends BaseReportFragment implements
                     public boolean onMenuItemClick(MenuItem item) {
                         switch (item.getItemId()) {
                             case R.id.ri_button_camera:
-                                openCamera();
+                                intendOpenCamera();
                                 break;
                             case R.id.ri_button_gallery:
-                                openGallery();
+                                intendOpenGallery();
                                 break;
                             default:
                                 break;
@@ -607,7 +620,7 @@ public class Open311ProblemFragment extends BaseReportFragment implements
         } else if (ServiceUtils.isTransitTripServiceByType(service.getType())) {
             if (mArrivalInfo != null) {
                 // Append trip service params
-                DateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
+                DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
 
                 sb.append(getResources().getString(R.string.ri_append_service_date,
                         dateFormat.format(new Date(mArrivalInfo.getServiceDate()))));
@@ -659,7 +672,7 @@ public class Open311ProblemFragment extends BaseReportFragment implements
                     }
                 }
 
-                dateFormat = new SimpleDateFormat("hh:mm a");
+                dateFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
                 if (mArrivalInfo.getPredicted()) {
                     sb.append(getResources().getString(R.string.ri_append_arrival_time,
                             dateFormat.format(new Date(mArrivalInfo.getPredictedArrivalTime()))));
@@ -795,6 +808,44 @@ public class Open311ProblemFragment extends BaseReportFragment implements
         return values;
     }
 
+    @SuppressLint("MissingPermission")
+    @Override
+    public void onRequestPermissionsResult(
+            int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == ReportConstants.CAPTURE_PICTURE_INTENT || requestCode == ReportConstants.GALLERY_INTENT) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // User granted permission
+                if (requestCode == ReportConstants.CAPTURE_PICTURE_INTENT) {
+                    openCamera();
+                } else {
+                    openGallery();
+                }
+            }
+        }
+    }
+
+    private void intendOpenCamera() {
+        if (!PermissionUtils.hasGrantedAtLeastOnePermission(getActivity(), CAMERA_PERMISSIONS)) {
+            requestPermissions(
+                    CAMERA_PERMISSIONS,
+                    ReportConstants.CAPTURE_PICTURE_INTENT
+            );
+        } else {
+            openCamera();
+        }
+    }
+
+    private void intendOpenGallery() {
+        if (!PermissionUtils.hasGrantedAtLeastOnePermission(getActivity(), STORAGE_PERMISSIONS)) {
+            requestPermissions(
+                    STORAGE_PERMISSIONS,
+                    ReportConstants.GALLERY_INTENT
+            );
+        } else {
+            openGallery();
+        }
+    }
+
     /**
      * From https://developer.android.com/training/camera/photobasics.html#TaskPath
      */
@@ -802,7 +853,7 @@ public class Open311ProblemFragment extends BaseReportFragment implements
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
         // Ensure that there's a camera activity to handle the intent
-        if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+        // if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
             // Create the File where the photo should go
             File photoFile = null;
             try {
@@ -817,11 +868,15 @@ public class Open311ProblemFragment extends BaseReportFragment implements
             if (photoFile != null) {
                 // Save a file: path for use with ACTION_VIEW intents
                 mImagePath = photoFile.getAbsolutePath();
-                mCapturedImageURI = Uri.fromFile(photoFile);
+                mCapturedImageURI = FileProvider.getUriForFile(getContext(),
+                        BuildConfig.APPLICATION_ID +".fileprovider",
+                        new File(mImagePath));
+
+                // mCapturedImageURI = Uri.fromFile(photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mCapturedImageURI);
                 startActivityForResult(takePictureIntent, ReportConstants.CAPTURE_PICTURE_INTENT);
             }
-        }
+        // }
     }
 
     private void openGallery() {

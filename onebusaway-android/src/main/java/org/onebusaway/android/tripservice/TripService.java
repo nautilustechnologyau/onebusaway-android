@@ -270,7 +270,8 @@ public class TripService extends Service {
      * Starts the service to schedule all pending reminders
      *
      * @param context
-     * @param startForeground true if the service should be started in the foreground, false if it should not.  This parameter doesn't have any effect on Android versions less than 8.0.
+     * @param startForeground true if the service should be started in the foreground, false if it should not.
+     *                        This parameter doesn't have any effect on Android versions less than 8.0.
      */
     public static void scheduleAll(Context context, boolean startForeground) {
         final Intent intent = new Intent(context, TripService.class);

@@ -46,6 +46,9 @@
     <!--<uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>-->
     <!-- For reminders - SCHEDULE_EXACT_ALARM is required when targeting Android 12 or higher-->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-feature android:name="android.hardware.camera" android:required="true" />
 
     <application
         android:allowBackup="false"
@@ -286,6 +289,17 @@
                 android:name="org.onebusaway.android.provider.ObaProvider"
                 android:authorities="${databaseAuthority}"/>
 
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="au.mymetro.android.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <!-- ressource file to create -->
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths">
+            </meta-data>
+        </provider>
         <service
                 android:name=".tripservice.TripService"
                 android:permission="${applicationId}.permission.TRIP_SERVICE"
