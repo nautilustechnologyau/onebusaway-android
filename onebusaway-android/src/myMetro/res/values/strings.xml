@@ -88,15 +88,6 @@
         this application which may decrease the performance of the application. To get the best experience
         from this application, please go to settings and disable performance optimizations for MyMetro.
     </string>
-    <string name="main_help_whatsnew">
-        <b>New supported regions</b>\n&#8226;\u0020
-        Public Transport Victoria\n&#8226;\u0020
-        Transport NSW\n
-        <b>Other features and fix</b>\n&#8226;\u0020
-        Crash bug fix\n&#8226;\u0020
-        Route/stop search improved\n&#8226;\u0020
-        Real-time status determination improved
-    </string>
     <string name="navdrawer_item_rate_app">Rate MyMetro</string>
     <string name="rate_title">Enjoying MyMetro?</string>
     <string name="rate_message">If you are enjoying using MyMetro, please take a moment to rate it. Your rating and feedback will help us improving the app.</string>
@@ -138,4 +129,14 @@
     </string>
 
     <string name="navdrawer_item_region">Your region</string>
+
+    <string name="main_help_whatsnew">
+        <b>New feature</b>\n&#8226;\u0020
+        Open311 Integration\n&#8226;\u0020
+        Users can track their submitted problem reports\n
+        <b>Bug fixes</b>\n&#8226;\u0020
+        Crash bug fix\n&#8226;\u0020
+        Performance improvement\n&#8226;\u0020
+        Libraries upgrade
+    </string>
 </resources>

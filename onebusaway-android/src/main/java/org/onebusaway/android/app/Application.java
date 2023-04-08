@@ -552,7 +552,7 @@ public class Application extends MultiDexApplication {
     private void initOpen311(ObaRegion region) {
         if (BuildConfig.DEBUG) {
             Open311Manager.getSettings().setDebugMode(true);
-            Open311Manager.getSettings().setDryRun(true);
+            Open311Manager.getSettings().setDryRun(false);
             Log.w(TAG,
                     "Open311 issue reporting is in debug/dry run mode - no issues will be submitted.");
         }

@@ -190,6 +190,8 @@ public class Open311ProblemFragment extends BaseReportFragment implements
 
     private static final String BLOCK_ID = ".blockId";
 
+    private static final Boolean ENABLE_CAMERA = true;
+
     private FirebaseAnalytics mFirebaseAnalytics;
 
     public static void show(AppCompatActivity activity, Integer containerViewId,
@@ -330,32 +332,41 @@ public class Open311ProblemFragment extends BaseReportFragment implements
 
         Button addImageButton = (Button) findViewById(R.id.ri_attach_image);
 
-        final PopupMenu popupMenu = new PopupMenu(getActivity(), addImageButton);
-        popupMenu.inflate(R.menu.report_issue_add_image);
-        addImageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                popupMenu.show();
-            }
-        });
+        if (ENABLE_CAMERA) {
+            final PopupMenu popupMenu = new PopupMenu(getActivity(), addImageButton);
+            popupMenu.inflate(R.menu.report_issue_add_image);
+            addImageButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    popupMenu.show();
+                }
+            });
 
-        popupMenu.setOnMenuItemClickListener(
+            popupMenu.setOnMenuItemClickListener(
                 new PopupMenu.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        switch (item.getItemId()) {
-                            case R.id.ri_button_camera:
-                                intendOpenCamera();
-                                break;
-                            case R.id.ri_button_gallery:
-                                intendOpenGallery();
-                                break;
-                            default:
-                                break;
-                        }
-                        return true;
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    switch (item.getItemId()) {
+                        case R.id.ri_button_camera:
+                            intendOpenCamera();
+                            break;
+                        case R.id.ri_button_gallery:
+                            intendOpenGallery();
+                            break;
+                        default:
+                            break;
                     }
-                });
+                    return true;
+                }
+            });
+        } else {
+            addImageButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    intendOpenGallery();
+                }
+            });
+        }
 
         mAnonymousReportingCheckBox = (CheckBox) findViewById(R.id.rici_anonymous_checkbox);
         mAnonymousReportingCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -836,7 +847,7 @@ public class Open311ProblemFragment extends BaseReportFragment implements
     }
 
     private void intendOpenGallery() {
-        if (!PermissionUtils.hasGrantedAtLeastOnePermission(getActivity(), STORAGE_PERMISSIONS)) {
+        if (!PermissionUtils.hasGrantedAllPermissions(getActivity(), STORAGE_PERMISSIONS)) {
             requestPermissions(
                     STORAGE_PERMISSIONS,
                     ReportConstants.GALLERY_INTENT
