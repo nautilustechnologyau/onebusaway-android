@@ -133,7 +133,8 @@
     <string name="main_help_whatsnew">
         <b>New feature</b>\n&#8226;\u0020
         Open311 Integration\n&#8226;\u0020
-        Users can track their submitted problem reports\n
+        Users can track their submitted problem reports\n&#8226;\u0020
+        On-screen shortcut for stop actions\n
         <b>Bug fixes</b>\n&#8226;\u0020
         Crash bug fix\n&#8226;\u0020
         Performance improvement\n&#8226;\u0020

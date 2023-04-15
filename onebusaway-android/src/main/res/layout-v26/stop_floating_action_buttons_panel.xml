@@ -27,7 +27,6 @@
                 android:tooltipText="Recent Stop/Routes"
                 app:backgroundTint="@color/theme_muted"
                 app:fabSize="auto"
-                app:layout_constraintTop_toBottomOf="@+id/extended_fab"
                 app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay"
                 app:srcCompat="@drawable/ic_history" />
 
