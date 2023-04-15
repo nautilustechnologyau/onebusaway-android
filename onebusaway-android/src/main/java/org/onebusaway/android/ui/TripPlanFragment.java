@@ -413,7 +413,7 @@ public class TripPlanFragment extends Fragment {
 
     private void advancedSettings() {
 
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity(), R.style.CustomAlertDialog);
 
         final boolean unitsAreImperial = !PreferenceUtils.getUnitsAreMetricFromPreferences(getContext());
 

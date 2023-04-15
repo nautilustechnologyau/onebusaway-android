@@ -197,7 +197,7 @@ public class NightLightActivity extends AppCompatActivity {
     private void maybeShowIntroDialog() {
         final SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         if (!sp.getBoolean(PREFERENCE_SHOWED_DIALOG, false)) {
-            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            final AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.CustomAlertDialog);
             builder.setTitle(R.string.night_light_dialog_title);
             builder.setCancelable(false);
             builder.setPositiveButton(R.string.night_light_start, (dialog, which) -> {

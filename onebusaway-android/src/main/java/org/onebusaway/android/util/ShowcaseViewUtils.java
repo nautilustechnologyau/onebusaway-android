@@ -312,7 +312,7 @@ public class ShowcaseViewUtils {
         final String showTutorialsKey = activity
                 .getString(R.string.preference_key_show_tutorial_screens);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity, R.style.CustomAlertDialog);
         builder.setTitle(R.string.tutorial_opt_out_dialog_title)
                 .setMessage(R.string.tutorial_opt_out_dialog_text)
                 .setPositiveButton(R.string.rt_yes,

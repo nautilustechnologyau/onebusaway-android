@@ -193,7 +193,7 @@ public class SearchResultsFragment extends ListFragment
     private void clickRoute(ObaRoute route) {
         final String routeId = route.getId();
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.CustomAlertDialog);
         builder.setTitle(UIUtils.getRouteDescription(route));
 
         builder.setItems(R.array.search_route_options, new DialogInterface.OnClickListener() {
@@ -216,7 +216,7 @@ public class SearchResultsFragment extends ListFragment
     }
 
     private void clickStop(final ObaStop stop) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.CustomAlertDialog);
         builder.setTitle(UIUtils.formatDisplayText(stop.getName()));
 
         builder.setItems(R.array.search_stop_options, new DialogInterface.OnClickListener() {

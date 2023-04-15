@@ -289,7 +289,7 @@ public class PreferencesActivity extends PreferenceActivity
             return;
         }
 
-        new AlertDialog.Builder(this)
+        new AlertDialog.Builder(this, R.style.CustomAlertDialog)
                 .setTitle(getString(R.string.preference_region_dialog_title))
                 .setMessage(getString(R.string.preference_region_dialog_message, obaRegion.getName()))
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {

@@ -345,7 +345,7 @@ public class TripPlanActivity extends AppCompatActivity implements TripRequest.C
         }
 
         final Bundle bundle = mBuilder.getBundle();
-        AlertDialog.Builder feedback = new AlertDialog.Builder(this)
+        AlertDialog.Builder feedback = new AlertDialog.Builder(this, R.style.CustomAlertDialog)
                 .setTitle(R.string.tripplanner_error_dialog_title)
                 .setMessage(msg);
         feedback.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {

@@ -491,7 +491,7 @@ public final class UIUtils {
      * @return an AlertDialog with the given title and message
      */
     public static AlertDialog buildAlertDialog(Context context, String title, String message) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.CustomAlertDialog);
         builder.setTitle(title);
         builder.setMessage(message);
         return builder.create();

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layoutStopActionPanels"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/pnlStopActionButtons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            tools:ignore="MissingConstraints">
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/btnRecentStopsRoutes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:alpha="0.85"
+                android:tooltipText="Recent Stop/Routes"
+                app:backgroundTint="@color/theme_muted"
+                app:fabSize="auto"
+                app:layout_constraintTop_toBottomOf="@+id/extended_fab"
+                app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay"
+                app:srcCompat="@drawable/ic_history" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/btnFilterRoute"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:alpha="0.85"
+                android:tooltipText="Filter Routes"
+                app:backgroundTint="@color/theme_muted"
+                app:fabSize="auto"
+                app:layout_constraintTop_toBottomOf="@+id/btnRecentStopsRoutes"
+                app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay"
+                app:srcCompat="@drawable/ic_content_filter_list" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/btnEditStop"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:alpha="0.85"
+                android:tooltipText="Edit Stop Name"
+                app:backgroundTint="@color/theme_muted"
+                app:fabSize="auto"
+                app:layout_constraintTop_toBottomOf="@+id/btnFilterRoute"
+                app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay"
+                app:srcCompat="@drawable/ic_edit_stop" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/btnAddStar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:alpha="0.85"
+                android:tooltipText="Add/Remove Star"
+                app:backgroundTint="@color/theme_muted"
+                app:fabSize="auto"
+                app:layout_constraintTop_toBottomOf="@+id/btnEditStop"
+                app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay"
+                app:srcCompat="@drawable/focus_star_on"
+                tools:ignore="MissingConstraints" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/btnStopDetails"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:alpha="0.85"
+                android:tooltipText="Show Stop Details"
+                app:backgroundTint="@color/theme_muted"
+                app:fabSize="auto"
+                app:layout_constraintTop_toBottomOf="@+id/btnAddStar"
+                app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay"
+                app:srcCompat="@drawable/ic_checkbox"
+                tools:ignore="MissingConstraints" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/btnReportStopProblem"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:alpha="0.85"
+                android:tooltipText="Report Stop Problem"
+                app:backgroundTint="@color/theme_muted"
+                app:fabSize="auto"
+                app:layout_constraintTop_toBottomOf="@+id/btnStopDetails"
+                app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay"
+                app:srcCompat="@drawable/ic_stop_problem"
+                tools:ignore="MissingConstraints" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/btnHideAlerts"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:alpha="0.85"
+                android:tooltipText="Hide Active Alerts"
+                app:backgroundTint="@color/theme_muted"
+                app:fabSize="auto"
+                app:layout_constraintTop_toBottomOf="@+id/btnReportStopProblem"
+                app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay"
+                app:srcCompat="@drawable/ic_remove_alerts"
+                tools:ignore="MissingConstraints" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btnShowHideStopActionButtons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            app:backgroundTint="@color/theme_primary"
+            app:fabSize="auto"
+            app:layout_constraintTop_toBottomOf="@+id/pnlStopActionButtons"
+            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay"
+            app:srcCompat="@drawable/ic_chevron_up"
+            tools:ignore="MissingConstraints"
+            android:visibility="gone"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>

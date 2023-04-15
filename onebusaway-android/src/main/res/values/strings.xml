@@ -282,7 +282,7 @@
         </item>
     </plurals>
     <string name="stop_info_load_more_arrivals">Load more arrivals</string>
-    <string name="stop_info_item_options_title">Bus options</string>
+    <string name="stop_info_item_options_title">Route options</string>
     <string name="stop_info_filter_title">Show only these routes</string>
     <string name="stop_info_filter_header">Showing %1$d of %2$d routes</string>
     <string name="stop_info_filter_showall">(show all)</string>

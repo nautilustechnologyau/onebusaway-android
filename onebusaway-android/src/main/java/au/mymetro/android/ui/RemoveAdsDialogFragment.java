@@ -70,7 +70,7 @@ public class RemoveAdsDialogFragment extends DialogFragment {
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        return new AlertDialog.Builder(getActivity())
+        return new AlertDialog.Builder(getActivity(), R.style.CustomAlertDialog)
                 .setTitle(R.string.remove_ads_title)
                 .setMessage(R.string.remove_ads_caption)
                 .setPositiveButton(R.string.remove_ads_dlg_btn_positive, new DialogInterface.OnClickListener() {

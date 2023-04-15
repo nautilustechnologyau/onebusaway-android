@@ -50,6 +50,19 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" />
                 <!-- Floating Action Button for My Location, overlaid on map -->
+
+                <include
+                    android:id="@+id/pnlStopActionButtonContainer"
+                    layout="@layout/stop_floating_action_buttons_panel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginStart="@dimen/fab_margin"
+                    android:layout_marginTop="@dimen/fab_margin"
+                    android:layout_marginEnd="@dimen/fab_margin"
+                    android:layout_marginBottom="@dimen/fab_margin"/>
+
                 <com.google.android.material.floatingactionbutton.FloatingActionButton
                     android:id="@+id/btnMyLocation"
                     android:layout_width="wrap_content"
@@ -61,6 +74,7 @@
                     android:layout_marginBottom="@dimen/fab_margin1"
                     android:contentDescription="@string/map_option_mylocation"
                     android:src="@drawable/ic_maps_my_location"
+                    app:backgroundTint="@color/theme_primary"
                     app:elevation="6dp"
                     app:pressedTranslationZ="12dp"
                     tools:ignore="ImageContrastCheck" />

@@ -96,7 +96,7 @@ public class SituationDialogFragment extends DialogFragment {
         Bundle args = getArguments();
         final String situationId = args.getString(ID);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.CustomAlertDialog)
                 .setView(R.layout.situation)
                 .setPositiveButton(R.string.hide, new DialogInterface.OnClickListener() {
                     @Override

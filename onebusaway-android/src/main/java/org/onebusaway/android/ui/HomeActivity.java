@@ -17,6 +17,8 @@
  */
 package org.onebusaway.android.ui;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 import static com.google.android.play.core.install.model.AppUpdateType.FLEXIBLE;
 import static com.google.android.play.core.install.model.AppUpdateType.IMMEDIATE;
 import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_ACTIVITY_FEED;
@@ -44,6 +46,8 @@ import static uk.co.markormesher.android_fab.FloatingActionButton.POSITION_END;
 import static uk.co.markormesher.android_fab.FloatingActionButton.POSITION_START;
 
 import android.Manifest;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -55,6 +59,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.location.Location;
 import android.net.Uri;
@@ -64,10 +69,13 @@ import android.os.Handler;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.ActionProvider;
+import android.view.ContextMenu;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -85,6 +93,7 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -132,6 +141,7 @@ import org.onebusaway.android.map.MapModeController;
 import org.onebusaway.android.map.MapParams;
 import org.onebusaway.android.map.googlemapsv2.BaseMapFragment;
 import org.onebusaway.android.map.googlemapsv2.LayerInfo;
+import org.onebusaway.android.provider.ObaContract;
 import org.onebusaway.android.region.ObaRegionsTask;
 import org.onebusaway.android.report.ui.ReportActivity;
 import org.onebusaway.android.travelbehavior.TravelBehaviorManager;
@@ -213,6 +223,7 @@ public class HomeActivity extends AppCompatActivity
     View mArrivalsListHeaderSubView;
 
     private FloatingActionButton mFabMyLocation;
+    private ViewGroup mStopActionButtonsView;
 
     uk.co.markormesher.android_fab.FloatingActionButton mLayersFab;
     uk.co.markormesher.android_fab.FloatingActionButton mZoomInFab;
@@ -239,6 +250,8 @@ public class HomeActivity extends AppCompatActivity
     private static final Random mRandom = new Random();
 
     Animation mMyLocationAnimation;
+
+    Animation mStopActionButtonsAnimation;
 
     // Ad views
     private InterstitialAd mAdMobInterstitialAd;
@@ -443,6 +456,8 @@ public class HomeActivity extends AppCompatActivity
         setupMapState(savedInstanceState);
 
         setupLayersSpeedDial();
+
+        setupStopActionButtons();
 
         setupMyLocationButton();
 
@@ -958,7 +973,7 @@ public class HomeActivity extends AppCompatActivity
 
     @SuppressWarnings("deprecation")
     private Dialog createHelpDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.CustomAlertDialog);
         builder.setTitle(R.string.main_help_title);
         // If a custom API URL is set, hide Contact Us, as we don't have a contact email to use
         int options;
@@ -1025,7 +1040,7 @@ public class HomeActivity extends AppCompatActivity
         TextView textView = (TextView) getLayoutInflater().inflate(R.layout.whats_new_dialog, null);
         textView.setText(R.string.main_help_whatsnew);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.CustomAlertDialog);
         builder.setTitle(R.string.main_help_whatsnew_title);
         builder.setIcon(R.mipmap.ic_launcher);
         builder.setView(textView);
@@ -1047,7 +1062,7 @@ public class HomeActivity extends AppCompatActivity
 
     @SuppressWarnings("deprecation")
     private Dialog createLegendDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.CustomAlertDialog);
         builder.setTitle(R.string.main_help_legend_title);
 
         Resources resources = getResources();
@@ -1177,6 +1192,8 @@ public class HomeActivity extends AppCompatActivity
             updateArrivalListFragment(stop.getId(), stop.getName(), stop.getStopCode(), stop,
                     routes);
 
+            showStopActionButtonsPanel();
+            // moveStopActionButtonsPanelLocation(mStopActionButtonsView, MY_LOC_DEFAULT_BOTTOM_MARGIN);
             ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
                     getString(R.string.analytics_label_button_press_map_icon),
                     null);
@@ -1185,6 +1202,8 @@ public class HomeActivity extends AppCompatActivity
             // and clear the currently focused stopId
             mFocusedStopId = null;
             moveFabsLocation();
+            // moveStopActionButtonsPanelLocation(mStopActionButtonsView, MY_LOC_DEFAULT_BOTTOM_MARGIN);
+            hideStopActionButtonsPanel();
             mSlidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
             if (mArrivalsListFragment != null) {
                 fm.beginTransaction().remove(mArrivalsListFragment).commit();
@@ -1332,6 +1351,8 @@ public class HomeActivity extends AppCompatActivity
         bundle.putBoolean(MapParams.ZOOM_INCLUDE_CLOSEST_VEHICLE, true);
         bundle.putString(MapParams.ROUTE_ID, arrivalInfo.getInfo().getRouteId());
         mMapFragment.setMapMode(MapParams.MODE_ROUTE, bundle);
+
+        collapseStopActionButtons();
 
         return true;
     }
@@ -1579,6 +1600,161 @@ public class HomeActivity extends AppCompatActivity
         } else {
             hideFloatingActionButtons();
             hideMapProgressBar();
+        }
+    }
+
+    private void setupStopActionButtons() {
+        // Initialize the My Location button
+        mStopActionButtonsView = findViewById(R.id.pnlStopActionButtonContainer);
+
+        if (mStopActionButtonsView != null) {
+            View parentView = mStopActionButtonsView.findViewById(R.id.layoutStopActionPanels);
+            FloatingActionButton btnShowHide = parentView.findViewById(R.id.btnShowHideStopActionButtons);
+            View pnlButton = mStopActionButtonsView.findViewById(R.id.pnlStopActionButtons);
+
+            if (mFocusedStopId != null) {
+                btnShowHide.setVisibility(VISIBLE);
+            }
+            pnlButton.setVisibility(GONE);
+
+            // listeners
+            btnShowHide.setOnClickListener(v -> {
+                if (pnlButton.getVisibility() == VISIBLE) {
+                    pnlButton.setAlpha(1.0f);
+                    pnlButton.setVisibility(VISIBLE);
+                    pnlButton.animate().cancel();
+                    pnlButton.animate().alpha(0.0f).setDuration(300).setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            pnlButton.setVisibility(GONE);
+                        }
+                    }).start();
+                    btnShowHide.animate().rotation(0).setDuration(300).start();
+                } else {
+                    btnShowHide.animate().rotation(180).setDuration(300).start();
+                    pnlButton.setAlpha(0.0f);
+                    pnlButton.setVisibility(VISIBLE);
+                    pnlButton.animate().cancel();
+                    pnlButton.animate().alpha(1.0f).setDuration(300).setListener(null).start();
+                }
+            });
+
+            FloatingActionButton btnRecentStops = pnlButton.findViewById(R.id.btnRecentStopsRoutes);
+            btnRecentStops.setOnClickListener(v -> {
+                ShowcaseViewUtils.doNotShowTutorial(ShowcaseViewUtils.TUTORIAL_RECENT_STOPS_ROUTES);
+                Intent myIntent = new Intent(this, MyRecentStopsAndRoutesActivity.class);
+                startActivity(myIntent);
+            });
+
+            FloatingActionButton btnFilterRoutes = pnlButton.findViewById(R.id.btnFilterRoute);
+            btnFilterRoutes.setOnClickListener(v -> {
+                if (mArrivalsListFragment != null) {
+                    mArrivalsListFragment.onOptionsItemSelected(R.id.filter);
+                }
+            });
+
+            FloatingActionButton btnEditStop = pnlButton.findViewById(R.id.btnEditStop);
+            btnEditStop.setOnClickListener(v -> {
+                if (mArrivalsListFragment != null) {
+                    mArrivalsListFragment.onOptionsItemSelected(R.id.edit_name);
+                }
+            });
+
+            FloatingActionButton btnAddStar = pnlButton.findViewById(R.id.btnAddStar);
+            btnAddStar.setOnClickListener(v -> {
+                if (mArrivalsListFragment != null) {
+                    mArrivalsListFragment.onOptionsItemSelected(R.id.toggle_favorite);
+                    if (mArrivalsListFragment.isFavoriteStop()) {
+                        Toast.makeText(this, "Star added to the stop", Toast.LENGTH_LONG).show();
+                        btnAddStar.setImageResource(R.drawable.focus_star_on);
+                    } else {
+                        Toast.makeText(this, "Star removed from the stop", Toast.LENGTH_LONG).show();
+                        btnAddStar.setImageResource(R.drawable.focus_star_off);
+                    }
+
+
+                }
+            });
+
+            FloatingActionButton btnStopDetails = pnlButton.findViewById(R.id.btnStopDetails);
+            btnStopDetails.setOnClickListener(v -> {
+                if (mArrivalsListFragment != null) {
+                    mArrivalsListFragment.onOptionsItemSelected(R.id.show_stop_details);
+                }
+            });
+
+            FloatingActionButton btnReportStopProblem = pnlButton.findViewById(R.id.btnReportStopProblem);
+            btnReportStopProblem.setOnClickListener(v -> {
+                if (mArrivalsListFragment != null) {
+                    mArrivalsListFragment.onOptionsItemSelected(R.id.report_stop_problem);
+                }
+            });
+
+            FloatingActionButton btnHideAlerts = pnlButton.findViewById(R.id.btnHideAlerts);
+            btnHideAlerts.setOnClickListener(v -> {
+                if (mArrivalsListFragment != null) {
+                    mArrivalsListFragment.onOptionsItemSelected(R.id.hide_alerts);
+                    Toast.makeText(this, "All active alerts will be hidden for this stop", Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+    }
+
+    private void showStopActionButtonsPanel() {
+        if (mStopActionButtonsView != null) {
+            View parentView = mStopActionButtonsView.findViewById(R.id.layoutStopActionPanels);
+            FloatingActionButton btnShowHide = parentView.findViewById(R.id.btnShowHideStopActionButtons);
+            View pnlButton = mStopActionButtonsView.findViewById(R.id.pnlStopActionButtons);
+            FloatingActionButton btnAddStar = pnlButton.findViewById(R.id.btnAddStar);
+            if (mArrivalsListFragment != null) {
+                boolean isFavourite = ObaContract.Stops.isFavorite(this, mFocusedStopId);
+                if (isFavourite) {
+                    btnAddStar.setImageResource(R.drawable.focus_star_on);
+                } else {
+                    btnAddStar.setImageResource(R.drawable.focus_star_off);
+                }
+            }
+
+            if (pnlButton.getVisibility() == VISIBLE) {
+                btnShowHide.callOnClick();
+            }
+
+            btnShowHide.setVisibility(VISIBLE);
+            btnShowHide.setAlpha(0.0f);
+            btnShowHide.animate().alpha(1.0f).setDuration(300).setListener(null).start();
+        }
+    }
+
+    private void hideStopActionButtonsPanel() {
+        if (mStopActionButtonsView != null) {
+            View parentView = mStopActionButtonsView.findViewById(R.id.layoutStopActionPanels);
+            FloatingActionButton btnShowHide = parentView.findViewById(R.id.btnShowHideStopActionButtons);
+            View pnlButton = mStopActionButtonsView.findViewById(R.id.pnlStopActionButtons);
+
+            if (pnlButton.getVisibility() == VISIBLE) {
+                btnShowHide.callOnClick();
+            }
+
+            btnShowHide.setVisibility(VISIBLE);
+            btnShowHide.setAlpha(1.0f);
+            btnShowHide.animate().alpha(0.0f).setDuration(300).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    btnShowHide.setVisibility(GONE);
+                }
+            }).start();
+        }
+    }
+
+    private void collapseStopActionButtons() {
+        if (mStopActionButtonsView != null) {
+            View parentView = mStopActionButtonsView.findViewById(R.id.layoutStopActionPanels);
+            FloatingActionButton btnShowHide = parentView.findViewById(R.id.btnShowHideStopActionButtons);
+            View pnlButton = mStopActionButtonsView.findViewById(R.id.pnlStopActionButtons);
+
+            if (pnlButton.getVisibility() == VISIBLE) {
+                btnShowHide.callOnClick();
+            }
         }
     }
 
@@ -2102,6 +2278,23 @@ public class HomeActivity extends AppCompatActivity
                 }
             }
         }
+
+        if (mStopActionButtonsView != null) {
+            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) mStopActionButtonsView
+                    .getLayoutParams();
+            if (leftHandMode) {
+                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                    layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_LEFT);
+                }
+            } else {
+                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                    layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+                }
+            }
+        }
+
         if (mLayersFab != null) {
             if (leftHandMode) {
                 mLayersFab.setButtonPosition(POSITION_BOTTOM | POSITION_START);
@@ -2134,6 +2327,7 @@ public class HomeActivity extends AppCompatActivity
      */
     synchronized private void moveFabsLocation() {
         moveFabLocation(mFabMyLocation, MY_LOC_DEFAULT_BOTTOM_MARGIN);
+        moveFabLocation(mStopActionButtonsView, MY_LOC_DEFAULT_BOTTOM_MARGIN);
         moveFabLocation(mLayersFab, LAYERS_FAB_DEFAULT_BOTTOM_MARGIN);
         moveFabLocation(mZoomInFab, MY_LOC_DEFAULT_BOTTOM_MARGIN + 88);
         moveFabLocation(mZoomOutFab, MY_LOC_DEFAULT_BOTTOM_MARGIN + 208);
@@ -2206,8 +2400,75 @@ public class HomeActivity extends AppCompatActivity
         }, 100);
     }
 
+    private void moveStopActionButtonsPanelLocation(final View fab, final int initialMargin) {
+        if (fab == null) {
+            return;
+        }
+        if (mStopActionButtonsAnimation != null &&
+                (mStopActionButtonsAnimation.hasStarted() && !mStopActionButtonsAnimation.hasEnded())) {
+            // We're already animating - do nothing
+
+            //return;
+        }
+
+        if (mStopActionButtonsAnimation != null) {
+            mStopActionButtonsAnimation.reset();
+        }
+
+        // Post this to a handler to allow the header to settle before animating the button
+        final Handler h = new Handler();
+        h.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                final ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) fab
+                        .getLayoutParams();
+
+                int tempMargin = initialMargin;
+
+                if (mSlidingPanel.getPanelState() == SlidingUpPanelLayout.PanelState.COLLAPSED) {
+                    tempMargin += mSlidingPanel.getPanelHeight();
+                    if (p.bottomMargin == tempMargin) {
+                        // Button is already in the right position, do nothing
+                        return;
+                    }
+                } else {
+                    if (mSlidingPanel.getPanelState() == SlidingUpPanelLayout.PanelState.HIDDEN) {
+                        if (p.bottomMargin == tempMargin) {
+                            // Button is already in the right position, do nothing
+                            return;
+                        }
+                    }
+                }
+
+                final int goalMargin = tempMargin;
+                final int currentMargin = p.bottomMargin;
+
+                mStopActionButtonsAnimation = new Animation() {
+                    @Override
+                    protected void applyTransformation(float interpolatedTime, Transformation t) {
+                        int bottom;
+                        if (goalMargin > currentMargin) {
+                            bottom = currentMargin + (int) (Math.abs(currentMargin - goalMargin)
+                                    * interpolatedTime);
+                        } else {
+                            bottom = currentMargin - (int) (Math.abs(currentMargin - goalMargin)
+                                    * interpolatedTime);
+                        }
+                        UIUtils.setMargins(fab,
+                                p.leftMargin,
+                                p.topMargin,
+                                p.rightMargin,
+                                bottom);
+                    }
+                };
+                mStopActionButtonsAnimation.setDuration(MY_LOC_BTN_ANIM_DURATION);
+                fab.startAnimation(mStopActionButtonsAnimation);
+            }
+        }, 100);
+    }
+
     private void showFloatingActionButtons() {
-        if (mFabMyLocation == null && mLayersFab == null) {
+        if (mFabMyLocation == null && mLayersFab == null && mStopActionButtonsView == null) {
             return;
         }
         if (mFabMyLocation != null && mFabMyLocation.getVisibility() != View.VISIBLE) {
@@ -2218,10 +2479,14 @@ public class HomeActivity extends AppCompatActivity
                 mLayersFab.setVisibility(View.VISIBLE);
             }
         }
+
+        if (mStopActionButtonsView != null && mStopActionButtonsView.getVisibility() != View.VISIBLE) {
+            mStopActionButtonsView.setVisibility(View.VISIBLE);
+        }
     }
 
     private void hideFloatingActionButtons() {
-        if (mFabMyLocation == null && mLayersFab == null) {
+        if (mFabMyLocation == null && mLayersFab == null && mStopActionButtonsView == null) {
             return;
         }
         if (mFabMyLocation != null && mFabMyLocation.getVisibility() != View.GONE) {
@@ -2229,6 +2494,9 @@ public class HomeActivity extends AppCompatActivity
         }
         if (mLayersFab != null && mLayersFab.getVisibility() != View.GONE) {
             mLayersFab.setVisibility(View.GONE);
+        }
+        if (mStopActionButtonsView != null && mStopActionButtonsView.getVisibility() != View.GONE) {
+            mStopActionButtonsView.setVisibility(View.GONE);
         }
     }
 
@@ -2358,15 +2626,19 @@ public class HomeActivity extends AppCompatActivity
                 switch (newState) {
                     case EXPANDED:
                         onPanelExpanded(panel);
+                        // showStopActionButtonsPanel(VISIBLE);
                         break;
                     case COLLAPSED:
                         onPanelCollapsed(panel);
+                        // showStopActionButtonsPanel(GONE);
                         break;
                     case ANCHORED:
                         onPanelAnchored(panel);
+                        // showStopActionButtonsPanel(VISIBLE);
                         break;
                     case HIDDEN:
                         onPanelHidden(panel);
+                        // showStopActionButtonsPanel(GONE);
                         break;
                 }
             }
@@ -2581,7 +2853,7 @@ public class HomeActivity extends AppCompatActivity
     }
 
     private void showIgnoreBatteryOptimizationDialog() {
-        new android.app.AlertDialog.Builder(this)
+        new android.app.AlertDialog.Builder(this, R.style.CustomAlertDialog)
                 .setMessage(R.string.application_ignoring_battery_opt_message)
                 .setTitle(R.string.application_ignoring_battery_opt_title)
                 .setIcon(R.drawable.ic_alert_warning)

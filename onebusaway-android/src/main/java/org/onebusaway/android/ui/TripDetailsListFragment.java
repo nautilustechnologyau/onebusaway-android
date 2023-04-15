@@ -529,7 +529,7 @@ public class TripDetailsListFragment extends ListFragment {
         public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
             if (position > 1) {
                 // Build AlertDialog
-                AlertDialog.Builder bldr = new AlertDialog.Builder(getActivity());
+                AlertDialog.Builder bldr = new AlertDialog.Builder(getActivity(), R.style.CustomAlertDialog);
                 bldr.setMessage(R.string.destination_reminder_dialog_msg).setTitle(R.string.destination_reminder_dialog_title);
 
                 // Confirmation button
@@ -680,7 +680,7 @@ public class TripDetailsListFragment extends ListFragment {
             Drawable icon = getResources().getDrawable(android.R.drawable.ic_dialog_map);
             DrawableCompat.setTint(icon, getResources().getColor(R.color.theme_primary));
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.CustomAlertDialog)
                     .setTitle(R.string.main_changelocationmode_title)
                     .setIcon(icon)
                     .setCancelable(false)
@@ -714,7 +714,7 @@ public class TripDetailsListFragment extends ListFragment {
         Drawable icon = getResources().getDrawable(android.R.drawable.ic_dialog_alert);
         DrawableCompat.setTint(icon, getResources().getColor(R.color.theme_primary));
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.CustomAlertDialog)
                 .setTitle(R.string.destination_reminder_beta_title)
                 .setIcon(icon)
                 .setCancelable(false)

@@ -43,7 +43,7 @@ public class RegionValidateDialog extends BaseReportDialogFragment {
         String regionName = Application.get().getCurrentRegion().getName();
         message.append(getResources().getString(R.string.region_dialog_message, regionName));
 
-        AlertDialog dialog =  new AlertDialog.Builder(getActivity())
+        AlertDialog dialog =  new AlertDialog.Builder(getActivity(), R.style.CustomAlertDialog)
                 .setMessage(message.toString())
                 .setPositiveButton(R.string.rt_yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {

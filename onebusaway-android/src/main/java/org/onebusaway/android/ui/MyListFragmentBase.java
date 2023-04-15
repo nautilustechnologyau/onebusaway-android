@@ -131,7 +131,7 @@ abstract class MyListFragmentBase extends ListFragment
 
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
-            return new AlertDialog.Builder(getActivity())
+            return new AlertDialog.Builder(getActivity(), R.style.CustomAlertDialog)
                     .setMessage(R.string.my_option_clear_confirm)
                     .setTitle(R.string.my_option_clear_confirm_title)
                     .setIcon(R.drawable.ic_alert)

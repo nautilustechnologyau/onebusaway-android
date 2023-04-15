@@ -176,7 +176,7 @@ public class RouteFavoriteDialogFragment extends DialogFragment {
         values.put(ObaContract.Routes.SHORTNAME, routeShortName);
         values.put(ObaContract.Routes.LONGNAME, routeLongName);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.CustomAlertDialog);
 
         // Default to the first element in the list, which is "This stop"
         mSelectedItem = SELECTION_THIS_STOP;

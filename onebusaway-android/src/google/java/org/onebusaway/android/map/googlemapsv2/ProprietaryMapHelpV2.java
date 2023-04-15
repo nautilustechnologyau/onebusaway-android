@@ -65,7 +65,7 @@ public class ProprietaryMapHelpV2 {
      * Prompts the user to install Android Maps V2 from Google Play
      */
     public static void promptUserInstallMaps(final Context context) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.CustomAlertDialog);
         builder.setMessage(context.getString(R.string.please_install_google_maps_dialog_title));
         builder.setCancelable(false);
         builder.setPositiveButton(context.getString(R.string.install_google_maps_positive_button),
@@ -80,7 +80,7 @@ public class ProprietaryMapHelpV2 {
                             context.startActivity(intent);
                         } else {
                             // User doesn't have Play Store installed
-                            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                            AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.CustomAlertDialog);
                             builder.setMessage(context.getString(
                                     R.string.no_play_store));
                             builder.setCancelable(true);

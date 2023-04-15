@@ -150,7 +150,7 @@ public class MyStarredStopsFragment extends MyStopListFragmentBase {
     }
 
     private void showSortByDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.CustomAlertDialog);
         builder.setTitle(R.string.menu_option_sort_by);
 
         final int currentStopOrder = PreferenceUtils.getStopSortOrderFromPreferences();

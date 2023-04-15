@@ -349,7 +349,7 @@ public final class MyRemindersFragment extends ListFragment
     }
 
     private void showSortByDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.CustomAlertDialog);
         builder.setTitle(R.string.menu_option_sort_by);
         mCurrentSortOrder = PreferenceUtils.getReminderSortOrderFromPreferences();
         builder.setSingleChoiceItems(R.array.sort_reminders, mCurrentSortOrder,

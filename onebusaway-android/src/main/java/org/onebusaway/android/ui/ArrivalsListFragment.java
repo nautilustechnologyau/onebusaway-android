@@ -617,45 +617,48 @@ public class ArrivalsListFragment extends ListFragment
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        final int id = item.getItemId();
-        if (id == R.id.show_on_map) {
+        return onOptionsItemSelected(item.getItemId());
+    }
+
+    public boolean onOptionsItemSelected(int menuItemId) {
+        if (menuItemId == R.id.show_on_map) {
             if (mStop != null) {
                 HomeActivity.start(getActivity(), mStop);
             }
             return true;
-        } else if (id == R.id.refresh) {
+        } else if (menuItemId == R.id.refresh) {
             refresh();
             return true;
-        } else if (id == R.id.sort_arrivals) {
+        } else if (menuItemId == R.id.sort_arrivals) {
             ShowcaseViewUtils.doNotShowTutorial(ShowcaseViewUtils.TUTORIAL_ARRIVAL_SORT);
             showSortByDialog();
-        } else if (id == R.id.filter) {
+        } else if (menuItemId == R.id.filter) {
             if (mStop != null) {
                 showRoutesFilterDialog();
             }
-        } else if (id == R.id.show_header_arrivals) {
+        } else if (menuItemId == R.id.show_header_arrivals) {
             doShowHideHeaderArrivals();
-        } else if (id == R.id.edit_name) {
+        } else if (menuItemId == R.id.edit_name) {
             if (mHeader != null) {
                 mHeader.beginNameEdit(null);
             }
-        } else if (id == R.id.toggle_favorite) {
+        } else if (menuItemId == R.id.toggle_favorite) {
             setFavoriteStop(!mFavorite);
             if (mHeader != null) {
                 mHeader.refresh();
             }
-        } else if (id == R.id.show_stop_details) {
+        } else if (menuItemId == R.id.show_stop_details) {
             showStopDetailsDialog();
-        } else if (id == R.id.report_stop_problem) {
+        } else if (menuItemId == R.id.report_stop_problem) {
             if (mStop != null) {
                 Intent intent = makeIntent(getActivity(), mStop.getId(), mStop.getName(),
                         mStop.getStopCode(), mStop.getLatitude(), mStop.getLongitude());
                 InfrastructureIssueActivity.startWithService(getActivity(), intent,
                         getString(R.string.ri_selected_service_stop));
             }
-        } else if (id == R.id.night_light) {
+        } else if (menuItemId == R.id.night_light) {
             NightLightActivity.start(getActivity());
-        } else if (id == R.id.hide_alerts) {
+        } else if (menuItemId == R.id.hide_alerts) {
             if (mSituationAlerts == null || mSituationAlerts.isEmpty()) {
                 return false;
             }
@@ -708,7 +711,7 @@ public class ArrivalsListFragment extends ListFragment
             return;
         }
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.CustomAlertDialog);
         builder.setTitle(R.string.stop_info_item_options_title);
 
         final String routeId = arrivalInfo.getInfo().getRouteId();
@@ -1175,7 +1178,7 @@ public class ArrivalsListFragment extends ListFragment
             mListener.onSortBySelected();
         }
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.CustomAlertDialog);
         builder.setTitle(R.string.menu_option_sort_by);
 
         int currentArrivalInfoStyle = BuildFlavorUtils.getArrivalInfoStyleFromPreferences();
@@ -1351,7 +1354,7 @@ public class ArrivalsListFragment extends ListFragment
                 mChecks = args.getBooleanArray(CHECKS);
             }
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.CustomAlertDialog);
             return builder.setTitle(R.string.stop_info_filter_title)
                     .setMultiChoiceItems(items, mChecks, this)
                     .setPositiveButton(R.string.stop_info_save, this)
@@ -1527,7 +1530,7 @@ public class ArrivalsListFragment extends ListFragment
             ObaContract.Stops.USER_NAME
     };
 
-    private void setUserInfo() {
+    public void setUserInfo() {
         ContentResolver cr = getActivity().getContentResolver();
         Cursor c = cr.query(mStopUri, USER_PROJECTION, null, null, null);
         if (c != null) {

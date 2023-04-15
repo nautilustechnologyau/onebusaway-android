@@ -72,7 +72,7 @@ public class RateItDialogFragment extends DialogFragment {
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        return new AlertDialog.Builder(getActivity())
+        return new AlertDialog.Builder(getActivity(), R.style.CustomAlertDialog)
                 .setTitle(R.string.rate_title)
                 .setMessage(R.string.rate_message)
                 .setPositiveButton(R.string.rate_positive, new DialogInterface.OnClickListener() {

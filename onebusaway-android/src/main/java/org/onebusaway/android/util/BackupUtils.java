@@ -54,7 +54,7 @@ public class BackupUtils {
         //
         // Because this is a destructive operation, we should warn the user.
         //
-        AlertDialog dialog = new AlertDialog.Builder(activityContext)
+        AlertDialog dialog = new AlertDialog.Builder(activityContext, R.style.CustomAlertDialog)
                 .setMessage(R.string.preferences_db_restore_warning)
                 .setPositiveButton(android.R.string.ok, (dialog12, which) -> {
                     dialog12.dismiss();

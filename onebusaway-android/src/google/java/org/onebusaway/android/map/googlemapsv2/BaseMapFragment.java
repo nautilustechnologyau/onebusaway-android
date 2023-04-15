@@ -1319,7 +1319,7 @@ public class BaseMapFragment extends SupportMapFragment
             Drawable icon = getResources().getDrawable(android.R.drawable.ic_dialog_map);
             DrawableCompat.setTint(icon, getResources().getColor(R.color.theme_primary));
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.CustomAlertDialog)
                     .setTitle(R.string.main_outofrange_title)
                     .setIcon(icon)
                     .setCancelable(false)
@@ -1357,7 +1357,7 @@ public class BaseMapFragment extends SupportMapFragment
             Drawable icon = getResources().getDrawable(android.R.drawable.ic_dialog_map);
             DrawableCompat.setTint(icon, getResources().getColor(R.color.theme_primary));
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.CustomAlertDialog)
                     .setTitle(R.string.main_nolocation_title)
                     .setIcon(icon)
                     .setCancelable(false)
@@ -1394,7 +1394,7 @@ public class BaseMapFragment extends SupportMapFragment
         if (locationPermissionDialog != null && locationPermissionDialog.isShowing()) {
             return;
         }
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.CustomAlertDialog)
                 .setTitle(R.string.location_permissions_title)
                 .setMessage(R.string.location_permissions_message)
                 .setCancelable(false)

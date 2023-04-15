@@ -99,7 +99,7 @@ class FirebaseDataPusher {
     }
 
     private fun showAlertDialog(context: Context, @StringRes title: Int, @StringRes summary: Int) {
-        val dialog = AlertDialog.Builder(context)
+        val dialog = AlertDialog.Builder(context, R.style.CustomAlertDialog)
         dialog.apply {
             setTitle(title)
             setMessage(
