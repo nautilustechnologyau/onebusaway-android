@@ -1155,7 +1155,7 @@ public class HomeActivity extends AppCompatActivity
             // Updates will remove the alarms. This should put them back.
             // (Unfortunately I can't find a way to reschedule them without
             // having the app run again).
-            TripService.scheduleAll(this, false);
+            TripService.scheduleAll(this, true);
             PreferenceUtils.saveInt(WHATS_NEW_VER, appInfo.versionCode);
             return true;
         }

@@ -433,7 +433,9 @@ public class BaseMapFragment extends SupportMapFragment
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 mUserDeniedPermission = false;
                 // Show the location on the map
-                mMap.setMyLocationEnabled(true);
+                if (mMap != null) {
+                    mMap.setMyLocationEnabled(true);
+                }
                 // Make sure location helper is registered
                 mLocationHelper.registerListener(this);
                 result = PackageManager.PERMISSION_GRANTED;

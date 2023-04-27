@@ -148,8 +148,14 @@ public final class UIUtils {
     public static void setupSearch(Activity activity, Menu menu) {
         SearchManager searchManager =
                 (SearchManager) activity.getSystemService(Context.SEARCH_SERVICE);
+        if (searchManager == null) {
+            return;
+        }
         final MenuItem searchMenu = menu.findItem(R.id.action_search);
         SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchMenu);
+        if (searchView == null) {
+            return;
+        }
         searchView.setSearchableInfo(
                 searchManager.getSearchableInfo(activity.getComponentName()));
         // Close the keyboard and SearchView at same time when the back button is pressed
