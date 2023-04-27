@@ -32,12 +32,18 @@ import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.libraries.places.compat.Place;
-import com.google.android.libraries.places.compat.ui.PlaceAutocomplete;
+import com.google.android.libraries.places.api.model.LocationBias;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.model.RectangularBounds;
+import com.google.android.libraries.places.widget.Autocomplete;
+import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 
 import org.onebusaway.android.R;
 import org.onebusaway.android.directions.util.CustomAddress;
 import org.onebusaway.android.io.elements.ObaRegion;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Helper methods specific to Google Maps API v2
@@ -105,14 +111,14 @@ public class ProprietaryMapHelpV2 {
      * Here because of LatLng, Place which are specific to Google Places API.
      */
     public static CustomAddress getCustomAddressFromPlacesIntent(Context context, Intent intent) {
-        Place place = PlaceAutocomplete.getPlace(context, intent);
+        Place place = Autocomplete.getPlaceFromIntent(intent);
 
         CustomAddress address = new CustomAddress();
 
-        String placeName = place.getName().toString();
+        String placeName = place.getName();
         address.setAddressLine(0, placeName);
 
-        String addressString = place.getAddress().toString();
+        String addressString = place.getAddress();
         String[] tokens = addressString.split(PLACES_ADDRESS_SEPARATOR);
 
         // Posible that first line of address is place name.
@@ -152,20 +158,22 @@ public class ProprietaryMapHelpV2 {
         @Override
         public void onClick(View v) {
             Intent intent = null;
-            PlaceAutocomplete.IntentBuilder builder =
-                    new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY);
+            List<Place.Field> fields = Arrays.asList(Place.Field.ID,Place.Field.NAME,Place.Field.LAT_LNG);
+            Autocomplete.IntentBuilder builder =
+                    new Autocomplete.IntentBuilder(AutocompleteActivityMode.OVERLAY, fields);
 
             if (mRegion != null) {
                 // Bias search results to region bounds
                 LatLngBounds bounds = MapHelpV2.getRegionBounds(mRegion);
-                builder.setBoundsBias(bounds);
+
+                LocationBias locationBias = RectangularBounds.newInstance(bounds.southwest, bounds.northeast);
+
+                builder.setLocationBias(locationBias);
             }
 
             try {
                 intent = builder.build(mFragment.getActivity());
-            } catch (GooglePlayServicesRepairableException e) {
-                e.printStackTrace();
-            } catch (GooglePlayServicesNotAvailableException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 

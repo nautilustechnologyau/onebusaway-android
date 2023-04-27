@@ -45,6 +45,7 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.tasks.Task;
+import com.google.android.libraries.places.api.Places;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import org.onebusaway.android.BuildConfig;
@@ -63,6 +64,7 @@ import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -119,6 +121,9 @@ public class Application extends MultiDexApplication {
         // initialise mobile ad as early as possible
         if (BuildConfig.ENABLE_ADMOB) {
             initMobileAds();
+        }
+        if (!Places.isInitialized()) {
+            Places.initialize(getApplicationContext(), getString(R.string.apiv2_key), Locale.getDefault());
         }
 
         initOba();

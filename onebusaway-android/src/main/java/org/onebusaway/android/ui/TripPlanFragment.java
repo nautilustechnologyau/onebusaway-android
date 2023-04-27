@@ -15,6 +15,7 @@
  */
 package org.onebusaway.android.ui;
 
+import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
@@ -126,6 +127,7 @@ public class TripPlanFragment extends Fragment {
     private FirebaseAnalytics mFirebaseAnalytics;
 
     // Create view, initialize state
+    @SuppressLint("MissingPermission")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
