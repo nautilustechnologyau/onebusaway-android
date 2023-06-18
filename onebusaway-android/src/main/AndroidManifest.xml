@@ -385,10 +385,6 @@
                 android:name="com.google.android.geo.API_KEY"
                 android:value="@string/apiv2_key"/>
 
-        <meta-data
-            android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" />
-
         <activity
                 android:name="org.onebusaway.android.ui.AboutActivity"
                 android:label="@string/title_activity_about"
