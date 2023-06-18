@@ -24,6 +24,7 @@ import org.onebusaway.android.directions.realtime.RealtimeService;
 import org.onebusaway.android.directions.util.ConversionUtils;
 import org.onebusaway.android.directions.util.DirectionExpandableListAdapter;
 import org.onebusaway.android.directions.util.DirectionsGenerator;
+import org.onebusaway.android.directions.util.FareUtils;
 import org.onebusaway.android.directions.util.OTPConstants;
 import org.onebusaway.android.map.MapParams;
 import org.onebusaway.android.map.googlemapsv2.BaseMapFragment;
@@ -37,6 +38,7 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -101,9 +103,9 @@ public class TripResultsFragment extends Fragment {
         mDirectionsListView = (ExpandableListView) view.findViewById(R.id.directionsListView);
         mMapFragmentFrame = view.findViewById(R.id.mapFragment);
 
-        mOptions[0] = new RoutingOptionPicker(view, R.id.option1LinearLayout, R.id.option1Title, R.id.option1Duration, R.id.option1Interval);
-        mOptions[1] = new RoutingOptionPicker(view, R.id.option2LinearLayout, R.id.option2Title, R.id.option2Duration, R.id.option2Interval);
-        mOptions[2] = new RoutingOptionPicker(view, R.id.option3LinearLayout, R.id.option3Title, R.id.option3Duration, R.id.option3Interval);
+        mOptions[0] = new RoutingOptionPicker(view, R.id.option1LinearLayout, R.id.option1Title, R.id.option1Duration, R.id.option1Interval, R.id.option1Fare);
+        mOptions[1] = new RoutingOptionPicker(view, R.id.option2LinearLayout, R.id.option2Title, R.id.option2Duration, R.id.option2Interval, R.id.option2Fare);
+        mOptions[2] = new RoutingOptionPicker(view, R.id.option3LinearLayout, R.id.option3Title, R.id.option3Duration, R.id.option3Interval, R.id.option3Fare);
 
         int rank = getArguments().getInt(OTPConstants.SELECTED_ITINERARY); // defaults to 0
         mShowingMap = getArguments().getBoolean(OTPConstants.SHOW_MAP);
@@ -273,15 +275,17 @@ public class TripResultsFragment extends Fragment {
         TextView titleView;
         TextView durationView;
         TextView intervalView;
+        TextView fareView;
 
         Itinerary itinerary;
         int rank;
 
-        RoutingOptionPicker(View view, int linearLayout, int titleView, int durationView, int intervalView) {
+        RoutingOptionPicker(View view, int linearLayout, int titleView, int durationView, int intervalView, int fareView) {
             this.linearLayout = (LinearLayout) view.findViewById(linearLayout);
             this.titleView = (TextView) view.findViewById(titleView);
             this.durationView = (TextView) view.findViewById(durationView);
             this.intervalView = (TextView) view.findViewById(intervalView);
+            this.fareView = (TextView) view.findViewById(fareView);
 
             this.linearLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -318,10 +322,17 @@ public class TripResultsFragment extends Fragment {
             String title = new DirectionsGenerator(itinerary.legs, getContext()).getItineraryTitle();
             String duration = ConversionUtils.getFormattedDurationTextNoSeconds(itinerary.duration, false, getContext());
             String interval = formatTimeString(itinerary.startTime, itinerary.duration * 1000);
+            String fare = FareUtils.getFare(itinerary.fare);
 
             titleView.setText(title);
             durationView.setText(duration);
             intervalView.setText(interval);
+            if (TextUtils.isEmpty(fare)) {
+                fareView.setVisibility(View.GONE);
+            } else {
+                fareView.setVisibility(View.VISIBLE);
+                fareView.setText(fare);
+            }
         }
 
         void updateInfo() {
