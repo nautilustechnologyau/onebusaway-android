@@ -1423,7 +1423,12 @@ class ArrivalsListHeader {
         if (mController == null) {
             return;
         }
+
         AlertList alerts = mController.getAlertList();
+        if (alerts == null) {
+            return;
+        }
+
         mIsAlertHidden = alerts.isAlertHidden();
 
         if (mShowHiddenAlert != null) {

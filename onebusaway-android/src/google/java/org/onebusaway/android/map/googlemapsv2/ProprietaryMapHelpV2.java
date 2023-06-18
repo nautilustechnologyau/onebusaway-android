@@ -23,6 +23,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.text.TextUtils;
 import android.view.View;
 
 import androidx.fragment.app.Fragment;
@@ -119,14 +120,16 @@ public class ProprietaryMapHelpV2 {
         address.setAddressLine(0, placeName);
 
         String addressString = place.getAddress();
-        String[] tokens = addressString.split(PLACES_ADDRESS_SEPARATOR);
+        if (!TextUtils.isEmpty(addressString)) {
+            String[] tokens = addressString.split(PLACES_ADDRESS_SEPARATOR);
 
-        // Posible that first line of address is place name.
-        int start = placeName.equals(tokens[0]) ? 1 : 0;
+            // Possible that first line of address is place name.
+            int start = placeName.equals(tokens[0]) ? 1 : 0;
 
-        int j = 1; // address line index
-        for (int i = start; i < tokens.length; i++) {
-            address.setAddressLine(j++, tokens[i]);
+            int j = 1; // address line index
+            for (int i = start; i < tokens.length; i++) {
+                address.setAddressLine(j++, tokens[i]);
+            }
         }
 
         LatLng loc = place.getLatLng();

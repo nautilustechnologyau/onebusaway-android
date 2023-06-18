@@ -280,7 +280,17 @@ public class TripService extends Service {
         intent.putExtra(TripService.START_FOREGROUND, startForeground);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && startForeground) {
-            context.startForegroundService(intent);
+            try {
+                context.startForegroundService(intent);
+            } catch (Exception ex) {
+                Log.e(TAG, ex.getMessage());
+
+                try {
+                    context.startService(intent);
+                } catch (Exception ex1) {
+                    Log.e(TAG, ex1.getMessage());
+                }
+            }
         } else {
             context.startService(intent);
         }

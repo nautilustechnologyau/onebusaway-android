@@ -1245,6 +1245,11 @@ public class ArrivalsListFragment extends ListFragment
     }
 
     private void showRoutesFilterDialog() {
+        ArrivalsListLoader loader = getArrivalsLoader();
+        if (loader == null) {
+            return;
+        }
+
         ObaArrivalInfoResponse response =
                 getArrivalsLoader().getLastGoodResponse();
         final List<ObaRoute> routes = response.getRoutes(mStop.getRouteIds());

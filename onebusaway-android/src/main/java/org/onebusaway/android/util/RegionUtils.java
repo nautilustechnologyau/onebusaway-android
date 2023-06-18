@@ -587,6 +587,9 @@ public class RegionUtils {
 
     private synchronized static ArrayList<ObaRegion> getRegionsFromServer(Context context) {
         ObaRegionsResponse response = ObaRegionsRequest.newRequest(context).call();
+        if (response == null) {
+            return null;
+        }
         return new ArrayList<ObaRegion>(Arrays.asList(response.getRegions()));
     }
 

@@ -222,7 +222,9 @@ public class RouteFavoriteDialogFragment extends DialogFragment {
                             @Override
                             public void onClick(DialogInterface dialog, int id) {
                                 // Callback with false value, because nothing changed
-                                mCallback.onSelectionComplete(false);
+                                if (mCallback != null) {
+                                    mCallback.onSelectionComplete(false);
+                                }
                             }
                         });
         return builder.create();

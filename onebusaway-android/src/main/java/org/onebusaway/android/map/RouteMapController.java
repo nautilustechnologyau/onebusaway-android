@@ -110,7 +110,7 @@ public class RouteMapController implements MapModeController {
         mZoomToRoute = args.getBoolean(MapParams.ZOOM_TO_ROUTE, false);
         mZoomIncludeClosestVehicle = args
                 .getBoolean(MapParams.ZOOM_INCLUDE_CLOSEST_VEHICLE, false);
-        if (!routeId.equals(mRouteId)) {
+        if (routeId != null && !routeId.equals(mRouteId)) {
             if (mRouteId != null) {
                 clearCurrentState();
             }
