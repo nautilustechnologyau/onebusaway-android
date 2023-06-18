@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<defaults>
+  <entry>
+    <key>enable_audience_network_interstitial_ads</key>
+    <value>true</value>
+  </entry>
+  <entry>
+    <key>enable_admob_interstitial_ads</key>
+    <value>true</value>
+  </entry>
+  <entry>
+    <key>enable_admob_banner_ads</key>
+    <value>true</value>
+  </entry>
+  <entry>
+    <key>enable_audience_network_banner_ads</key>
+    <value>true</value>
+  </entry>
+</defaults>

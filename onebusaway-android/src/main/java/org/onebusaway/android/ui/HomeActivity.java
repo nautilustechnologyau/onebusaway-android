@@ -116,6 +116,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -127,6 +128,11 @@ import com.google.android.play.core.install.model.AppUpdateType;
 import com.google.android.play.core.install.model.InstallStatus;
 import com.google.android.play.core.install.model.UpdateAvailability;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.remoteconfig.ConfigUpdate;
+import com.google.firebase.remoteconfig.ConfigUpdateListener;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigException;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import org.onebusaway.android.BuildConfig;
@@ -245,6 +251,14 @@ public class HomeActivity extends AppCompatActivity
 
     private static boolean mAdsFreeVersion = false;
 
+    private static boolean mAudienceNetworkInterstitialAdsEnabled = true;
+
+    private static boolean mAudienceNetworkBannerAdsEnabled = true;
+
+    private static boolean mAdmobInterstitialAdsEnabled = true;
+
+    private static boolean mAdmobBannerAdsEnabled = true;
+
     private static int mMarkerClickedCount = 0;
 
     private static final Random mRandom = new Random();
@@ -330,6 +344,8 @@ public class HomeActivity extends AppCompatActivity
     boolean mInitialStartup = true;
 
     private FirebaseAnalytics mFirebaseAnalytics;
+
+    private FirebaseRemoteConfig mFirebaseRemoteConfig;
 
     private ActivityResultLauncher<String> travelBehaviorPermissionsLauncher;
 
@@ -442,6 +458,9 @@ public class HomeActivity extends AppCompatActivity
         }
 
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+
+        // firebase remote config
+        setupRemoteConfig();
 
         setContentView(R.layout.main);
 
@@ -1944,6 +1963,10 @@ public class HomeActivity extends AppCompatActivity
     }
 
     void loadAdmobBannerAds() {
+        if (!mAdmobBannerAdsEnabled) {
+            return;
+        }
+
         LinearLayout bannerAdLayoutView = findViewById(R.id.adViewBottom);
         if (bannerAdLayoutView == null) {
             return;
@@ -1988,6 +2011,10 @@ public class HomeActivity extends AppCompatActivity
     }
 
     void loadAudienceNetworkBannerAds() {
+        if (!mAudienceNetworkBannerAdsEnabled) {
+            return;
+        }
+
         LinearLayout bannerAdLayoutView = findViewById(R.id.adViewBottom);
         if (bannerAdLayoutView == null) {
             return;
@@ -2084,6 +2111,9 @@ public class HomeActivity extends AppCompatActivity
     }
 
     private void loadAdMobInterstitialAd() {
+        if (!mAdmobInterstitialAdsEnabled) {
+            return;
+        }
         // an add is showing, don't show again
         if (mInterstitialAdShowing) {
             return;
@@ -2140,6 +2170,10 @@ public class HomeActivity extends AppCompatActivity
     }
 
     void loadAudienceNetworkInterstitialAds() {
+        if (!mAudienceNetworkInterstitialAdsEnabled) {
+            return;
+        }
+
         // an add is showing, don't show again
         if (mInterstitialAdShowing) {
             return;
@@ -2540,6 +2574,55 @@ public class HomeActivity extends AppCompatActivity
                     mNavigationDrawerFragment.selectItem(1);
                 }*/
             }
+        }
+    }
+
+    private void setupRemoteConfig() {
+        mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
+                .setMinimumFetchIntervalInSeconds(3600)
+                .build();
+        mFirebaseRemoteConfig.setConfigSettingsAsync(configSettings);
+        mFirebaseRemoteConfig.setDefaultsAsync(R.xml.remote_config_defaults);
+        mFirebaseRemoteConfig.fetchAndActivate()
+                .addOnCompleteListener(this, new OnCompleteListener<Boolean>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Boolean> task) {
+                        Log.d(TAG, "Remote config fetched");
+                        if (task.isSuccessful()) {
+                            updateConfigFromRemoteConfig();
+                        }
+                    }
+                });
+
+        mFirebaseRemoteConfig.addOnConfigUpdateListener(new ConfigUpdateListener() {
+            @Override
+            public void onUpdate(@NonNull ConfigUpdate configUpdate) {
+                Log.d(TAG, "Updated keys: " + configUpdate.getUpdatedKeys());
+                mFirebaseRemoteConfig.activate().addOnCompleteListener(new OnCompleteListener() {
+                    @Override
+                    public void onComplete(@NonNull Task task) {
+                        Log.d(TAG, "Updated remote config fetched");
+                        if (task.isSuccessful()) {
+                            updateConfigFromRemoteConfig();
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void onError(FirebaseRemoteConfigException error) {
+                Log.w(TAG, "Config update error with code: " + error.getCode(), error);
+            }
+        });
+    }
+
+    private void updateConfigFromRemoteConfig() {
+        if (mFirebaseRemoteConfig != null) {
+            mAudienceNetworkInterstitialAdsEnabled = mFirebaseRemoteConfig.getBoolean("enable_audience_network_interstitial_ads");
+            mAdmobInterstitialAdsEnabled = mFirebaseRemoteConfig.getBoolean("enable_admob_interstitial_ads");
+            mAudienceNetworkBannerAdsEnabled = mFirebaseRemoteConfig.getBoolean("enable_audience_network_banner_ads");
+            mAdmobBannerAdsEnabled = mFirebaseRemoteConfig.getBoolean("enable_admob_banner_ads");
         }
     }
 

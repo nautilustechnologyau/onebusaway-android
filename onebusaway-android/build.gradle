@@ -45,8 +45,8 @@ android {
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 33
-        versionCode 153
-        versionName "3.0.5"
+        versionCode 155
+        versionName "3.0.6"
 
         multiDexEnabled true
 
@@ -508,6 +508,7 @@ configurations {
 dependencies {
     // Firebase Analytics
     implementation 'com.google.firebase:firebase-core:21.0.0'
+    implementation 'com.google.firebase:firebase-config:21.4.0'
     implementation 'com.google.firebase:firebase-analytics:21.0.0'
     // Cloud Firestore (for storing destination alert test data)
     implementation 'com.google.firebase:firebase-firestore:24.1.2'
