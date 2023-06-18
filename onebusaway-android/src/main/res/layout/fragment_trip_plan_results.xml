@@ -58,6 +58,11 @@
                     android:id="@+id/option1Interval"
                     android:textColor="@color/header_text_faded_color" />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/option1Fare"
+                android:textColor="@color/header_text_faded_color" />
         </LinearLayout>
 
         <LinearLayout
@@ -91,6 +96,12 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/option2Interval"
                     android:textColor="@color/header_text_faded_color" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/option2Fare"
+                android:textColor="@color/header_text_faded_color" />
 
         </LinearLayout>
 
@@ -126,6 +137,11 @@
                     android:id="@+id/option3Interval"
                     android:textColor="@color/header_text_faded_color" />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/option3Fare"
+                android:textColor="@color/header_text_faded_color" />
         </LinearLayout>
     </LinearLayout>
 
