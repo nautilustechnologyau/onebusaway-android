@@ -178,7 +178,9 @@ public class NavigationService extends Service implements LocationHelper.Listene
     @Override
     public void onDestroy() {
         Log.d(TAG, "Destroying Service.");
-        mLocationHelper.unregisterListener(this);
+        if (mLocationHelper != null) {
+            mLocationHelper.unregisterListener(this);
+        }
         super.onDestroy();
 
         // Send Broadcast

@@ -131,10 +131,6 @@
     <string name="navdrawer_item_region">Your region</string>
 
     <string name="main_help_whatsnew">
-        <b>New features</b>\n&#8226;\u0020
-        Fare on trip planner (only if agency provides the data)\n&#8226;\u0020
-        Remote config\n
-        <b>Crash Bug Fixes</b>\n&#8226;\u0020
-        Crash on trip planner address search
+        <b>Winter crash bugs fix!</b>
     </string>
 </resources>

@@ -706,6 +706,9 @@ public final class ObaContract {
         public static boolean markAsFavorite(Context context,
                 Uri uri,
                 boolean favorite) {
+            if (context == null) {
+                return false;
+            }
             ContentResolver cr = context.getContentResolver();
             ContentValues values = new ContentValues();
             values.put(ObaContract.Stops.FAVORITE, favorite ? 1 : 0);

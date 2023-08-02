@@ -25,6 +25,7 @@ import android.os.Bundle;
 import android.text.Html;
 import android.text.TextUtils;
 import android.text.style.ClickableSpan;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -193,8 +194,12 @@ public class SituationDialogFragment extends DialogFragment {
 
             ClickableSpan urlClick = new ClickableSpan() {
                 public void onClick(View v) {
-                    getActivity().startActivity(
-                            new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                    try {
+                        getActivity().startActivity(
+                                new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                    } catch (Exception ex) {
+                        Log.e(TAG, ex.getMessage());
+                    }
                 }
             };
             UIUtils.setClickableSpan(urlView, urlClick);

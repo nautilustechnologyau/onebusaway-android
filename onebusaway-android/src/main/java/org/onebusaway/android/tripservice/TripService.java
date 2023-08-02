@@ -169,7 +169,16 @@ public class TripService extends Service {
                     .setContentText(foregroundNotifyText)
                     .setContentIntent(pendingIntent).build();
 
-            startForeground(FOREGROUND_NOTIFICATION_ID, notification);
+            try {
+                startForeground(FOREGROUND_NOTIFICATION_ID, notification);
+            } catch (Exception ex) {
+                Log.e(TAG, ex.getMessage());
+                try {
+                    getApplicationContext().startService(intent);
+                } catch (Exception ex1) {
+                    Log.e(TAG, ex1.getMessage());
+                }
+            }
         }
         return handleCommand(intent, startId);
     }

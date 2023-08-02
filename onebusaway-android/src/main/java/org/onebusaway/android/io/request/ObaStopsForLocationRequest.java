@@ -38,8 +38,11 @@ public final class ObaStopsForLocationRequest extends RequestBase
 
         public Builder(Context context, Location location) {
             super(context, BASE_PATH + "/stops-for-location.json");
-            mBuilder.appendQueryParameter("lat", String.valueOf(location.getLatitude()));
-            mBuilder.appendQueryParameter("lon", String.valueOf(location.getLongitude()));
+
+            if (location != null) {
+                mBuilder.appendQueryParameter("lat", String.valueOf(location.getLatitude()));
+                mBuilder.appendQueryParameter("lon", String.valueOf(location.getLongitude()));
+            }
         }
 
         /**

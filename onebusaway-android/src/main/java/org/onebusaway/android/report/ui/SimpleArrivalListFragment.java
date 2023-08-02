@@ -177,7 +177,11 @@ public class SimpleArrivalListFragment extends Fragment
     }
 
     private void loadArrivalList(ObaArrivalInfo[] info, final ObaReferences refs, long currentTime) {
-        LinearLayout contentLayout = (LinearLayout) getActivity().
+        if (getActivity() == null) {
+            return;
+        }
+
+        LinearLayout contentLayout = (LinearLayout) requireActivity().
                 findViewById(R.id.simple_arrival_content);
         contentLayout.removeAllViews();
 

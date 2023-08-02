@@ -796,12 +796,13 @@ public class ArrivalsListFragment extends ListFragment
                         blockId = trip.getBlockId();
                     }
 
-                    Intent intent = makeIntent(getActivity(), mStop.getId(), mStop.getName(),
-                            mStop.getStopCode(), mStop.getLatitude(), mStop.getLongitude());
-
-                    InfrastructureIssueActivity.startWithService(getActivity(), intent,
-                            getString(R.string.ri_selected_service_trip), arrivalInfo.getInfo(),
-                            agencyName, blockId);
+                    if (getActivity() != null) {
+                        Intent intent = makeIntent(getActivity(), mStop.getId(), mStop.getName(),
+                                mStop.getStopCode(), mStop.getLatitude(), mStop.getLongitude());
+                        InfrastructureIssueActivity.startWithService(getActivity(), intent,
+                                getString(R.string.ri_selected_service_trip), arrivalInfo.getInfo(),
+                                agencyName, blockId);
+                    }
                 } else if (occupancy != null &&
                         ((!hasUrl && which == 6) || (hasUrl && which == 7))) {
                     ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
