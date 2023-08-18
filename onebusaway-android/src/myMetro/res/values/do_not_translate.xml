@@ -16,9 +16,6 @@
 <resources>
     <!-- DO NOT TRANSLATE ANY STRINGS IN THIS FILE. -->
 
-    <!-- Android Maps API v2 key for MyMetro -->
-    <string name="apiv2_key">AIzaSyBboqo-KyChJSMAcEwOwLyMmQsnljKcy_s</string>
-
     <!-- Problem reporting additions -->
     <string name="ri_static_user_name">MyMetro</string>
     <string name="ri_static_user_last_name">User</string>

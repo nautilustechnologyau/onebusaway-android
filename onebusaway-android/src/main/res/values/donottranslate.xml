@@ -53,6 +53,13 @@
     <string name="preference_key_restore_backup">preference_key_restore_backup</string>
     <string name="preference_key_never_show_location_dialog">never_show_location_dialog</string>
     <string name="preference_key_layer_bikeshare_visible">layer_bike_selected</string>
+    <string name="preference_key_layer_mapstyle_grayscale_visible">layer_mapstyle_grayscale_selected</string>
+    <string name="preference_key_layer_mapstyle_night_visible">layer_mapstyle_night_selected</string>
+    <string name="preference_key_layer_mapstyle_retro_visible">layer_mapstyle_retro_selected</string>
+    <string name="preference_key_layer_mapstyle_aubergine_visible">layer_mapstyle_aubergine_selected</string>
+    <string name="preference_key_layer_mapstyle_dark_visible">layer_mapstyle_dark_selected</string>
+    <string name="preference_key_layer_mapstyle_standard_visible">layer_mapstyle_standard_selected</string>
+    <string name="preference_key_layer_mapstyle_silver_visible">layer_mapstyle_silver_selected</string>
     <string name="preference_key_trip_plan_travel_by">preference_trip_plan_travel_by</string>
     <string name="preference_key_trip_plan_maximum_walking_distance">preference_trip_plan_maximum_walking_distance</string>
     <string name="preference_key_trip_plan_minimize_transfers">preference_trip_plan_minimize_transfers</string>
@@ -104,6 +111,13 @@
     <string name="analytics_customer_service">customer_service</string>
     <string name="analytics_service_alerts">service_alerts</string>
     <string name="analytics_layer_bikeshare">layer_bikeshare</string>
+    <string name="analytics_layer_mapstyle_grayscale">layer_mapstyle_grayscale</string>
+    <string name="analytics_layer_mapstyle_night">layer_mapstyle_night</string>
+    <string name="analytics_layer_mapstyle_retro">layer_mapstyle_retro</string>
+    <string name="analytics_layer_mapstyle_aubergine">layer_mapstyle_aubergine</string>
+    <string name="analytics_layer_mapstyle_dark">layer_mapstyle_dark</string>
+    <string name="analytics_layer_mapstyle_standard">layer_mapstyle_standard</string>
+    <string name="analytics_layer_mapstyle_silver">layer_mapstyle_silver</string>
 
     <!-- The below region name value needs to match existing iOS Firebase User Property -->
     <string name="analytics_label_region_name">RegionName</string>
@@ -188,6 +202,20 @@
     <string name="analytics_label_service_alerts">Clicked Service Alerts from:\u0020</string>
     <string name="analytics_label_bikeshare_activated">Bikeshare layer activated</string>
     <string name="analytics_label_bikeshare_deactivated">Bikeshare layer deactivated</string>
+    <string name="analytics_label_mapstyle_grascale_activated">Grayscale map style layer activated</string>
+    <string name="analytics_label_mapstyle_grascale_deactivated">Grayscale map style layer deactivated</string>
+    <string name="analytics_label_mapstyle_night_activated">Night map style layer activated</string>
+    <string name="analytics_label_mapstyle_night_deactivated">Night map style layer deactivated</string>
+    <string name="analytics_label_mapstyle_retro_activated">Retro map style layer activated</string>
+    <string name="analytics_label_mapstyle_retro_deactivated">Retro map style layer deactivated</string>
+    <string name="analytics_label_mapstyle_aubergine_activated">Aubergine map style layer activated</string>
+    <string name="analytics_label_mapstyle_aubergine_deactivated">Aubergine map style layer deactivated</string>
+    <string name="analytics_label_mapstyle_dark_activated">Dark map style layer activated</string>
+    <string name="analytics_label_mapstyle_dark_deactivated">Dark map style layer deactivated</string>
+    <string name="analytics_label_mapstyle_standard_activated">Standard map style layer activated</string>
+    <string name="analytics_label_mapstyle_standard_deactivated">Standard map style layer deactivated</string>
+    <string name="analytics_label_mapstyle_silver_activated">Silver map style layer activated</string>
+    <string name="analytics_label_mapstyle_silver_deactivated">Silver map style layer deactivated</string>
     <string name="analytics_label_bike_station_marker_clicked">Pressed bike station marker</string>
     <string name="analytics_label_floating_bike_marker_clicked">Pressed floating bike marker</string>
     <string name="analytics_label_bike_station_balloon_clicked">Pressed bike station balloon</string>

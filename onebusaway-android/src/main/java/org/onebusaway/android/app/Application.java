@@ -123,7 +123,7 @@ public class Application extends MultiDexApplication {
             initMobileAds();
         }
         if (!Places.isInitialized()) {
-            Places.initialize(getApplicationContext(), getString(R.string.apiv2_key), Locale.getDefault());
+            Places.initialize(getApplicationContext(), BuildConfig.GOOGLE_MAPS_API_KEY, Locale.getDefault());
         }
 
         initOba();

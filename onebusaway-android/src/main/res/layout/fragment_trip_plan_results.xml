@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2010 Paul Watts (paulcwatts@gmail.com)
+<?xml version="1.0" encoding="utf-8"?><!-- Copyright (C) 2010 Paul Watts (paulcwatts@gmail.com)
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,180 +13,200 @@
      limitations under the License.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:layout_width="fill_parent"
-              android:layout_height="fill_parent"
-              android:weightSum="1"
-              android:background="#eeeeee">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#eeeeee"
+    android:orientation="vertical"
+    android:weightSum="1">
 
     <LinearLayout
-            android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="4dp"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:id="@+id/option1LinearLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="4dp">
-
-        <LinearLayout
-                android:orientation="vertical"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginRight="1dp"
-                android:background="@color/theme_primary"
-                android:gravity="center_vertical"
-                android:id="@+id/option1LinearLayout"
-                android:padding="4dp">
+            android:layout_marginRight="1dp"
+            android:layout_weight="1"
+            android:background="@color/theme_primary"
+            android:gravity="center_vertical"
+            android:orientation="vertical"
+            android:padding="4dp">
 
             <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:id="@+id/option1Title"
-                    android:textColor="@color/header_text_color"
-                    android:singleLine="true"
-                    android:ellipsize="end"/>
-
-            <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/option1Duration"
-                    android:textColor="@color/header_text_faded_color" />
-
-            <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/option1Interval"
-                    android:textColor="@color/header_text_faded_color" />
-
-            <TextView
+                android:id="@+id/option1Title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/header_text_color" />
+
+            <TextView
+                android:id="@+id/option1Duration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/header_text_faded_color" />
+
+            <TextView
+                android:id="@+id/option1Interval"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/header_text_faded_color" />
+
+            <TextView
                 android:id="@+id/option1Fare"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:textColor="@color/header_text_faded_color" />
         </LinearLayout>
 
         <LinearLayout
-                android:orientation="vertical"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginRight="1dp"
-                android:background="@color/theme_primary"
-                android:gravity="center_vertical"
-                android:id="@+id/option2LinearLayout"
-                android:padding="4dp">
+            android:id="@+id/option2LinearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="1dp"
+            android:layout_weight="1"
+            android:background="@color/theme_primary"
+            android:gravity="center_vertical"
+            android:orientation="vertical"
+            android:padding="4dp">
 
             <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:id="@+id/option2Title"
-                    android:textColor="@color/header_text_color"
-                    android:singleLine="true"
-                    android:ellipsize="end"/>
-
-            <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/option2Duration"
-                    android:textColor="@color/header_text_faded_color" />
-
-            <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/option2Interval"
-                    android:textColor="@color/header_text_faded_color" />
-
-            <TextView
+                android:id="@+id/option2Title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/header_text_color" />
+
+            <TextView
+                android:id="@+id/option2Duration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/header_text_faded_color" />
+
+            <TextView
+                android:id="@+id/option2Interval"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/header_text_faded_color" />
+
+            <TextView
                 android:id="@+id/option2Fare"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:textColor="@color/header_text_faded_color" />
 
         </LinearLayout>
 
         <LinearLayout
-                android:orientation="vertical"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@color/theme_primary"
-                android:gravity="center_vertical"
-                android:id="@+id/option3LinearLayout"
-                android:padding="4dp"
-                >
+            android:id="@+id/option3LinearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@color/theme_primary"
+            android:gravity="center_vertical"
+            android:orientation="vertical"
+            android:padding="4dp">
 
             <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:id="@+id/option3Title"
-                    android:textColor="@color/header_text_color"
-                    android:singleLine="true"
-                    android:ellipsize="end" />
-
-            <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/option3Duration"
-                    android:textColor="@color/header_text_faded_color" />
-
-            <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/option3Interval"
-                    android:textColor="@color/header_text_faded_color" />
-
-            <TextView
+                android:id="@+id/option3Title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/header_text_color" />
+
+            <TextView
+                android:id="@+id/option3Duration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/header_text_faded_color" />
+
+            <TextView
+                android:id="@+id/option3Interval"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/header_text_faded_color" />
+
+            <TextView
                 android:id="@+id/option3Fare"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:textColor="@color/header_text_faded_color" />
         </LinearLayout>
     </LinearLayout>
 
-
     <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tab_layout_switch_view"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/trip_results_tab_size">
+
+        <com.google.android.material.tabs.TabItem
             android:layout_width="match_parent"
-            android:layout_height="@dimen/trip_results_tab_size"
-            android:id="@+id/tab_layout_switch_view">
+            android:layout_height="match_parent"
+            android:icon="@drawable/ic_list"
+            android:layout="@layout/tab_trip_results_view"
+            android:text="@string/trip_plan_list_view" />
 
         <com.google.android.material.tabs.TabItem
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="@string/trip_plan_list_view"
-                android:icon="@drawable/ic_list"
-                android:layout="@layout/tab_trip_results_view"
-        />
-
-        <com.google.android.material.tabs.TabItem
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="@string/trip_plan_map_view"
-                android:icon="@drawable/ic_arrivals_styleb_action_map"
-                android:layout="@layout/tab_trip_results_view"
-        />
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:icon="@drawable/ic_arrivals_styleb_action_map"
+            android:layout="@layout/tab_trip_results_view"
+            android:text="@string/trip_plan_map_view" />
 
     </com.google.android.material.tabs.TabLayout>
 
-
     <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dip"
-            android:layout_weight="1"
-            android:id="@+id/directionsFrame">
+        android:id="@+id/directionsFrame"
+        android:layout_width="match_parent"
+        android:layout_height="0dip"
+        android:layout_weight="1">
 
         <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:id="@+id/mapFragment"/>
+            android:id="@+id/mapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
         <ExpandableListView
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:background="@android:color/white"
             android:id="@+id/directionsListView"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:background="@android:color/white"
             android:isScrollContainer="false" />
 
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btn_save_trip_plan"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginLeft="@dimen/fab_margin"
+            android:layout_marginRight="@dimen/fab_margin"
+            android:layout_marginBottom="@dimen/fab_margin1"
+            android:contentDescription="@string/tripplanner_save_trip"
+            app:srcCompat="@drawable/ic_action_content_save" />
+
     </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal">
+        <com.google.android.ads.nativetemplates.TemplateView
+            android:id="@+id/trip_result_ad_template"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:gnt_template_type="@layout/gnt_small_template_view" />
+    </LinearLayout>
 
 </LinearLayout>

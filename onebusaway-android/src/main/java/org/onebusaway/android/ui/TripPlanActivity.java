@@ -110,15 +110,17 @@ public class TripPlanActivity extends AppCompatActivity implements TripRequest.C
 
         // see if there is data from intent
         Intent intent = getIntent();
+        OTPConstants.Source source = null;
 
         if (intent != null && intent.getExtras() != null) {
 
-            OTPConstants.Source source = (OTPConstants.Source) intent
+            source = (OTPConstants.Source) intent
                     .getSerializableExtra(OTPConstants.INTENT_SOURCE);
             if (source != null) {
 
                 // Copy planning params - necessary if this intent came from a notification.
-                if (source == OTPConstants.Source.NOTIFICATION) {
+                if (source == OTPConstants.Source.NOTIFICATION
+                        || source == OTPConstants.Source.EXTERNAL_ACTIVITY) {
                     new TripRequestBuilder(intent.getExtras()).copyIntoBundle(bundle);
                 }
 
@@ -202,6 +204,10 @@ public class TripPlanActivity extends AppCompatActivity implements TripRequest.C
                 mPanel.setPanelHeight(viewHeight - height);
             }
         });
+
+        if (source == OTPConstants.Source.EXTERNAL_ACTIVITY) {
+            onTripRequestReady();
+        }
     }
 
     @Override

@@ -130,7 +130,18 @@
 
     <string name="navdrawer_item_region">Your region</string>
 
-    <string name="main_help_whatsnew">
-        <b>Winter crash bugs fix!</b>
+    <string name="main_help_whatsnew">&#8226;\u0020
+        <b>Where to go</b>\n
+        - A new search bar to allow user any destination to plan a trip.\n
+        - User can select previously saved trip plan.\n&#8226;\u0020
+        <b>Speed dial for map</b>\n
+        - Speed dial button to choose map style.\n&#8226;\u0020
+        <b>Trip plan button</b>\n
+        - Floating action button to plan trip from selected stop.\n&#8226;\u0020
+        <b>Trip planner improvements</b>\n
+        - Trip plan can be saved and reused\n&#8226;\u0020
+        <b>UI improvements</b>\n
+        - Default map style is set to dark\n
+        - Speed dial buttons for selected stop action
     </string>
 </resources>

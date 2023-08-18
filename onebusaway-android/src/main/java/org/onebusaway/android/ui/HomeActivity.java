@@ -17,8 +17,6 @@
  */
 package org.onebusaway.android.ui;
 
-import static android.view.View.GONE;
-import static android.view.View.VISIBLE;
 import static com.google.android.play.core.install.model.AppUpdateType.FLEXIBLE;
 import static com.google.android.play.core.install.model.AppUpdateType.IMMEDIATE;
 import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_ACTIVITY_FEED;
@@ -46,8 +44,6 @@ import static uk.co.markormesher.android_fab.FloatingActionButton.POSITION_END;
 import static uk.co.markormesher.android_fab.FloatingActionButton.POSITION_START;
 
 import android.Manifest;
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -59,7 +55,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.Paint;
-import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.location.Location;
 import android.net.Uri;
@@ -67,21 +62,18 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.ActionProvider;
-import android.view.ContextMenu;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
+import android.widget.AutoCompleteTextView;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -93,7 +85,6 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -101,17 +92,6 @@ import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Observer;
 
 import com.android.billingclient.api.Purchase;
-import com.facebook.ads.Ad;
-import com.facebook.ads.InterstitialAdListener;
-import com.google.android.gms.ads.AdError;
-import com.google.android.gms.ads.AdListener;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdSize;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.FullScreenContentCallback;
-import com.google.android.gms.ads.LoadAdError;
-import com.google.android.gms.ads.interstitial.InterstitialAd;
-import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -138,6 +118,11 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import org.onebusaway.android.BuildConfig;
 import org.onebusaway.android.R;
 import org.onebusaway.android.app.Application;
+import org.onebusaway.android.directions.util.CustomAddress;
+import org.onebusaway.android.directions.util.OTPConstants;
+import org.onebusaway.android.directions.util.PlacesAutoCompleteAdapter;
+import org.onebusaway.android.directions.util.TripPlanAddresses;
+import org.onebusaway.android.directions.util.TripRequestBuilder;
 import org.onebusaway.android.io.ObaAnalytics;
 import org.onebusaway.android.io.elements.ObaRegion;
 import org.onebusaway.android.io.elements.ObaRoute;
@@ -147,7 +132,7 @@ import org.onebusaway.android.map.MapModeController;
 import org.onebusaway.android.map.MapParams;
 import org.onebusaway.android.map.googlemapsv2.BaseMapFragment;
 import org.onebusaway.android.map.googlemapsv2.LayerInfo;
-import org.onebusaway.android.provider.ObaContract;
+import org.onebusaway.android.map.googlemapsv2.ProprietaryMapHelpV2;
 import org.onebusaway.android.region.ObaRegionsTask;
 import org.onebusaway.android.report.ui.ReportActivity;
 import org.onebusaway.android.travelbehavior.TravelBehaviorManager;
@@ -171,16 +156,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
+import au.mymetro.android.ads.AdsManager;
 import au.mymetro.android.billing.BillingClientLifecycle;
 import au.mymetro.android.ui.RateItDialogFragment;
 import au.mymetro.android.ui.RemoveAdsActivity;
-import au.mymetro.android.ui.RemoveAdsDialogFragment;
 
 public class HomeActivity extends AppCompatActivity
         implements BaseMapFragment.OnFocusChangedListener,
         BaseMapFragment.OnProgressBarChangedListener,
         ArrivalsListFragment.Listener, NavigationDrawerCallbacks,
-        ObaRegionsTask.Callback {
+        ObaRegionsTask.Callback, StopSpeedDialAdapter.StopSpeedDialListener {
 
     interface SlidingPanelController {
 
@@ -229,35 +214,24 @@ public class HomeActivity extends AppCompatActivity
     View mArrivalsListHeaderSubView;
 
     private FloatingActionButton mFabMyLocation;
-    private ViewGroup mStopActionButtonsView;
 
-    uk.co.markormesher.android_fab.FloatingActionButton mLayersFab;
-    uk.co.markormesher.android_fab.FloatingActionButton mZoomInFab;
-    uk.co.markormesher.android_fab.FloatingActionButton mZoomOutFab;
+    private uk.co.markormesher.android_fab.FloatingActionButton mLayersFab;
+    private uk.co.markormesher.android_fab.FloatingActionButton mZoomInFab;
+    private uk.co.markormesher.android_fab.FloatingActionButton mZoomOutFab;
+    private uk.co.markormesher.android_fab.FloatingActionButton mStopFab;
+    private uk.co.markormesher.android_fab.FloatingActionButton mPlanTripFab;
 
     private static int MY_LOC_DEFAULT_BOTTOM_MARGIN;
+
+    private static int STOP_FAB_DEFAULT_BOTTOM_MARGIN;
 
     private static int LAYERS_FAB_DEFAULT_BOTTOM_MARGIN;
 
     private static final int MY_LOC_BTN_ANIM_DURATION = 100;  // ms
 
-    private static boolean mInterstitialAdShowing = false;
-
-    private static long mLastInterstitialAdShowTime = 0L;
-
-    private static int mInterstitialAdShowCount = 0;
-
     public static final String ADS_FREE_VERSION = "adsFreeVersion";
 
     private static boolean mAdsFreeVersion = false;
-
-    private static boolean mAudienceNetworkInterstitialAdsEnabled = true;
-
-    private static boolean mAudienceNetworkBannerAdsEnabled = true;
-
-    private static boolean mAdmobInterstitialAdsEnabled = true;
-
-    private static boolean mAdmobBannerAdsEnabled = true;
 
     private static int mMarkerClickedCount = 0;
 
@@ -266,10 +240,6 @@ public class HomeActivity extends AppCompatActivity
     Animation mMyLocationAnimation;
 
     Animation mStopActionButtonsAnimation;
-
-    // Ad views
-    private InterstitialAd mAdMobInterstitialAd;
-    private com.facebook.ads.InterstitialAd mAnInterstitialAd;
 
     /**
      * GoogleApiClient being used for Location Services
@@ -298,15 +268,7 @@ public class HomeActivity extends AppCompatActivity
      */
     private int mCurrentNavDrawerPosition = -1;
 
-    /**
-     * Fragments that can be selected as main content via the NavigationDrawer
-     */
-    MyStarredStopsFragment mMyStarredStopsFragment;
-
-
     BaseMapFragment mMapFragment;
-
-    MyRemindersFragment mMyRemindersFragment;
 
     /**
      * Control which menu options are shown per fragment menu groups
@@ -350,6 +312,14 @@ public class HomeActivity extends AppCompatActivity
     private ActivityResultLauncher<String> travelBehaviorPermissionsLauncher;
 
     private BillingClientLifecycle mBillingClient;
+
+    private AdsManager mTopAdsManager;
+
+    private AdsManager mArrivalListAdsManager;
+
+    private static boolean mShowRateitDialog = false;
+
+    private TripPlanHelper tripPlanHelper;
 
     /**
      * Starts the MapActivity with a particular stop focused with the center of
@@ -450,8 +420,11 @@ public class HomeActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
 
         // this flag will control the ads/subscription feature
+        mTopAdsManager = new AdsManager(this);
+        mArrivalListAdsManager = new AdsManager(this);
         if (!BuildConfig.ENABLE_ADMOB) {
             mAdsFreeVersion = true;
+            PreferenceUtils.saveBoolean(ADS_FREE_VERSION, true);
         } else {
             mAdsFreeVersion = PreferenceUtils.getBoolean(ADS_FREE_VERSION, false);
             setupBillingClient();
@@ -476,7 +449,7 @@ public class HomeActivity extends AppCompatActivity
 
         setupLayersSpeedDial();
 
-        setupStopActionButtons();
+        setupStopsSpeedDial();
 
         setupMyLocationButton();
 
@@ -513,6 +486,8 @@ public class HomeActivity extends AppCompatActivity
 
         // check if update available
         checkUpdate();
+
+        setUpAutocomplete();
     }
 
     @Override
@@ -525,6 +500,8 @@ public class HomeActivity extends AppCompatActivity
         AccessibilityManager am = (AccessibilityManager) getSystemService(ACCESSIBILITY_SERVICE);
         Boolean isTalkBackEnabled = am.isTouchExplorationEnabled();
         ObaAnalytics.setAccessibility(mFirebaseAnalytics, isTalkBackEnabled);
+
+        mTopAdsManager.loadMainTopAd(findViewById(R.id.main_top_banner_ad_view), findViewById(R.id.main_top_native_ad_view));
     }
 
     @Override
@@ -570,6 +547,7 @@ public class HomeActivity extends AppCompatActivity
         }
         checkLeftHandMode();
         updateLayersFab();
+        updateStopFab();
 
         mFabMyLocation.requestLayout();
     }
@@ -587,6 +565,7 @@ public class HomeActivity extends AppCompatActivity
             mGoogleApiClient.disconnect();
         }
         mLayersFab.closeSpeedDialMenu();
+        mStopFab.closeSpeedDialMenu();
         super.onStop();
     }
 
@@ -618,8 +597,6 @@ public class HomeActivity extends AppCompatActivity
                 if (!BuildConfig.USE_FIXED_REGION) {
                     RegionsActivity.start(this);
                     mCurrentNavDrawerPosition = NAVDRAWER_ITEM_NEARBY;
-                    // Intent selectRegion = new Intent(HomeActivity.this, RegionsActivity.class);
-                    // startActivity(selectRegion);
                     ObaAnalytics.reportUiEvent(mFirebaseAnalytics, getString(R.string.analytics_label_region_select), null);
                 }
                 break;
@@ -630,6 +607,15 @@ public class HomeActivity extends AppCompatActivity
                             getString(R.string.analytics_label_button_press_star),
                             null);
                     mCurrentNavDrawerPosition = NAVDRAWER_ITEM_NEARBY;
+                }
+                break;
+            case NAVDRAWER_ITEM_MY_REMINDERS:
+                if (mCurrentNavDrawerPosition != NAVDRAWER_ITEM_STARRED_STOPS) {
+                    showMyRemindersFragment();
+                    mCurrentNavDrawerPosition = NAVDRAWER_ITEM_NEARBY;
+                    ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                            getString(R.string.analytics_label_button_press_reminders),
+                            null);
                 }
                 break;
             // below values are deprecated; fall through to NAVDRAWER_ITEM_NEARBY
@@ -646,18 +632,9 @@ public class HomeActivity extends AppCompatActivity
                             null);
                 }
                 break;
-            case NAVDRAWER_ITEM_MY_REMINDERS:
-                if (mCurrentNavDrawerPosition != NAVDRAWER_ITEM_MY_REMINDERS) {
-                    showMyRemindersFragment();
-                    mCurrentNavDrawerPosition = item;
-                    ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
-                            getString(R.string.analytics_label_button_press_reminders),
-                            null);
-                }
-                break;
             case NAVDRAWER_ITEM_PLAN_TRIP:
                 if (BuildConfig.ENABLE_ADMOB) {
-                    loadInterstitialAd(false, "Plan a trip");
+                    mTopAdsManager.loadInterstitialAd(false, "Plan a trip", mMarkerClickedCount);
                 }
                 Intent planTrip = new Intent(HomeActivity.this, TripPlanActivity.class);
                 startActivity(planTrip);
@@ -717,8 +694,6 @@ public class HomeActivity extends AppCompatActivity
         /**
          * Hide everything that shouldn't be shown
          */
-        hideStarredStopsFragment();
-        hideReminderFragment();
         mShowStarredStopsMenu = false;
         mShowStarredRoutesMenu = false;
         /**
@@ -778,48 +753,8 @@ public class HomeActivity extends AppCompatActivity
         checkDisplayZoomControls();
 
         if (BuildConfig.ENABLE_ADMOB) {
-            setupAds();
+            mTopAdsManager.loadMainTopAd(findViewById(R.id.main_top_banner_ad_view), findViewById(R.id.main_top_native_ad_view));
         }
-    }
-
-    private void showStarredStopsFragment() {
-        FragmentManager fm = getSupportFragmentManager();
-        /**
-         * Hide everything that shouldn't be shown
-         */
-        hideFloatingActionButtons();
-        hideMapProgressBar();
-        hideMapFragment();
-        hideReminderFragment();
-        hideSlidingPanel();
-
-        if (BuildConfig.ENABLE_ADMOB) {
-            hideBannerAds();
-        }
-
-        mShowArrivalsMenu = false;
-        showZoomControls(false);
-
-        /**
-         * Show fragment (we use show instead of replace to keep the map state)
-         */
-        mShowStarredStopsMenu = true;
-        mShowStarredRoutesMenu = true;
-        if (mMyStarredStopsFragment == null) {
-            // First check to see if an instance of MyStarredStopsFragment already exists (see #356)
-            mMyStarredStopsFragment = (MyStarredStopsFragment) fm
-                    .findFragmentByTag(MyStarredStopsFragment.TAG);
-
-            if (mMyStarredStopsFragment == null) {
-                // No existing fragment was found, so create a new one
-                Log.d(TAG, "Creating new MyStarredStopsFragment");
-                mMyStarredStopsFragment = new MyStarredStopsFragment();
-                fm.beginTransaction().add(R.id.main_fragment_container, mMyStarredStopsFragment,
-                        MyStarredStopsFragment.TAG).commit();
-            }
-        }
-        fm.beginTransaction().show(mMyStarredStopsFragment).commit();
-        setTitle(getResources().getString(R.string.navdrawer_item_starred_stops));
     }
 
     private void showStarredStopsRoutesFragment() {
@@ -828,41 +763,8 @@ public class HomeActivity extends AppCompatActivity
     }
 
     private void showMyRemindersFragment() {
-        FragmentManager fm = getSupportFragmentManager();
-        /**
-         * Hide everything that shouldn't be shown
-         */
-        hideFloatingActionButtons();
-        hideMapProgressBar();
-        hideStarredStopsFragment();
-        hideMapFragment();
-        hideSlidingPanel();
-
-        if (BuildConfig.ENABLE_ADMOB) {
-            hideBannerAds();
-        }
-
-        mShowArrivalsMenu = false;
-        mShowStarredRoutesMenu = false;
-        showZoomControls(false);
-        /**
-         * Show fragment (we use show instead of replace to keep the map state)
-         */
-        if (mMyRemindersFragment == null) {
-            // First check to see if an instance of MyRemindersFragment already exists (see #356)
-            mMyRemindersFragment = (MyRemindersFragment) fm
-                    .findFragmentByTag(MyRemindersFragment.TAG);
-
-            if (mMyRemindersFragment == null) {
-                // No existing fragment was found, so create a new one
-                Log.d(TAG, "Creating new MyRemindersFragment");
-                mMyRemindersFragment = new MyRemindersFragment();
-                fm.beginTransaction().add(R.id.main_fragment_container, mMyRemindersFragment,
-                        MyRemindersFragment.TAG).commit();
-            }
-        }
-        fm.beginTransaction().show(mMyRemindersFragment).commit();
-        setTitle(getResources().getString(R.string.navdrawer_item_my_reminders));
+        Intent myIntent = new Intent(this, MyRemindersActivity.class);
+        startActivity(myIntent);
     }
 
     private void hideMapFragment() {
@@ -870,59 +772,6 @@ public class HomeActivity extends AppCompatActivity
         mMapFragment = (BaseMapFragment) fm.findFragmentByTag(BaseMapFragment.TAG);
         if (mMapFragment != null && !mMapFragment.isHidden()) {
             fm.beginTransaction().hide(mMapFragment).commit();
-        }
-    }
-
-    private void hideStarredStopsFragment() {
-        FragmentManager fm = getSupportFragmentManager();
-        mMyStarredStopsFragment = (MyStarredStopsFragment) fm.findFragmentByTag(
-                MyStarredStopsFragment.TAG);
-        if (mMyStarredStopsFragment != null && !mMyStarredStopsFragment.isHidden()) {
-            fm.beginTransaction().hide(mMyStarredStopsFragment).commit();
-        }
-
-        if (BuildConfig.ENABLE_ADMOB) {
-            showBannerAds();
-        }
-    }
-
-    private void hideReminderFragment() {
-        FragmentManager fm = getSupportFragmentManager();
-        mMyRemindersFragment = (MyRemindersFragment) fm
-                .findFragmentByTag(MyRemindersFragment.TAG);
-        if (mMyRemindersFragment != null && !mMyRemindersFragment.isHidden()) {
-            fm.beginTransaction().hide(mMyRemindersFragment).commit();
-        }
-        if (BuildConfig.ENABLE_ADMOB) {
-            showBannerAds();
-        }
-    }
-
-    private void hideSlidingPanel() {
-        if (mSlidingPanel != null) {
-            mSlidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
-        }
-    }
-
-    private void hideBannerAds() {
-        if (!BuildConfig.ENABLE_ADMOB) {
-            return;
-        }
-
-        LinearLayout mBannerAdView = findViewById(R.id.adViewBottom);
-        if (mBannerAdView != null) {
-            mBannerAdView.setVisibility(View.GONE);
-        }
-    }
-
-    private void showBannerAds() {
-        if (!BuildConfig.ENABLE_ADMOB) {
-            return;
-        }
-
-        LinearLayout mBannerAdView = findViewById(R.id.adViewBottom);
-        if (mBannerAdView != null && !mAdsFreeVersion) {
-            mBannerAdView.setVisibility(View.VISIBLE);
         }
     }
 
@@ -1211,8 +1060,7 @@ public class HomeActivity extends AppCompatActivity
             updateArrivalListFragment(stop.getId(), stop.getName(), stop.getStopCode(), stop,
                     routes);
 
-            showStopActionButtonsPanel();
-            // moveStopActionButtonsPanelLocation(mStopActionButtonsView, MY_LOC_DEFAULT_BOTTOM_MARGIN);
+            showStopFab();
             ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
                     getString(R.string.analytics_label_button_press_map_icon),
                     null);
@@ -1221,8 +1069,7 @@ public class HomeActivity extends AppCompatActivity
             // and clear the currently focused stopId
             mFocusedStopId = null;
             moveFabsLocation();
-            // moveStopActionButtonsPanelLocation(mStopActionButtonsView, MY_LOC_DEFAULT_BOTTOM_MARGIN);
-            hideStopActionButtonsPanel();
+            hideStopFab();
             mSlidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
             if (mArrivalsListFragment != null) {
                 fm.beginTransaction().remove(mArrivalsListFragment).commit();
@@ -1371,7 +1218,7 @@ public class HomeActivity extends AppCompatActivity
         bundle.putString(MapParams.ROUTE_ID, arrivalInfo.getInfo().getRouteId());
         mMapFragment.setMapMode(MapParams.MODE_ROUTE, bundle);
 
-        collapseStopActionButtons();
+        // collapseStopActionButtons();
 
         return true;
     }
@@ -1581,6 +1428,7 @@ public class HomeActivity extends AppCompatActivity
             ).show();
         }
         updateLayersFab();
+        updateStopFab();
     }
 
     private void setupZoomButtons() {
@@ -1622,158 +1470,22 @@ public class HomeActivity extends AppCompatActivity
         }
     }
 
-    private void setupStopActionButtons() {
-        // Initialize the My Location button
-        mStopActionButtonsView = findViewById(R.id.pnlStopActionButtonContainer);
+    private void showStopFab() {
+        if (mStopFab != null) {
+            mStopFab.show();
+        }
 
-        if (mStopActionButtonsView != null) {
-            View parentView = mStopActionButtonsView.findViewById(R.id.layoutStopActionPanels);
-            FloatingActionButton btnShowHide = parentView.findViewById(R.id.btnShowHideStopActionButtons);
-            View pnlButton = mStopActionButtonsView.findViewById(R.id.pnlStopActionButtons);
-
-            if (mFocusedStopId != null) {
-                btnShowHide.setVisibility(VISIBLE);
-            }
-            pnlButton.setVisibility(GONE);
-
-            // listeners
-            btnShowHide.setOnClickListener(v -> {
-                if (pnlButton.getVisibility() == VISIBLE) {
-                    pnlButton.setAlpha(1.0f);
-                    pnlButton.setVisibility(VISIBLE);
-                    pnlButton.animate().cancel();
-                    pnlButton.animate().alpha(0.0f).setDuration(300).setListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            pnlButton.setVisibility(GONE);
-                        }
-                    }).start();
-                    btnShowHide.animate().rotation(0).setDuration(300).start();
-                } else {
-                    btnShowHide.animate().rotation(180).setDuration(300).start();
-                    pnlButton.setAlpha(0.0f);
-                    pnlButton.setVisibility(VISIBLE);
-                    pnlButton.animate().cancel();
-                    pnlButton.animate().alpha(1.0f).setDuration(300).setListener(null).start();
-                }
-            });
-
-            FloatingActionButton btnRecentStops = pnlButton.findViewById(R.id.btnRecentStopsRoutes);
-            btnRecentStops.setOnClickListener(v -> {
-                ShowcaseViewUtils.doNotShowTutorial(ShowcaseViewUtils.TUTORIAL_RECENT_STOPS_ROUTES);
-                Intent myIntent = new Intent(this, MyRecentStopsAndRoutesActivity.class);
-                startActivity(myIntent);
-            });
-
-            FloatingActionButton btnFilterRoutes = pnlButton.findViewById(R.id.btnFilterRoute);
-            btnFilterRoutes.setOnClickListener(v -> {
-                if (mArrivalsListFragment != null) {
-                    mArrivalsListFragment.onOptionsItemSelected(R.id.filter);
-                }
-            });
-
-            FloatingActionButton btnEditStop = pnlButton.findViewById(R.id.btnEditStop);
-            btnEditStop.setOnClickListener(v -> {
-                if (mArrivalsListFragment != null) {
-                    mArrivalsListFragment.onOptionsItemSelected(R.id.edit_name);
-                }
-            });
-
-            FloatingActionButton btnAddStar = pnlButton.findViewById(R.id.btnAddStar);
-            btnAddStar.setOnClickListener(v -> {
-                if (mArrivalsListFragment != null) {
-                    mArrivalsListFragment.onOptionsItemSelected(R.id.toggle_favorite);
-                    if (mArrivalsListFragment.isFavoriteStop()) {
-                        Toast.makeText(this, "Star added to the stop", Toast.LENGTH_LONG).show();
-                        btnAddStar.setImageResource(R.drawable.focus_star_on);
-                    } else {
-                        Toast.makeText(this, "Star removed from the stop", Toast.LENGTH_LONG).show();
-                        btnAddStar.setImageResource(R.drawable.focus_star_off);
-                    }
-
-
-                }
-            });
-
-            FloatingActionButton btnStopDetails = pnlButton.findViewById(R.id.btnStopDetails);
-            btnStopDetails.setOnClickListener(v -> {
-                if (mArrivalsListFragment != null) {
-                    mArrivalsListFragment.onOptionsItemSelected(R.id.show_stop_details);
-                }
-            });
-
-            FloatingActionButton btnReportStopProblem = pnlButton.findViewById(R.id.btnReportStopProblem);
-            btnReportStopProblem.setOnClickListener(v -> {
-                if (mArrivalsListFragment != null) {
-                    mArrivalsListFragment.onOptionsItemSelected(R.id.report_stop_problem);
-                }
-            });
-
-            FloatingActionButton btnHideAlerts = pnlButton.findViewById(R.id.btnHideAlerts);
-            btnHideAlerts.setOnClickListener(v -> {
-                if (mArrivalsListFragment != null) {
-                    mArrivalsListFragment.onOptionsItemSelected(R.id.hide_alerts);
-                    Toast.makeText(this, "All active alerts will be hidden for this stop", Toast.LENGTH_LONG).show();
-                }
-            });
+        if (mPlanTripFab != null) {
+            mPlanTripFab.show();
         }
     }
 
-    private void showStopActionButtonsPanel() {
-        if (mStopActionButtonsView != null) {
-            View parentView = mStopActionButtonsView.findViewById(R.id.layoutStopActionPanels);
-            FloatingActionButton btnShowHide = parentView.findViewById(R.id.btnShowHideStopActionButtons);
-            View pnlButton = mStopActionButtonsView.findViewById(R.id.pnlStopActionButtons);
-            FloatingActionButton btnAddStar = pnlButton.findViewById(R.id.btnAddStar);
-            if (mArrivalsListFragment != null) {
-                boolean isFavourite = ObaContract.Stops.isFavorite(this, mFocusedStopId);
-                if (isFavourite) {
-                    btnAddStar.setImageResource(R.drawable.focus_star_on);
-                } else {
-                    btnAddStar.setImageResource(R.drawable.focus_star_off);
-                }
-            }
-
-            if (pnlButton.getVisibility() == VISIBLE) {
-                btnShowHide.callOnClick();
-            }
-
-            btnShowHide.setVisibility(VISIBLE);
-            btnShowHide.setAlpha(0.0f);
-            btnShowHide.animate().alpha(1.0f).setDuration(300).setListener(null).start();
+    private void hideStopFab() {
+        if (mStopFab != null && mStopFab.isShown()) {
+            mStopFab.hide(false);
         }
-    }
-
-    private void hideStopActionButtonsPanel() {
-        if (mStopActionButtonsView != null) {
-            View parentView = mStopActionButtonsView.findViewById(R.id.layoutStopActionPanels);
-            FloatingActionButton btnShowHide = parentView.findViewById(R.id.btnShowHideStopActionButtons);
-            View pnlButton = mStopActionButtonsView.findViewById(R.id.pnlStopActionButtons);
-
-            if (pnlButton.getVisibility() == VISIBLE) {
-                btnShowHide.callOnClick();
-            }
-
-            btnShowHide.setVisibility(VISIBLE);
-            btnShowHide.setAlpha(1.0f);
-            btnShowHide.animate().alpha(0.0f).setDuration(300).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    btnShowHide.setVisibility(GONE);
-                }
-            }).start();
-        }
-    }
-
-    private void collapseStopActionButtons() {
-        if (mStopActionButtonsView != null) {
-            View parentView = mStopActionButtonsView.findViewById(R.id.layoutStopActionPanels);
-            FloatingActionButton btnShowHide = parentView.findViewById(R.id.btnShowHideStopActionButtons);
-            View pnlButton = mStopActionButtonsView.findViewById(R.id.pnlStopActionButtons);
-
-            if (pnlButton.getVisibility() == VISIBLE) {
-                btnShowHide.callOnClick();
-            }
+        if (mPlanTripFab != null && mPlanTripFab.isShown()) {
+            mPlanTripFab.hide(false);
         }
     }
 
@@ -1852,6 +1564,8 @@ public class HomeActivity extends AppCompatActivity
                 // If the update is cancelled or fails,
                 // you can request to start the update again.
             }
+        } else if (requestCode == TripPlanFragment.USE_TO_ADDRESS) {
+            startTripPlanActivity(requestCode, resultCode, data);
         }
     }
 
@@ -1902,358 +1616,20 @@ public class HomeActivity extends AppCompatActivity
 
         PreferenceUtils.saveBoolean(ADS_FREE_VERSION, mAdsFreeVersion);
 
-        setupAds();
-    }
+        mTopAdsManager.loadMainTopAd(findViewById(R.id.main_top_banner_ad_view), findViewById(R.id.main_top_native_ad_view));
 
-    public void setupAds() {
-        if (!BuildConfig.ENABLE_ADMOB) {
-            return;
-        }
-
-        if (mAdsFreeVersion) {
-            LinearLayout mBannerAdView = findViewById(R.id.adViewBottom);
-            if (mBannerAdView != null) {
-                mBannerAdView.setVisibility(View.GONE);
-            }
-        } else {
-            loadBannerAd();
-            setBannerAdVisibility();
-        }
-    }
-
-    private void setBannerAdVisibility() {
-        if (!BuildConfig.ENABLE_ADMOB) {
-            return;
-        }
-
-        LinearLayout mBannerAdView = findViewById(R.id.adViewBottom);
-        if (mBannerAdView == null) {
-            return;
-        }
-
-        if (mAdsFreeVersion) {
-            mBannerAdView.setVisibility(View.GONE);
-            return;
-        }
-
-        mBannerAdView.setVisibility(View.VISIBLE);
-    }
-
-    private void loadBannerAd() {
-        if (!BuildConfig.ENABLE_ADMOB) {
-            return;
-        }
-
-        LinearLayout mBannerAdView = findViewById(R.id.adViewBottom);
-        if (mBannerAdView == null) {
-            return;
-        }
-
-        loadAdmobBannerAds();
-    }
-
-    private AdSize getAdSize() {
-        Display display = getWindowManager().getDefaultDisplay();
-        DisplayMetrics outMetrics = new DisplayMetrics();
-        display.getMetrics(outMetrics);
-        float widthPixels = outMetrics.widthPixels;
-        float density = outMetrics.density; int adWidth = (int) (widthPixels / density);
-
-        return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(this, adWidth);
-    }
-
-    void loadAdmobBannerAds() {
-        if (!mAdmobBannerAdsEnabled) {
-            return;
-        }
-
-        LinearLayout bannerAdLayoutView = findViewById(R.id.adViewBottom);
-        if (bannerAdLayoutView == null) {
-            return;
-        }
-
-        AdRequest bannerAdRequest = new AdRequest.Builder().build();
-        AdView admobAdView = new AdView(this);
-        if (admobAdView.getParent() != null) {
-            ((ViewGroup)admobAdView.getParent()).removeView(admobAdView);
-        }
-        bannerAdLayoutView.removeAllViews();
-        bannerAdLayoutView.addView(admobAdView);
-        AdSize adSize = getAdSize();
-        admobAdView.setAdSize(adSize);
-        //if (BuildConfig.DEBUG) {
-        //    admobAdView.setAdUnitId("ca-app-pub-3940256099942544/6300978111");
-        //} else {
-            admobAdView.setAdUnitId(getResources().getString(R.string.admob_banner_unit_id));
-        //}
-        admobAdView.setAdListener(new AdListener() {
-            @Override
-            public void onAdLoaded() {
-                super.onAdLoaded();
-                Log.d(TAG, "onAdLoaded()");
-                // Code to be executed when an ad finishes loading.
-            }
-
-            @Override
-            public void onAdClosed() {
-                super.onAdClosed();
-                RemoveAdsDialogFragment.show(getApplicationContext(), HomeActivity.this.getSupportFragmentManager());
-            }
-
-            @Override
-            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                super.onAdFailedToLoad(loadAdError);
-                Log.d(TAG, "AdMob onAdFailedToLoad(): " + loadAdError.getMessage());
-                loadAudienceNetworkBannerAds();
-            }
-        });
-        admobAdView.loadAd(bannerAdRequest);
-    }
-
-    void loadAudienceNetworkBannerAds() {
-        if (!mAudienceNetworkBannerAdsEnabled) {
-            return;
-        }
-
-        LinearLayout bannerAdLayoutView = findViewById(R.id.adViewBottom);
-        if (bannerAdLayoutView == null) {
-            return;
-        }
-        String placementId = getResources().getString(R.string.an_banner_placement_id);
-        if (BuildConfig.DEBUG) {
-            placementId = "IMG_16_9_APP_INSTALL#" + placementId;
-        }
-        com.facebook.ads.AdView anAdView =
-                new com.facebook.ads.AdView(HomeActivity.this,
-                        placementId,
-                        com.facebook.ads.AdSize.BANNER_HEIGHT_50);
-        bannerAdLayoutView.removeAllViews();
-        bannerAdLayoutView.addView(anAdView);
-
-        com.facebook.ads.AdListener adListener = new com.facebook.ads.AdListener() {
-            @Override
-            public void onError(Ad ad, com.facebook.ads.AdError adError) {
-                // Ad error callback
-                Log.d(TAG, "Audience Network onError: " + adError.getErrorCode() + " - " + adError.getErrorMessage());
-                if (BuildConfig.DEBUG) {
-                    Toast.makeText(HomeActivity.this,
-                            "Error: " + adError.getErrorMessage(),
-                            Toast.LENGTH_LONG).show();
-                }
-            }
-
-            @Override
-            public void onAdLoaded(Ad ad) {
-                // Ad loaded callback
-                Log.d(TAG, "Audience Network onAdLoaded: " + ad.toString());
-            }
-
-            @Override
-            public void onAdClicked(Ad ad) {
-                // Ad clicked callback
-                Log.d(TAG, "Audience Network onAdClicked: " + ad.toString());
-            }
-
-            @Override
-            public void onLoggingImpression(Ad ad) {
-                // Ad impression logged callback
-                Log.d(TAG, "Audience Network onLoggingImpression: " + ad.toString());
-            }
-        };
-
-        anAdView.loadAd(anAdView.buildLoadAdConfig().withAdListener(adListener).build());
-    }
-
-    private void loadInterstitialAd(boolean showAlways, String initiator) {
-        if (!BuildConfig.ENABLE_ADMOB) {
-            return;
-        }
-
-        if (mAdsFreeVersion) {
-            return;
-        }
-
-        if (BuildConfig.DEBUG) {
-            Random rand = new Random(System.currentTimeMillis());
-            if (rand.nextInt(100) % 10 != 0) {
-                return;
-            }
-        }
-
-        if (!showAlways && !BuildConfig.DEBUG) {
-            if ((initiator == null) && (mMarkerClickedCount % 5 != 0)) {
-                return;
-            }
-
-            float hitPercent = 0.7f; // 30% of the time it will show ad
-            Log.d(TAG, "Ad hit percentage: " + hitPercent);
-            if (mRandom.nextFloat() > hitPercent) {
-                return;
-            }
-
-            if (mLastInterstitialAdShowTime > 0) {
-                long now = new Date().getTime();
-                long duration = now - mLastInterstitialAdShowTime;
-                // don't show add too frequently. at least 60 secs gap.
-                if (duration < 60000) {
-                    return;
-                }
-            }
-        }
-
-        // we will not show ad first time on home screen
-        if ("Nearby".equals(initiator) && mInterstitialAdShowCount == 0) {
-            mInterstitialAdShowCount++;
-            return;
-        }
-
-        loadAdMobInterstitialAd();
-    }
-
-    private void loadAdMobInterstitialAd() {
-        if (!mAdmobInterstitialAdsEnabled) {
-            return;
-        }
-        // an add is showing, don't show again
-        if (mInterstitialAdShowing) {
-            return;
-        }
-
-        AdRequest adRequest = new AdRequest.Builder().build();
-        InterstitialAd.load(this, getResources().getString(R.string.admob_interstitial_unit_id), adRequest,
-                new InterstitialAdLoadCallback() {
-                    @Override
-                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
-                        // The mInterstitialAd reference will be null until
-                        // an ad is loaded.
-                        mAdMobInterstitialAd = interstitialAd;
-                        // Log.i(TAG, "onAdLoaded");
-                        Log.d(TAG, "Banner adapter class name: " + interstitialAd.getResponseInfo().getMediationAdapterClassName());
-                        mAdMobInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
-                            @Override
-                            public void onAdDismissedFullScreenContent() {
-                                // Called when ad is dismissed.
-                                // Set the ad reference to null so you don't show the ad a second time.
-                                Log.d(TAG, "Ad dismissed fullscreen content.");
-                                mAdMobInterstitialAd = null;
-                                mInterstitialAdShowing = false;
-                                RemoveAdsDialogFragment.show(HomeActivity.this, HomeActivity.this.getSupportFragmentManager());
-                            }
-
-                            @Override
-                            public void onAdFailedToShowFullScreenContent(AdError adError) {
-                                // Called when ad fails to show.
-                                Log.e(TAG, "AdMob onAdFailedToShowFullScreenContent(): " + adError.getMessage());
-                                mAdMobInterstitialAd = null;
-                                mInterstitialAdShowing = false;
-                                loadAudienceNetworkInterstitialAds();
-                            }
-                        });
-                        if (!mInterstitialAdShowing) {
-                            mInterstitialAdShowing = true;
-                            mInterstitialAdShowCount++;
-                            mLastInterstitialAdShowTime = new Date().getTime();
-                            mAdMobInterstitialAd.show(HomeActivity.this);
-                        }
-                    }
-
-                    @Override
-                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                        // Handle the error
-                        Log.d(TAG, "AdMob onAdFailedToLoad: " + loadAdError.toString());
-                        mAdMobInterstitialAd = null;
-                        mInterstitialAdShowing = false;
-                        loadAudienceNetworkInterstitialAds();
-                    }
-                });
-
-    }
-
-    void loadAudienceNetworkInterstitialAds() {
-        if (!mAudienceNetworkInterstitialAdsEnabled) {
-            return;
-        }
-
-        // an add is showing, don't show again
-        if (mInterstitialAdShowing) {
-            return;
-        }
-        String placementId = getResources().getString(R.string.an_interstitial_placement_id);
-        if (BuildConfig.DEBUG) {
-            placementId = "CAROUSEL_IMG_SQUARE_APP_INSTALL#" + placementId;
-        }
-        mAnInterstitialAd = new com.facebook.ads.InterstitialAd(
-                this, placementId);
-        // Create listeners for the Interstitial Ad
-        InterstitialAdListener interstitialAdListener = new InterstitialAdListener() {
-            @Override
-            public void onInterstitialDisplayed(Ad ad) {
-                // Interstitial ad displayed callback
-                mInterstitialAdShowing = true;
-                mInterstitialAdShowCount++;
-                Log.e(TAG, "Interstitial ad displayed.");
-            }
-
-            @Override
-            public void onInterstitialDismissed(Ad ad) {
-                // Interstitial dismissed callback
-                Log.e(TAG, "Audience Network Interstitial ad dismissed.");
-                mAnInterstitialAd = null;
-                mInterstitialAdShowing = false;
-            }
-
-            @Override
-            public void onError(Ad ad, com.facebook.ads.AdError adError) {
-                // Ad error callback
-                Log.e(TAG, "Audience Network Interstitial ad failed to load: " + adError.getErrorCode() + " - "  + adError.getErrorMessage());
-                if (BuildConfig.DEBUG) {
-                    Toast.makeText(HomeActivity.this,
-                            "Error: " + adError.getErrorMessage(),
-                            Toast.LENGTH_LONG).show();
-                }
-                mAnInterstitialAd = null;
-                mInterstitialAdShowing = false;
-            }
-
-            @Override
-            public void onAdLoaded(Ad ad) {
-                // Interstitial ad is loaded and ready to be displayed
-                Log.d(TAG, "Audience Network Interstitial ad is loaded and ready to be displayed!");
-                // Show the ad
-                mInterstitialAdShowing = true;
-                mAnInterstitialAd.show();
-            }
-
-            @Override
-            public void onAdClicked(Ad ad) {
-                // Ad clicked callback
-                Log.d(TAG, "Audience Network Interstitial ad clicked!");
-            }
-
-            @Override
-            public void onLoggingImpression(Ad ad) {
-                // Ad impression logged callback
-                Log.d(TAG, "Audience Network Interstitial ad impression logged!");
-            }
-        };
-
-        // For auto play video ads, it's recommended to load the ad
-        // at least 30 seconds before it is shown
-        mAnInterstitialAd.loadAd(
-                mAnInterstitialAd.buildLoadAdConfig()
-                        .withAdListener(interstitialAdListener)
-                        .build());
+        showHideArrivalListAds();
     }
 
     public void onMarkerClicked(Marker marker) {
         mMarkerClickedCount++;
-        if (mRandom.nextBoolean()) {
+        if (mRandom.nextBoolean() && mShowRateitDialog) {
             // show rate dialog
             RateItDialogFragment.show(getApplicationContext(), getSupportFragmentManager());
         } else {
             // show interstitial ad
             if (BuildConfig.ENABLE_ADMOB) {
-                loadInterstitialAd(false, null);
+                mTopAdsManager.loadInterstitialAd(false, null, mMarkerClickedCount);
             }
         }
     }
@@ -2313,27 +1689,27 @@ public class HomeActivity extends AppCompatActivity
             }
         }
 
-        if (mStopActionButtonsView != null) {
-            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) mStopActionButtonsView
-                    .getLayoutParams();
-            if (leftHandMode) {
-                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                    layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_LEFT);
-                }
-            } else {
-                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                    layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-                }
-            }
-        }
-
         if (mLayersFab != null) {
             if (leftHandMode) {
                 mLayersFab.setButtonPosition(POSITION_BOTTOM | POSITION_START);
             } else {
                 mLayersFab.setButtonPosition(POSITION_BOTTOM | POSITION_END);
+            }
+        }
+
+        if (mStopFab != null) {
+            if (leftHandMode) {
+                mStopFab.setButtonPosition(POSITION_BOTTOM | POSITION_END);
+            } else {
+                mStopFab.setButtonPosition(POSITION_BOTTOM | POSITION_START);
+            }
+        }
+
+        if (mPlanTripFab != null) {
+            if (leftHandMode) {
+                mPlanTripFab.setButtonPosition(POSITION_BOTTOM | POSITION_END);
+            } else {
+                mPlanTripFab.setButtonPosition(POSITION_BOTTOM | POSITION_START);
             }
         }
 
@@ -2361,8 +1737,9 @@ public class HomeActivity extends AppCompatActivity
      */
     synchronized private void moveFabsLocation() {
         moveFabLocation(mFabMyLocation, MY_LOC_DEFAULT_BOTTOM_MARGIN);
-        moveFabLocation(mStopActionButtonsView, MY_LOC_DEFAULT_BOTTOM_MARGIN);
         moveFabLocation(mLayersFab, LAYERS_FAB_DEFAULT_BOTTOM_MARGIN);
+        moveFabLocation(mStopFab, LAYERS_FAB_DEFAULT_BOTTOM_MARGIN);
+        moveFabLocation(mPlanTripFab, STOP_FAB_DEFAULT_BOTTOM_MARGIN);
         moveFabLocation(mZoomInFab, MY_LOC_DEFAULT_BOTTOM_MARGIN + 88);
         moveFabLocation(mZoomOutFab, MY_LOC_DEFAULT_BOTTOM_MARGIN + 208);
     }
@@ -2434,93 +1811,28 @@ public class HomeActivity extends AppCompatActivity
         }, 100);
     }
 
-    private void moveStopActionButtonsPanelLocation(final View fab, final int initialMargin) {
-        if (fab == null) {
-            return;
-        }
-        if (mStopActionButtonsAnimation != null &&
-                (mStopActionButtonsAnimation.hasStarted() && !mStopActionButtonsAnimation.hasEnded())) {
-            // We're already animating - do nothing
-
-            //return;
-        }
-
-        if (mStopActionButtonsAnimation != null) {
-            mStopActionButtonsAnimation.reset();
-        }
-
-        // Post this to a handler to allow the header to settle before animating the button
-        final Handler h = new Handler();
-        h.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                final ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) fab
-                        .getLayoutParams();
-
-                int tempMargin = initialMargin;
-
-                if (mSlidingPanel.getPanelState() == SlidingUpPanelLayout.PanelState.COLLAPSED) {
-                    tempMargin += mSlidingPanel.getPanelHeight();
-                    if (p.bottomMargin == tempMargin) {
-                        // Button is already in the right position, do nothing
-                        return;
-                    }
-                } else {
-                    if (mSlidingPanel.getPanelState() == SlidingUpPanelLayout.PanelState.HIDDEN) {
-                        if (p.bottomMargin == tempMargin) {
-                            // Button is already in the right position, do nothing
-                            return;
-                        }
-                    }
-                }
-
-                final int goalMargin = tempMargin;
-                final int currentMargin = p.bottomMargin;
-
-                mStopActionButtonsAnimation = new Animation() {
-                    @Override
-                    protected void applyTransformation(float interpolatedTime, Transformation t) {
-                        int bottom;
-                        if (goalMargin > currentMargin) {
-                            bottom = currentMargin + (int) (Math.abs(currentMargin - goalMargin)
-                                    * interpolatedTime);
-                        } else {
-                            bottom = currentMargin - (int) (Math.abs(currentMargin - goalMargin)
-                                    * interpolatedTime);
-                        }
-                        UIUtils.setMargins(fab,
-                                p.leftMargin,
-                                p.topMargin,
-                                p.rightMargin,
-                                bottom);
-                    }
-                };
-                mStopActionButtonsAnimation.setDuration(MY_LOC_BTN_ANIM_DURATION);
-                fab.startAnimation(mStopActionButtonsAnimation);
-            }
-        }, 100);
-    }
-
     private void showFloatingActionButtons() {
-        if (mFabMyLocation == null && mLayersFab == null && mStopActionButtonsView == null) {
+        if (mFabMyLocation == null && mLayersFab == null && mStopFab == null && mPlanTripFab == null) {
             return;
         }
         if (mFabMyLocation != null && mFabMyLocation.getVisibility() != View.VISIBLE) {
             mFabMyLocation.setVisibility(View.VISIBLE);
         }
         if (mLayersFab != null && mLayersFab.getVisibility() != View.VISIBLE) {
-            if (Application.isBikeshareEnabled()) {
-                mLayersFab.setVisibility(View.VISIBLE);
-            }
+            mLayersFab.setVisibility(View.VISIBLE);
         }
 
-        if (mStopActionButtonsView != null && mStopActionButtonsView.getVisibility() != View.VISIBLE) {
-            mStopActionButtonsView.setVisibility(View.VISIBLE);
+        if (mStopFab != null && mStopFab.getVisibility() != View.VISIBLE) {
+            mStopFab.setVisibility(View.VISIBLE);
+        }
+
+        if (mPlanTripFab != null && mPlanTripFab.getVisibility() != View.VISIBLE) {
+            mPlanTripFab.setVisibility(View.VISIBLE);
         }
     }
 
     private void hideFloatingActionButtons() {
-        if (mFabMyLocation == null && mLayersFab == null && mStopActionButtonsView == null) {
+        if (mFabMyLocation == null && mLayersFab == null && mStopFab == null && mPlanTripFab == null) {
             return;
         }
         if (mFabMyLocation != null && mFabMyLocation.getVisibility() != View.GONE) {
@@ -2529,8 +1841,11 @@ public class HomeActivity extends AppCompatActivity
         if (mLayersFab != null && mLayersFab.getVisibility() != View.GONE) {
             mLayersFab.setVisibility(View.GONE);
         }
-        if (mStopActionButtonsView != null && mStopActionButtonsView.getVisibility() != View.GONE) {
-            mStopActionButtonsView.setVisibility(View.GONE);
+        if (mStopFab != null && mStopFab.getVisibility() != View.GONE) {
+            mStopFab.setVisibility(View.GONE);
+        }
+        if (mPlanTripFab != null && mPlanTripFab.getVisibility() != View.GONE) {
+            mPlanTripFab.setVisibility(View.GONE);
         }
     }
 
@@ -2605,6 +1920,7 @@ public class HomeActivity extends AppCompatActivity
                         Log.d(TAG, "Updated remote config fetched");
                         if (task.isSuccessful()) {
                             updateConfigFromRemoteConfig();
+                            mTopAdsManager.loadMainTopAd(findViewById(R.id.main_top_banner_ad_view), findViewById(R.id.main_top_native_ad_view));
                         }
                     }
                 });
@@ -2619,10 +1935,13 @@ public class HomeActivity extends AppCompatActivity
 
     private void updateConfigFromRemoteConfig() {
         if (mFirebaseRemoteConfig != null) {
-            mAudienceNetworkInterstitialAdsEnabled = mFirebaseRemoteConfig.getBoolean("enable_audience_network_interstitial_ads");
-            mAdmobInterstitialAdsEnabled = mFirebaseRemoteConfig.getBoolean("enable_admob_interstitial_ads");
-            mAudienceNetworkBannerAdsEnabled = mFirebaseRemoteConfig.getBoolean("enable_audience_network_banner_ads");
-            mAdmobBannerAdsEnabled = mFirebaseRemoteConfig.getBoolean("enable_admob_banner_ads");
+            AdsManager.setAudienceNetworkInterstitialAdsEnabled(mFirebaseRemoteConfig.getBoolean("enable_audience_network_interstitial_ads"));
+            AdsManager.setAdmobInterstitialAdsEnabled(mFirebaseRemoteConfig.getBoolean("enable_admob_interstitial_ads"));
+            AdsManager.setAudienceNetworkBannerAdsEnabled(mFirebaseRemoteConfig.getBoolean("enable_audience_network_banner_ads"));
+            AdsManager.setAdmobBannerAdsEnabled(mFirebaseRemoteConfig.getBoolean("enable_admob_banner_ads"));
+            AdsManager.setMainTopAdsFormat(mFirebaseRemoteConfig.getString("main_top_ads_format"));
+            AdsManager.setShowAdsInArrivalList(mFirebaseRemoteConfig.getBoolean("show_ads_in_arrival_list"));
+            mShowRateitDialog = mFirebaseRemoteConfig.getBoolean("show_rateit_dialog");
         }
     }
 
@@ -2644,7 +1963,7 @@ public class HomeActivity extends AppCompatActivity
         LAYERS_FAB_DEFAULT_BOTTOM_MARGIN = p.bottomMargin;
 
         mLayersFab.setButtonIconResource(R.drawable.ic_layers_white_24dp);
-        mLayersFab.setButtonBackgroundColour(ContextCompat.getColor(this, R.color.theme_accent));
+        mLayersFab.setButtonBackgroundColour(ContextCompat.getColor(this, R.color.theme_primary));
 
         LayersSpeedDialAdapter adapter = new LayersSpeedDialAdapter(this);
         // Add the BaseMapFragment listener to activate the layer on the map
@@ -2658,12 +1977,14 @@ public class HomeActivity extends AppCompatActivity
             public void onActivateLayer(LayerInfo layer) {
                 Handler h = new Handler(getMainLooper());
                 h.postDelayed(() -> mLayersFab.rebuildSpeedDialMenu(), 100);
+                mLayersFab.closeSpeedDialMenu();
             }
 
             @Override
             public void onDeactivateLayer(LayerInfo layer) {
                 Handler h = new Handler(getMainLooper());
                 h.postDelayed(() -> mLayersFab.rebuildSpeedDialMenu(), 100);
+                mLayersFab.closeSpeedDialMenu();
             }
         });
         mLayersFab.setSpeedDialMenuAdapter(adapter);
@@ -2674,18 +1995,99 @@ public class HomeActivity extends AppCompatActivity
         mLayersFab.setContentCoverEnabled(false);
     }
 
+    private void setupStopsSpeedDial() {
+        mStopFab = findViewById(R.id.stopSpeedDial);
+
+        mStopFab.setButtonIconResource(R.drawable.ic_map_stop_white);
+        mStopFab.setButtonBackgroundColour(ContextCompat.getColor(this, R.color.theme_primary));
+
+        StopSpeedDialAdapter adapter = new StopSpeedDialAdapter(this);
+        // Add the BaseMapFragment listener to activate the layer on the map
+        adapter.addStopSpeedDialListener(this);
+
+        // Add another listener to rebuild the menu options after selection. This other listener
+        // was added here because the call to rebuildSpeedDialMenu exists on the FAB and we have a
+        // reference to it only in the main activity.
+        mStopFab.setSpeedDialMenuAdapter(adapter);
+        mStopFab.setOnSpeedDialMenuOpenListener(
+                v -> mStopFab.setButtonIconResource(R.drawable.ic_add_white_24dp));
+        mStopFab.setOnSpeedDialMenuCloseListener(
+                v -> mStopFab.setButtonIconResource(R.drawable.ic_map_stop_white));
+        mStopFab.setContentCoverEnabled(false);
+        mStopFab.hide(true);
+
+        mPlanTripFab = findViewById(R.id.btnPlanTrip);
+
+        ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) mPlanTripFab
+                .getLayoutParams();
+        STOP_FAB_DEFAULT_BOTTOM_MARGIN = p.bottomMargin;
+
+        mPlanTripFab.setButtonIconResource(R.drawable.ic_navigation);
+        mPlanTripFab.setButtonBackgroundColour(ContextCompat.getColor(this, R.color.theme_primary));
+        mPlanTripFab.setContentCoverEnabled(false);
+        mPlanTripFab.hide(true);
+        mPlanTripFab.setOnClickListener(v -> {
+            planTripFromStop();
+        });
+    }
+
+    @Override
+    public void onStopSpeedDialClicked(LayerInfo layer) {
+        switch (layer.getLayerlabel()) {
+            case "Stop Info": {
+                if (mArrivalsListFragment != null) {
+                    mArrivalsListFragment.onOptionsItemSelected(R.id.show_stop_details);
+                }
+                break;
+            }
+            case "Filter Route": {
+                if (mArrivalsListFragment != null) {
+                    mArrivalsListFragment.onOptionsItemSelected(R.id.filter);
+                }
+                break;
+            }
+            case "Hide Alerts": {
+                if (mArrivalsListFragment != null) {
+                    mArrivalsListFragment.onOptionsItemSelected(R.id.hide_alerts);
+                    Toast.makeText(this, "All active alerts will be hidden for this stop", Toast.LENGTH_LONG).show();
+                }
+                break;
+            }
+            case "Report Issue": {
+                if (mArrivalsListFragment != null) {
+                    mArrivalsListFragment.onOptionsItemSelected(R.id.report_stop_problem);
+                }
+                break;
+            }
+        }
+
+        mStopFab.closeSpeedDialMenu();
+    }
+
     /**
      * Method used to (re)display the layers FAB button when the activity restarts or regions data
      * is updated
      */
     private void updateLayersFab() {
-        if (Application.isBikeshareEnabled()
-                && mCurrentNavDrawerPosition == NAVDRAWER_ITEM_NEARBY) {
+        if (mCurrentNavDrawerPosition == NAVDRAWER_ITEM_NEARBY) {
             mLayersFab.setVisibility(View.VISIBLE);
         } else {
             mLayersFab.setVisibility(View.GONE);
         }
         mLayersFab.rebuildSpeedDialMenu();
+    }
+
+    /**
+     * Method used to (re)display the layers FAB button when the activity restarts or regions data
+     * is updated
+     */
+    private void updateStopFab() {
+        if (mCurrentNavDrawerPosition == NAVDRAWER_ITEM_NEARBY) {
+            mStopFab.setVisibility(View.VISIBLE);
+        } else {
+            mStopFab.setVisibility(View.GONE);
+        }
+        mStopFab.rebuildSpeedDialMenu();
     }
 
 
@@ -2831,6 +2233,11 @@ public class HomeActivity extends AppCompatActivity
                 return -1;
             }
         };
+
+        showHideArrivalListAds();
+        if (BuildConfig.ENABLE_ADMOB) {
+            mArrivalListAdsManager.loadBannerAd(findViewById(R.id.arrivalsAdView));
+        }
     }
 
     /**
@@ -2966,10 +2373,140 @@ public class HomeActivity extends AppCompatActivity
 
     @Override
     protected void onDestroy() {
-        if (mAnInterstitialAd != null) {
-            mAnInterstitialAd.destroy();
+        if (mTopAdsManager != null) {
+            mTopAdsManager.destroy();
         }
 
         super.onDestroy();
+    }
+
+    private void setUpAutocomplete() {
+        ObaRegion region = Application.get().getCurrentRegion();
+
+        ImageButton tripPlanListBtn = findViewById(R.id.trip_plan_list_btn);
+        tripPlanHelper = new TripPlanHelper(this);
+        tripPlanHelper.setTripPlanListItemSelectedListener(new TripPlanHelper.TripPlanListItemSelectedListener() {
+            @Override
+            public void onTripPlanListItemSelected(TripPlanAddresses tripPlan) {
+                startTripPlanActivity(tripPlan.getFromAddress(), tripPlan.getToAddress());
+            }
+        });
+        tripPlanListBtn.setOnClickListener(v -> {
+            tripPlanHelper.loadTrips();
+        });
+
+        AutoCompleteTextView tv = findViewById(R.id.where_to_go_txt);
+
+        // Use Google Places widget if build config uses it and it's available
+        if (!BuildConfig.USE_PELIAS_GEOCODING && GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this)
+                == ConnectionResult.SUCCESS) {
+            tv.setFocusable(false);
+            tv.setOnClickListener(new ProprietaryMapHelpV2.StartPlacesAutocompleteOnClick(TripPlanFragment.USE_TO_ADDRESS, this, null, region));
+            return;
+        }
+
+        // Set up autocomplete with Pelias geocoder
+        tv.setAdapter(new PlacesAutoCompleteAdapter(this, R.layout.geocode_result, region));
+        tv.setOnItemClickListener((parent, view, position, id) -> {
+            CustomAddress fromAddr = makeAddressFromLocation();
+            CustomAddress toAddr = (CustomAddress) parent.getAdapter().getItem(position);
+
+            TripRequestBuilder mBuilder = new TripRequestBuilder(new Bundle());
+            mBuilder.setFrom(fromAddr);
+            mBuilder.setTo(toAddr);
+
+            tv.dismissDropDown();
+            UIUtils.closeKeyboard(this, tv);
+
+            Intent planTrip = new Intent(HomeActivity.this, TripPlanActivity.class);
+            //planTrip.putExtras(mBuilder.getBundle());
+            startActivity(planTrip, mBuilder.getBundle());
+            ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                    getString(R.string.analytics_label_button_press_trip_plan),
+                    null);
+        });
+    }
+
+    private CustomAddress makeAddressFromLocation() {
+        return TripPlanHelper.makeAddressFromLocation(this, mGoogleApiClient);
+    }
+
+    /**
+     * Receives a geocoding result from the Google Places SDK
+     *
+     * @param requestCode
+     * @param resultCode
+     * @param intent
+     */
+    public void startTripPlanActivity(int requestCode, int resultCode, Intent intent) {
+        if (resultCode != -1) {
+            Log.e(TAG, "Error getting geocoding results");
+            return;
+        }
+
+        AutoCompleteTextView tv = findViewById(R.id.where_to_go_txt);
+        CustomAddress toAddr = ProprietaryMapHelpV2.getCustomAddressFromPlacesIntent(Application.get().getApplicationContext(), intent);
+
+        tv.dismissDropDown();
+        UIUtils.closeKeyboard(this, tv);
+
+        startTripPlanActivity(null, toAddr);
+    }
+
+    public void startTripPlanActivity(CustomAddress fromAddr, CustomAddress toAddr) {
+        CustomAddress fromAddress = fromAddr;
+        if (fromAddr == null) {
+            fromAddress = makeAddressFromLocation();
+        }
+
+        CustomAddress toAddress = toAddr;
+        if (toAddr == null) {
+            toAddress = makeAddressFromLocation();
+        }
+
+        TripRequestBuilder mBuilder = new TripRequestBuilder(new Bundle());
+        mBuilder.setFrom(fromAddress);
+        mBuilder.setTo(toAddress);
+        Intent planTrip = new Intent(HomeActivity.this, TripPlanActivity.class);
+        planTrip.putExtras(mBuilder.getBundle());
+        planTrip.putExtra(OTPConstants.INTENT_SOURCE, OTPConstants.Source.EXTERNAL_ACTIVITY);
+        startActivity(planTrip);
+        ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                getString(R.string.analytics_label_button_press_trip_plan),
+                null);
+    }
+
+    private void planTripFromStop() {
+        if (mFocusedStop != null) {
+            CustomAddress fromAddress = CustomAddress.getEmptyAddress();
+            fromAddress.setAddressLine(0, mFocusedStop.getName());
+            fromAddress.setLatitude(mFocusedStop.getLatitude());
+            fromAddress.setLongitude(mFocusedStop.getLongitude());
+
+            TripRequestBuilder mBuilder = new TripRequestBuilder(new Bundle());
+            mBuilder.setFrom(fromAddress);
+            Intent planTrip = new Intent(HomeActivity.this, TripPlanActivity.class);
+            planTrip.putExtras(mBuilder.getBundle());
+            planTrip.putExtra(OTPConstants.INTENT_SOURCE, OTPConstants.Source.NOTIFICATION);
+            startActivity(planTrip);
+            ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                    getString(R.string.analytics_label_button_press_trip_plan),
+                    null);
+        }
+    }
+
+    private void showHideArrivalListAds() {
+        if (!BuildConfig.ENABLE_ADMOB) {
+            return;
+        }
+
+        if (AdsManager.isShowAdsInArrivalList()) {
+            mArrivalListAdsManager.loadBannerAd(findViewById(R.id.arrivalsAdView));
+        } else {
+            View v = findViewById(R.id.arrivalsAdView);
+            if (v != null) {
+                v.setVisibility(View.GONE);
+            }
+        }
     }
 }

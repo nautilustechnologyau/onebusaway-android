@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <FrameLayout
+        style="@style/MaterialLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <ImageView
+            style="@style/MaterialSmallIcon"
+            android:layout_marginTop="12dp"
+            android:src="@android:drawable/ic_input_get"
+            android:visibility="gone" />
+
+        <EditText
+            android:id="@+id/trip_planner_name_txt"
+            android:inputType="text"
+            android:layout_margin="10dp"
+            android:gravity="center"
+            android:layout_gravity="center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </FrameLayout>
+</RelativeLayout>

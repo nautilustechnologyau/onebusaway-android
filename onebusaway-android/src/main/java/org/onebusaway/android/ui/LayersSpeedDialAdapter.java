@@ -22,6 +22,8 @@ import android.os.Build;
 import android.preference.PreferenceManager;
 import android.widget.TextView;
 
+import androidx.constraintlayout.helper.widget.Layer;
+
 import org.jetbrains.annotations.NotNull;
 import org.onebusaway.android.R;
 import org.onebusaway.android.map.googlemapsv2.LayerInfo;
@@ -58,11 +60,17 @@ public class LayersSpeedDialAdapter extends SpeedDialMenuAdapter {
      */
     private List<LayerActivationListener> layerActivationListeners = new ArrayList<>();
 
+    private int mLayerCount = 6;
+
     public LayersSpeedDialAdapter(Context context) {
         this.context = context;
+        if (LayerUtils.isBikeshareLayerVisible()) {
+            mLayerCount++;
+        }
         setupLayers();
-        activatedLayers = new Boolean[1];
-        activatedLayers[0] = LayerUtils.isBikeshareLayerVisible();
+        activatedLayers = new Boolean[mLayerCount];
+
+        refreshActiveLayerStates();
     }
 
     public void addLayerActivationListener(LayerActivationListener listener) {
@@ -70,13 +78,25 @@ public class LayersSpeedDialAdapter extends SpeedDialMenuAdapter {
     }
 
     private void setupLayers() {
-        layers = new LayerInfo[1];
-        layers[0] = LayerUtils.bikeshareLayerInfo;
+        layers = new LayerInfo[mLayerCount];
+
+        int i = 0;
+        if (LayerUtils.isBikeshareLayerVisible()) {
+            layers[i++] =  LayerUtils.bikeshareLayerInfo;
+        }
+
+        layers[i++] = LayerUtils.mapstyleGrayscaleLayerInfo;
+        layers[i++] = LayerUtils.mapstyleNightLayerInfo;
+        layers[i++] = LayerUtils.mapstyleRetroLayerInfo;
+        layers[i++] = LayerUtils.mapstyleAubergineLayerInfo;
+        layers[i++] = LayerUtils.mapstyleDarkLayerInfo;
+        layers[i] = LayerUtils.mapstyleStandardLayerInfo;
+        // layers[i] = LayerUtils.mapstyleSilverLayerInfo;
     }
 
     @Override
     public int getCount() {
-        return 1;
+        return mLayerCount;
     }
 
     /**
@@ -89,7 +109,7 @@ public class LayersSpeedDialAdapter extends SpeedDialMenuAdapter {
     @Override
     public SpeedDialMenuItem getMenuItem(Context context, int position) {
         // Refresh active layer info
-        activatedLayers[0] = LayerUtils.isBikeshareLayerVisible();
+        refreshActiveLayerStates();
 
         LayerInfo layer = layers[position];
 
@@ -108,7 +128,7 @@ public class LayersSpeedDialAdapter extends SpeedDialMenuAdapter {
     @Override
     public void onPrepareItemLabel(@NotNull Context context, int position, @NotNull TextView label) {
         // Refresh active layer info
-        activatedLayers[0] = LayerUtils.isBikeshareLayerVisible();
+        refreshActiveLayerStates();
 
         LayerInfo layer = layers[position];
 
@@ -149,8 +169,25 @@ public class LayersSpeedDialAdapter extends SpeedDialMenuAdapter {
                     }
                 }
             }
-            activatedLayers[position] = !activatedLayers[position];
-            persistSelection(position);
+
+            LayerInfo selectedLayer = layers[position];
+            int group = selectedLayer.getGroup();
+            if (getGroupMemberCount(group) > 1) {
+                for (int i = 0; i < activatedLayers.length; i++) {
+                    if (i == position) {
+                        activatedLayers[i] = true;
+                        persistSelection(i);
+                        continue;
+                    }
+                    if (layers[i].getGroup() == group) {
+                        activatedLayers[i] = false;
+                        persistSelection(i);
+                    }
+                }
+            } else {
+                activatedLayers[position] = !activatedLayers[position];
+                persistSelection(position);
+            }
             return false;
         } else {
             return super.onMenuItemClick(position);
@@ -167,11 +204,37 @@ public class LayersSpeedDialAdapter extends SpeedDialMenuAdapter {
         sp.edit().putBoolean(layers[position].getSharedPreferenceKey(), activatedLayers[position]).apply();
     }
 
+    private int getGroupMemberCount(int group) {
+        int count = 0;
+        for (LayerInfo layer : layers) {
+            if (layer.getGroup() == group) {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    private void refreshActiveLayerStates() {
+        int i = 0;
+        if (LayerUtils.isBikeshareLayerVisible()) {
+            activatedLayers[i++] = LayerUtils.isBikeshareLayerVisible();
+        }
+
+        activatedLayers[i++] = LayerUtils.isMapstyleGrayscaleLayerVisible();
+        activatedLayers[i++] = LayerUtils.isMapstyleNightLayerVisible();
+        activatedLayers[i++] = LayerUtils.isMapstyleRetroLayerVisible();
+        activatedLayers[i++] = LayerUtils.isMapstyleAubergineLayerVisible();
+        activatedLayers[i++] = LayerUtils.isMapstyleDarkLayerVisible();
+        activatedLayers[i] = LayerUtils.isMapstyleStandardLayerVisible();
+        // activatedLayers[i] = LayerUtils.isMapstyleSilverLayerVisible();
+    }
+
     @SuppressWarnings("deprecation")
     @Override
     public int getBackgroundColour(int position) {
         // Refresh active layer info
-        activatedLayers[0] = LayerUtils.isBikeshareLayerVisible();
+        refreshActiveLayerStates();
 
         int activatedColor = layers[position].getLayerColor();
         int deactivatedColor = context.getResources().getColor(R.color.layer_disabled);

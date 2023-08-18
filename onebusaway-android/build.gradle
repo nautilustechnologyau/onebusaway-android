@@ -45,8 +45,8 @@ android {
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 33
-        versionCode 157
-        versionName "3.0.6"
+        versionCode 160
+        versionName "4.0.0"
 
         multiDexEnabled true
 
@@ -372,8 +372,11 @@ android {
         variant.resValue "string", "admob_application_id", apikeyProperties['ADMOB_APPLICATION_ID']
         variant.resValue "string", "admob_banner_unit_id", apikeyProperties['ADMOB_BANNER_UNIT_ID']
         variant.resValue "string", "admob_interstitial_unit_id", apikeyProperties['ADMOB_INTERSTITIAL_UNIT_ID']
+        variant.resValue "string", "admob_native_unit_id", apikeyProperties['ADMOB_NATIVE_UNIT_ID']
         variant.resValue "string", "an_banner_placement_id", apikeyProperties['AN_BANNER_PLACEMENT_ID']
         variant.resValue "string", "an_interstitial_placement_id", apikeyProperties['AN_INTERSTITIAL_PLACEMENT_ID']
+        variant.resValue "string", "google_maps_api_key", apikeyProperties['GOOGLE_MAPS_API_KEY']
+        variant.buildConfigField "String", "GOOGLE_MAPS_API_KEY", apikeyProperties['GOOGLE_MAPS_API_KEY']
     }
 
     // http://stackoverflow.com/questions/20673625/gradle-0-7-0-duplicate-files-during-packaging-of-apk
@@ -576,6 +579,7 @@ dependencies {
     implementation 'com.google.ads.mediation:facebook:6.12.0.0'
     implementation 'com.google.ads.mediation:inmobi:10.1.2.1'
     implementation 'com.facebook.android:audience-network-sdk:6.12.0'
+    implementation project(':nativetemplates')
 
     // Billing
     implementation 'com.android.billingclient:billing:5.1.0'

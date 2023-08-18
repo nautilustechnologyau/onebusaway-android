@@ -34,12 +34,15 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import org.onebusaway.android.BuildConfig;
 import org.onebusaway.android.R;
 import org.onebusaway.android.app.Application;
+import org.onebusaway.android.directions.util.CustomAddress;
+import org.onebusaway.android.directions.util.TripPlanAddresses;
 import org.onebusaway.android.io.ObaAnalytics;
 import org.onebusaway.android.io.elements.ObaRegion;
 import org.onebusaway.android.io.elements.ObaRegionElement;
 import org.onebusaway.android.nav.model.PathLink;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The contract between clients and the ObaProvider.
@@ -624,6 +627,73 @@ public final class ObaContract {
          */
         public static final String ACTIVE = "is_active";
 
+    }
+
+    protected interface TripPlansColumns {
+
+        /**
+         * The name of the trip plan. It can be any string provided by user
+         * <P>
+         * Type: TEXT
+         * </P>
+         */
+        public static final String PLAN_NAME = "plan_name";
+
+        /**
+         * The region ID
+         * <P>
+         * Type: INTEGER
+         * </P>
+         */
+        public static final String REGION_ID = "region_id";
+
+        /**
+         * The address line 1 of the from address
+         * <P>
+         * Type: TEXT
+         * </P>
+         */
+        public static final String FROM_ADDRESS_LINE1 = "from_address_line1";
+
+        /**
+         * The latitude of the from address
+         * <P>
+         * Type: DOUBLE
+         * </P>
+         */
+        public static final String FROM_ADDRESS_LATITUDE = "from_address_latitude";
+
+        /**
+         * The longitude of the from address
+         * <P>
+         * Type: DOUBLE
+         * </P>
+         */
+        public static final String FROM_ADDRESS_LONGITUDE = "from_address_longitude";
+
+        /**
+         * The address line 1 of the to address
+         * <P>
+         * Type: TEXT
+         * </P>
+         */
+        public static final String TO_ADDRESS_LINE1 = "to_address_line1";
+
+        /**
+         * The latitude of the to address
+         * <P>
+         * Type: DOUBLE
+         * </P>
+         */
+        public static final String TO_ADDRESS_LATITUDE = "to_address_latitude";
+
+        /**
+         * The longitude of the to address
+         * <P>
+         * Type: DOUBLE
+         * </P>
+         */
+        public static final String TO_ADDRESS_LONGITUDE = "to_address_longitude";
     }
 
     public static class Stops implements BaseColumns, StopsColumns, UserColumns {
@@ -1764,7 +1834,6 @@ public final class ObaContract {
         }
     }
 
-
     public static class NavStops implements BaseColumns, NavigationColumns {
 
         // Cannot be instantiated
@@ -1890,6 +1959,176 @@ public final class ObaContract {
                     } while (c.moveToNext());
 
                     return results;
+                } finally {
+                    c.close();
+                }
+            }
+            return null;
+        }
+    }
+
+    public static class TripPlans implements BaseColumns, TripPlansColumns {
+
+        // Cannot be instantiated
+        private TripPlans() {
+        }
+
+        /** The URI path portion for this table */
+        public static final String PATH = "trip_plans";
+
+        public static final String CONTENT_TYPE
+                = "vnd.android.cursor.item/" + BuildConfig.DATABASE_AUTHORITY + ".trip_plans";
+
+        public static final String CONTENT_DIR_TYPE
+                = "vnd.android.dir/" + BuildConfig.DATABASE_AUTHORITY + ".trip_plans";
+
+        /** The content:// style URI for this table */
+        public static final Uri CONTENT_URI = Uri.withAppendedPath(
+                AUTHORITY_URI, PATH);
+
+        public static Uri buildUri(int id) {
+            return CONTENT_URI.buildUpon().appendPath(String.valueOf(id))
+                    .build();
+        }
+
+        public static Uri insertOrUpdate(Context context, TripPlanAddresses tripPlan) {
+            return insertOrUpdate(context.getContentResolver(), tripPlan);
+        }
+
+        public static Uri insertOrUpdate(ContentResolver cr, TripPlanAddresses tripPlan) {
+            Uri result;
+            long regionId = Application.get().getCurrentRegion().getId();
+            Cursor c = cr.query(CONTENT_URI,
+                    new String[]{_ID},
+                    String.format("%s=? AND %s=?", _ID, REGION_ID),
+                    new String[]{String.valueOf(tripPlan.getId()), String.valueOf(regionId)},
+                    null);
+            if (c != null && c.moveToNext()) {
+                result = buildUri(c.getInt(0));
+                cr.update(result, createTripPlanRecord(tripPlan), null, null);
+            } else {
+                result = cr.insert(CONTENT_URI, createTripPlanRecord(tripPlan));
+            }
+            if (c != null) {
+                c.close();
+            }
+            return result;
+        }
+
+        public static int delete(Context context, int id) {
+            long regionId = Application.get().getCurrentRegion().getId();
+            final String[] selectionArgs = {String.valueOf(id), String.valueOf(regionId)};
+            final String where = String.format("%s=? AND %s=?", _ID, REGION_ID);
+            ContentResolver cr = context.getContentResolver();
+            return cr.delete(CONTENT_URI, where, selectionArgs);
+        }
+
+        private static ContentValues createTripPlanRecord(TripPlanAddresses tripPlan) {
+            ContentValues values = new ContentValues();
+            long regionId = Application.get().getCurrentRegion().getId();
+            values.put(REGION_ID, String.valueOf(regionId));
+
+            String planName = tripPlan.getPlanName();
+            CustomAddress fromAddress = tripPlan.getFromAddress();
+            CustomAddress toAddress = tripPlan.getToAddress();
+
+            values.put(PLAN_NAME, planName);
+
+            if (fromAddress.getMaxAddressLineIndex() >= 0) {
+                values.put(FROM_ADDRESS_LINE1, fromAddress.getAddressLine(0));
+            }
+            values.put(FROM_ADDRESS_LATITUDE, fromAddress.getLatitude());
+            values.put(FROM_ADDRESS_LONGITUDE, fromAddress.getLongitude());
+
+            if (toAddress.getMaxAddressLineIndex() >= 0) {
+                values.put(TO_ADDRESS_LINE1, toAddress.getAddressLine(0));
+            }
+            values.put(TO_ADDRESS_LATITUDE, toAddress.getLatitude());
+            values.put(TO_ADDRESS_LONGITUDE, toAddress.getLongitude());
+
+            return values;
+        }
+
+        public static ArrayList<TripPlanAddresses> getAllTripPlans(Context context) {
+            ArrayList<TripPlanAddresses> tripPlans = new ArrayList<>();
+
+            final String[] PROJECTION = {
+                    _ID,
+                    PLAN_NAME,
+                    FROM_ADDRESS_LINE1,
+                    FROM_ADDRESS_LATITUDE,
+                    FROM_ADDRESS_LONGITUDE,
+                    TO_ADDRESS_LINE1,
+                    TO_ADDRESS_LATITUDE,
+                    TO_ADDRESS_LONGITUDE
+            };
+
+            long regionId = Application.get().getCurrentRegion().getId();
+            ContentResolver cr = context.getContentResolver();
+            Cursor c = cr.query(CONTENT_URI,
+                    PROJECTION,
+                    String.format("%s=?", REGION_ID),
+                    new String[]{String.valueOf(regionId)},
+                    null);
+            if (c != null) {
+                try {
+                    if (c.getCount() == 0) {
+                        return tripPlans;
+                    }
+                    while (c.moveToNext()) {
+                        TripPlanAddresses tripPlan = new TripPlanAddresses(
+                                c.getInt(0),
+                                c.getString(1),
+                                c.getString(2),
+                                c.getDouble(3),
+                                c.getDouble(4),
+                                c.getString(5),
+                                c.getDouble(6),
+                                c.getDouble(7));
+                        tripPlans.add(tripPlan);
+                    }
+                } finally {
+                    c.close();
+                }
+            }
+
+            return tripPlans;
+        }
+
+        public static TripPlanAddresses getTripPlan(Context context, int id) {
+            final String[] PROJECTION = {
+                    _ID,
+                    PLAN_NAME,
+                    FROM_ADDRESS_LINE1,
+                    FROM_ADDRESS_LATITUDE,
+                    FROM_ADDRESS_LONGITUDE,
+                    TO_ADDRESS_LINE1,
+                    TO_ADDRESS_LATITUDE,
+                    TO_ADDRESS_LONGITUDE
+            };
+
+            long regionId = Application.get().getCurrentRegion().getId();
+
+            ContentResolver cr = context.getContentResolver();
+            Cursor c = cr.query(CONTENT_URI, PROJECTION,
+                    _ID + "=? AND " + REGION_ID + "=?",
+                    new String[] { String.valueOf(id), String.valueOf(regionId) },
+                    null);
+            if (c != null) {
+                try {
+                    if (c.getCount() == 0) {
+                        return null;
+                    }
+                    c.moveToFirst();
+                    return new TripPlanAddresses(
+                            c.getInt(0),
+                            c.getString(1),
+                            c.getString(2),
+                            c.getDouble(3),
+                            c.getDouble(4),
+                            c.getString(5),
+                            c.getDouble(6),
+                            c.getDouble(7));
                 } finally {
                     c.close();
                 }

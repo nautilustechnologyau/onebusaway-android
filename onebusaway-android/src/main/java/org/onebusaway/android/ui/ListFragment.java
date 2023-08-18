@@ -16,6 +16,7 @@
 
 package org.onebusaway.android.ui;
 
+import org.onebusaway.android.BuildConfig;
 import org.onebusaway.android.R;
 
 import android.content.Context;
@@ -32,9 +33,16 @@ import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+
+import com.google.android.ads.nativetemplates.NativeTemplateStyle;
+import com.google.android.ads.nativetemplates.TemplateView;
+
+import au.mymetro.android.ads.AdsManager;
 
 /**
  * This is copied from the support package that allows us to use our own IDs,
@@ -76,6 +84,8 @@ public class ListFragment extends Fragment {
 
     boolean mListShown;
 
+    private AdsManager adsManager;
+
     public ListFragment() {
     }
 
@@ -99,7 +109,7 @@ public class ListFragment extends Fragment {
             Bundle savedInstanceState) {
         final Context context = getActivity();
 
-        FrameLayout root = new FrameLayout(context);
+        /*FrameLayout root = new FrameLayout(context);
 
         // ------------------------------------------------------------------
 
@@ -115,7 +125,7 @@ public class ListFragment extends Fragment {
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
         root.addView(pframe, new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
         // ------------------------------------------------------------------
 
@@ -126,22 +136,68 @@ public class ListFragment extends Fragment {
         tv.setId(R.id.internalEmpty);
         tv.setGravity(Gravity.CENTER);
         lframe.addView(tv, new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
         ListView lv = new ListView(getActivity());
         lv.setId(android.R.id.list);
         lv.setDrawSelectorOnTop(false);
         lframe.addView(lv, new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
         root.addView(lframe, new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
         // ------------------------------------------------------------------
 
         root.setLayoutParams(new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));*/
 
+        /*if (BuildConfig.ENABLE_ADMOB) {
+            LinearLayout layout = (LinearLayout) inflater.inflate(R.layout.my_search_route_list, null, false);
+            TemplateView adView = layout.findViewById(R.id.search_list_ad_template);
+            layout.removeView(adView);
+
+            FrameLayout.LayoutParams fl = new FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+
+            root.addView(adView, fl);
+
+            adsManager = new AdsManager((AppCompatActivity) requireActivity());
+            TemplateView template = root.findViewById(R.id.search_list_ad_template);
+            adsManager.loadNativeAd(template);
+        }*/
+
+        /*LinearLayout linear = (LinearLayout)findViewById(R.id.myLayout);
+        linear.addView(layout);
+
+        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+
+        NativeTemplateStyle styles = new
+                NativeTemplateStyle.Builder()..build();
+
+        TemplateView adView = new TemplateView(getActivity());
+        adView.setId(R.id.search_list_ad_template);
+        adView.setStyles();
+        //adView.setLayoutParams(layoutParams);
+        root.addView(adView, layoutParams);*/
+
+        /*
+        <com.google.android.ads.nativetemplates.TemplateView
+        android:id="@+id/search_list_ad_template"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        app:gnt_template_type="@layout/gnt_small_template_view" />
+         */
+
+        View root = inflater.inflate(R.layout.fragment_list, null);
+        if (BuildConfig.ENABLE_ADMOB) {
+            adsManager = new AdsManager((AppCompatActivity) requireActivity());
+            TemplateView template = root.findViewById(R.id.search_list_ad_template);
+            adsManager.loadNativeAd(template);
+        }
         return root;
     }
 

@@ -65,6 +65,7 @@ import com.amazon.geo.mapsv2.UiSettings;
 import com.amazon.geo.mapsv2.model.CameraPosition;
 import com.amazon.geo.mapsv2.model.LatLng;
 import com.amazon.geo.mapsv2.model.LatLngBounds;
+import com.amazon.geo.mapsv2.model.MapStyleOptions;
 import com.amazon.geo.mapsv2.model.Marker;
 import com.amazon.geo.mapsv2.model.Polyline;
 import com.amazon.geo.mapsv2.model.PolylineOptions;
@@ -93,6 +94,7 @@ import org.onebusaway.android.map.googlemapsv2.bike.BikeStationOverlay;
 import org.onebusaway.android.region.ObaRegionsTask;
 import org.onebusaway.android.ui.HomeActivity;
 import org.onebusaway.android.ui.LayersSpeedDialAdapter;
+import org.onebusaway.android.util.LayerUtils;
 import org.onebusaway.android.util.LocationHelper;
 import org.onebusaway.android.util.LocationUtils;
 import org.onebusaway.android.util.PermissionUtils;
@@ -221,6 +223,55 @@ public class BaseMapFragment extends SupportMapFragment
                 }
                 break;
             }
+            case "Grayscale": {
+                applyMapStyle(R.raw.mapstyle_grayscale);
+                ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                        getString(R.string.analytics_layer_mapstyle_grayscale),
+                        getString(R.string.analytics_label_mapstyle_grascale_activated));
+                break;
+            }
+            case "Night": {
+                applyMapStyle(R.raw.mapstyle_night);
+                ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                        getString(R.string.analytics_layer_mapstyle_night),
+                        getString(R.string.analytics_label_mapstyle_night_activated));
+                break;
+            }
+            case "Retro": {
+                applyMapStyle(R.raw.mapstyle_retro);
+                ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                        getString(R.string.analytics_layer_mapstyle_retro),
+                        getString(R.string.analytics_label_mapstyle_retro_activated));
+                break;
+            }
+            case "Aubergine": {
+                applyMapStyle(R.raw.mapstyle_aubergine);
+                ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                        getString(R.string.analytics_layer_mapstyle_aubergine),
+                        getString(R.string.analytics_label_mapstyle_aubergine_activated));
+                break;
+            }
+            case "Dark": {
+                applyMapStyle(R.raw.mapstyle_dark);
+                ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                        getString(R.string.analytics_layer_mapstyle_dark),
+                        getString(R.string.analytics_label_mapstyle_dark_activated));
+                break;
+            }
+            case "Standard": {
+                applyMapStyle(R.raw.mapstyle_standard);
+                ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                        getString(R.string.analytics_layer_mapstyle_standard),
+                        getString(R.string.analytics_label_mapstyle_standard_activated));
+                break;
+            }
+            case "Silver": {
+                applyMapStyle(R.raw.mapstyle_silver);
+                ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                        getString(R.string.analytics_layer_mapstyle_silver),
+                        getString(R.string.analytics_label_mapstyle_silver_activated));
+                break;
+            }
         }
     }
 
@@ -341,6 +392,14 @@ public class BaseMapFragment extends SupportMapFragment
     public void onMapReady(com.amazon.geo.mapsv2.AmazonMap map) {
         mMap = map;
 
+        if (LayerUtils.isMapstyleNightLayerVisible()) {
+            applyMapStyle(R.raw.mapstyle_night);
+        } else if (LayerUtils.isMapstyleGrayscaleLayerVisible()) {
+            applyMapStyle(R.raw.mapstyle_grayscale);
+        } else if (LayerUtils.isMapstyleRetroLayerVisible()) {
+            applyMapStyle(R.raw.mapstyle_retro);
+        }
+
         MapClickListeners mapClickListeners = new MapClickListeners();
 
         mMap.setOnMarkerClickListener(mapClickListeners);
@@ -354,6 +413,22 @@ public class BaseMapFragment extends SupportMapFragment
         }
 
         initMap(mLastSavedInstanceState);
+    }
+
+    private void applyMapStyle(int resourceId) {
+        if (mMap == null) {
+            return;
+        }
+        try {
+            boolean success = mMap.setMapStyle(
+                    MapStyleOptions.loadRawResourceStyle(
+                            requireActivity(), resourceId));
+            if (!success) {
+                Log.e(TAG, "Style parsing failed.");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Can't find style. Error: ", e);
+        }
     }
 
     private void initMap(Bundle savedInstanceState) {

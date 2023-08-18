@@ -53,4 +53,10 @@ public interface LayerInfo {
      * @return unique shared preferences key
      */
     String getSharedPreferenceKey();
+
+    /**
+     * Id of the group this layer belongs to. All layer in same group will act as toggle button.
+     * @return Group id
+     */
+    int getGroup();
 }

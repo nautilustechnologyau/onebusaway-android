@@ -74,7 +74,7 @@ public class OTPConstants {
     // flag to indicate intent sent by or on behalf of TripPlanActivity
     public static final String INTENT_SOURCE = "org.onebusaway.android.INTENT_SOURCE";
 
-    public enum Source {ACTIVITY, NOTIFICATION}
+    public enum Source {ACTIVITY, NOTIFICATION, EXTERNAL_ACTIVITY}
 
     ;
 }

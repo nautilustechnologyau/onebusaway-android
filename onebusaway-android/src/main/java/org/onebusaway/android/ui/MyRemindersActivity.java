@@ -16,18 +16,16 @@
  */
 package org.onebusaway.android.ui;
 
-import org.onebusaway.android.util.UIUtils;
-
 import android.os.Bundle;
 import android.view.MenuItem;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 
+import org.onebusaway.android.R;
+import org.onebusaway.android.util.UIUtils;
+
 public class MyRemindersActivity extends AppCompatActivity {
-    // private static final String TAG = "TripListActivity";
-
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,12 +38,14 @@ public class MyRemindersActivity extends AppCompatActivity {
             MyRemindersFragment list = new MyRemindersFragment();
             fm.beginTransaction().add(android.R.id.content, list).commit();
         }
+
+        setTitle(R.string.my_reminder_title);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            NavHelp.goHome(this, false);
+            onBackPressed();
             return true;
         }
         return false;

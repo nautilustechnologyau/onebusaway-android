@@ -1,1 +1,2 @@
 include ':onebusaway-android'
+include ':nativetemplates'

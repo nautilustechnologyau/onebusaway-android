@@ -15,6 +15,7 @@
  */
 package org.onebusaway.android.ui;
 
+import org.onebusaway.android.BuildConfig;
 import org.onebusaway.android.R;
 
 import android.app.Activity;
@@ -30,10 +31,15 @@ import android.os.Handler;
 import android.view.View;
 import android.widget.ListView;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.cursoradapter.widget.SimpleCursorAdapter;
 import androidx.fragment.app.DialogFragment;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
+
+import com.google.android.ads.nativetemplates.TemplateView;
+
+import au.mymetro.android.ads.AdsManager;
 
 /**
  * Base class for the stop/route list fragments.

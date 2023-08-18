@@ -15,6 +15,7 @@
  */
 package org.onebusaway.android.map.googlemapsv2;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -150,11 +151,13 @@ public class ProprietaryMapHelpV2 {
 
         int mRequestCode;
         Fragment mFragment;
+        Activity mActivity;
         ObaRegion mRegion;
 
-        public StartPlacesAutocompleteOnClick(int requestCode, Fragment fragment, ObaRegion region) {
+        public StartPlacesAutocompleteOnClick(int requestCode, Activity activity, Fragment fragment, ObaRegion region) {
             mRequestCode = requestCode;
             mFragment = fragment;
+            mActivity = activity;
             mRegion = region;
         }
 
@@ -175,12 +178,20 @@ public class ProprietaryMapHelpV2 {
             }
 
             try {
-                intent = builder.build(mFragment.getActivity());
+                if (mActivity != null) {
+                    intent = builder.build(mActivity);
+                } else {
+                    intent = builder.build(mFragment.getActivity());
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-            mFragment.startActivityForResult(intent, mRequestCode);
+            if (mActivity != null) {
+                mActivity.startActivityForResult(intent, mRequestCode);
+            } else {
+                mFragment.startActivityForResult(intent, mRequestCode);
+            }
         }
     }
 

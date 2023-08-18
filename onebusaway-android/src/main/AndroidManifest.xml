@@ -383,7 +383,7 @@
 
         <meta-data
                 android:name="com.google.android.geo.API_KEY"
-                android:value="@string/apiv2_key"/>
+                android:value="@string/google_maps_api_key"/>
 
         <activity
                 android:name="org.onebusaway.android.ui.AboutActivity"

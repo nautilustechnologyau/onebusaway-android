@@ -622,6 +622,7 @@ public class NavigationDrawerFragment extends Fragment {
                 itemId == NAVDRAWER_ITEM_RATE_APP ||
                 itemId == NAVDRAWER_ITEM_REMOVE_ADS ||
                 itemId == NAVDRAWER_ITEM_STARRED_STOPS ||
+                itemId == NAVDRAWER_ITEM_MY_REMINDERS ||
                 itemId == NAVDRAWER_ITEM_REGION;
     }
 

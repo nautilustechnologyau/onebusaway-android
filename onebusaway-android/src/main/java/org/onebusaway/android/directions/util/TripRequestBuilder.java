@@ -47,11 +47,11 @@ public class TripRequestBuilder {
     private static final String TAG = "TripRequestBuilder";
 
     private static final String ARRIVE_BY = ".ARRIVE_BY";
-    private static final String FROM_ADDRESS = ".FROM_ADDRESS";
+    public static final String FROM_ADDRESS = ".FROM_ADDRESS";
     private static final String FROM_LAT = ".FROM_LAT";
     private static final String FROM_LON = ".FROM_LON";
     private static final String FROM_NAME = ".FROM_NAME";
-    private static final String TO_ADDRESS = ".TO_ADDRESS";
+    public static final String TO_ADDRESS = ".TO_ADDRESS";
     private static final String TO_LAT = ".TO_LAT";
     private static final String TO_LON = ".TO_LON";
     private static final String TO_NAME = ".TO_NAME";
@@ -313,7 +313,7 @@ public class TripRequestBuilder {
     public Date getDateTime() {
         Long time = mBundle.getLong(DATE_TIME);
         if (time == null || time == 0L) {
-            return null;
+            return new Date();
         } else {
             return new Date(time);
         }

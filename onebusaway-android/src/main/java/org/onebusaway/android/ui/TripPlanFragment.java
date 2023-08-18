@@ -15,6 +15,8 @@
  */
 package org.onebusaway.android.ui;
 
+import static org.onebusaway.android.util.ShowcaseViewUtils.showTutorial;
+
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
@@ -36,6 +38,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -43,15 +46,14 @@ import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.ads.nativetemplates.TemplateView;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
@@ -62,6 +64,7 @@ import org.onebusaway.android.directions.util.ConversionUtils;
 import org.onebusaway.android.directions.util.CustomAddress;
 import org.onebusaway.android.directions.util.OTPConstants;
 import org.onebusaway.android.directions.util.PlacesAutoCompleteAdapter;
+import org.onebusaway.android.directions.util.TripPlanAddresses;
 import org.onebusaway.android.directions.util.TripRequestBuilder;
 import org.onebusaway.android.io.ObaAnalytics;
 import org.onebusaway.android.io.elements.ObaRegion;
@@ -78,7 +81,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-import static org.onebusaway.android.util.ShowcaseViewUtils.showTutorial;
+import au.mymetro.android.ads.AdsManager;
 
 
 public class TripPlanFragment extends Fragment {
@@ -96,8 +99,8 @@ public class TripPlanFragment extends Fragment {
 
     public static final String TAG = "TripPlanFragment";
 
-    private static final int USE_FROM_ADDRESS = 1;
-    private static final int USE_TO_ADDRESS = 2;
+    public static final int USE_FROM_ADDRESS = 1;
+    public static final int USE_TO_ADDRESS = 2;
 
     private AutoCompleteTextView mFromAddressTextArea;
     private AutoCompleteTextView mToAddressTextArea;
@@ -108,6 +111,7 @@ public class TripPlanFragment extends Fragment {
     private Spinner mTime;
     private ArrayAdapter mTimeAdapter;
     private Spinner mLeavingChoice;
+    private Button mLoadTripPlanButton;
     ArrayAdapter<CharSequence> mLeavingChoiceAdapter;
 
     Calendar mMyCalendar;
@@ -125,6 +129,12 @@ public class TripPlanFragment extends Fragment {
     private String mPlanRequestUrl;
 
     private FirebaseAnalytics mFirebaseAnalytics;
+
+    private AdsManager adsManager;
+
+    private AlertDialog mSelectPlanDlg;
+
+    private TripPlanHelper tripPlanHelper;
 
     // Create view, initialize state
     @SuppressLint("MissingPermission")
@@ -168,6 +178,8 @@ public class TripPlanFragment extends Fragment {
                 R.array.trip_plan_leaving_arriving_array, R.layout.simple_list_item);
         mLeavingChoiceAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mLeavingChoice.setAdapter(mLeavingChoiceAdapter);
+
+        mLoadTripPlanButton = view.findViewById(R.id.btn_load_trip_plan);
 
         // Set mLeavingChoice onclick adapter in onResume() so we do not fire it when setting it
         final TimePickerDialog.OnTimeSetListener timeCallback = new TimePickerDialog.OnTimeSetListener() {
@@ -240,7 +252,7 @@ public class TripPlanFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 mToAddressTextArea.setText(getString(R.string.tripplanner_current_location));
-                mToAddress = makeAddressFromLocation();
+                mToAddress = TripPlanHelper.makeAddressFromLocation(requireActivity(), mGoogleApiClient);
                 mBuilder.setTo(mToAddress);
                 checkRequestAndSubmit();
             }
@@ -250,11 +262,23 @@ public class TripPlanFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 mFromAddressTextArea.setText(getString(R.string.tripplanner_current_location));
-                mFromAddress = makeAddressFromLocation();
+                mFromAddress = TripPlanHelper.makeAddressFromLocation(requireActivity(), mGoogleApiClient);
                 mBuilder.setFrom(mFromAddress);
                 checkRequestAndSubmit();
             }
         });
+
+        tripPlanHelper = new TripPlanHelper(requireActivity());
+        tripPlanHelper.setTripPlanListItemSelectedListener(this::onTripPlanSelected);
+        mLoadTripPlanButton.setOnClickListener(v -> {
+            tripPlanHelper.loadTrips();
+        });
+
+        if (BuildConfig.ENABLE_ADMOB) {
+            adsManager = new AdsManager((AppCompatActivity) requireActivity());
+            TemplateView template = view.findViewById(R.id.trip_plan_ad_template);
+            adsManager.loadNativeAd(template);
+        }
 
         // Start: default from address is Current Location, to address is unset
         return view;
@@ -313,7 +337,7 @@ public class TripPlanFragment extends Fragment {
         mFromAddress = mBuilder.getFrom();
 
         if (mFromAddress == null) {
-            mFromAddress = makeAddressFromLocation();
+            mFromAddress = TripPlanHelper.makeAddressFromLocation(requireActivity(), mGoogleApiClient);
             mBuilder.setFrom(mFromAddress);
         }
 
@@ -570,23 +594,6 @@ public class TripPlanFragment extends Fragment {
         }
     }
 
-    private CustomAddress makeAddressFromLocation() {
-        CustomAddress address = CustomAddress.getEmptyAddress();
-
-        Location loc = Application.getLastKnownLocation(getContext(), mGoogleApiClient);
-        if (loc == null) {
-            if (getContext() != null) {
-                Toast.makeText(getContext(), getString(R.string.no_location_permission), Toast.LENGTH_SHORT).show();
-            }
-        } else {
-            address.setLatitude(loc.getLatitude());
-            address.setLongitude(loc.getLongitude());
-        }
-
-        address.setAddressLine(0, getString(R.string.tripplanner_current_location));
-        return address;
-    }
-
     /**
      * Receives a geocoding result from the Google Places SDK
      *
@@ -624,7 +631,7 @@ public class TripPlanFragment extends Fragment {
         if (!BuildConfig.USE_PELIAS_GEOCODING && GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getContext())
                 == ConnectionResult.SUCCESS) {
             tv.setFocusable(false);
-            tv.setOnClickListener(new ProprietaryMapHelpV2.StartPlacesAutocompleteOnClick(use, this, region));
+            tv.setOnClickListener(new ProprietaryMapHelpV2.StartPlacesAutocompleteOnClick(use, null, this, region));
             return;
         }
 
@@ -644,6 +651,26 @@ public class TripPlanFragment extends Fragment {
             checkRequestAndSubmit();
         });
         tv.dismissDropDown();
+    }
+
+    private void onTripPlanSelected(TripPlanAddresses selected) {
+        if (selected.getFromAddress() == null) {
+            mFromAddress = TripPlanHelper.makeAddressFromLocation(requireActivity(), mGoogleApiClient);
+        } else {
+            mFromAddress = selected.getFromAddress();
+        }
+        mBuilder.setFrom(mFromAddress);
+        mFromAddressTextArea.setText(mFromAddress.toString());
+
+        if (selected.getToAddress() == null) {
+            mToAddress = TripPlanHelper.makeAddressFromLocation(requireActivity(), mGoogleApiClient);
+        } else {
+            mToAddress = selected.getToAddress();
+        }
+        mBuilder.setTo(mToAddress);
+        mToAddressTextArea.setText(mToAddress.toString());
+
+        checkRequestAndSubmit();
     }
 }
 

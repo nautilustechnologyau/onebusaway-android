@@ -366,7 +366,8 @@
     <string name="my_recent_menu_title">Recent stops/routes</string>
     <string name="my_recent_stops">Stops</string>
     <string name="my_recent_routes">Routes</string>
-    <string name="my_starred_title">Starred</string>
+    <string name="my_starred_title">Starred stop/routes</string>
+    <string name="my_reminder_title">My reminders</string>
     <string name="my_search_title">Search</string>
     <string name="my_no_recent_stops">You have no recent stops.</string>
     <string name="my_no_starred_stops">You have no starred stops.\n\nYou can add a star to a stop on
@@ -957,6 +958,7 @@
 
     <string name="trip_plan_start_location_hint">Starting address or location name</string>
     <string name="trip_plan_end_location_hint">Ending address or location name</string>
+    <string name="trip_plan_where_to_go_hint">Where to go today?</string>
 
     <string name="trip_plan_list_view">List View</string>
     <string name="trip_plan_map_view">Map View</string>
@@ -992,6 +994,8 @@
 
     <string name="tripplanner_reverse">Reverse</string>
     <string name="tripplanner_report_trip_problem">Report Trip Plan Problem</string>
+    <string name="tripplanner_save_trip">Save Trip</string>
+    <string name="tripplanner_load_trip">Load From Saved Trip…</string>
 
     <string name="no_trip_planner_title">Google cost increase</string>
     <string name="no_trip_planner_message">Google is now charging OneBusAway for all trip plans (about $1,000 per month)!
@@ -1168,6 +1172,19 @@
     <string name="layers_speedial_bikeshare_label">Bikeshare</string>
     <string name="bike_station_title">Tap to reserve a bike</string>
     <string name="floating_bike_title">Tap to reserve this bike</string>
+    <string name="layers_speedial_mapstyle_grayscale_label">Grayscale</string>
+    <string name="layers_speedial_mapstyle_night_label">Night</string>
+    <string name="layers_speedial_mapstyle_retro_label">Retro</string>
+    <string name="layers_speedial_mapstyle_aubergine_label">Aubergine</string>
+    <string name="layers_speedial_mapstyle_dark_label">Dark</string>
+    <string name="layers_speedial_mapstyle_standard_label">Standard</string>
+    <string name="layers_speedial_mapstyle_silver_label">Silver</string>
+    <string name="layers_speedial_stop_stop_info_label">Stop Info</string>
+    <string name="layers_speedial_stop_plan_trip_label">Plan Trip</string>
+    <string name="layers_speedial_stop_filter_route_label">Filter Route</string>
+    <string name="layers_speedial_stop_hide_alert_label">Hide Alerts</string>
+    <string name="layers_speedial_stop_report_issue_label">Report Issue</string>
+
 
     <string name="application_ignoring_battery_opt_title">Performance Alert!</string>
     <string name="application_ignoring_battery_opt_message">Battery optimizations are enabled for
@@ -1228,5 +1245,17 @@
     <string name="remove_ads_dlg_btn_neutral">Remind Me Later</string>
     <string name="analytics_label_button_press_remove_ads">remove_ads</string>
     <string name="analytics_label_button_press_buy_ads_free_subscription">buy_ads_free_subscription</string>
+
+    <!-- Trip Plan Dialogs -->
+    <string name="trip_plan_select_dialog_title">Select Trip Plan</string>
+    <string name="trip_plan_select_dialog_empty_message">There is no trip plan saved.</string>
+    <string name="trip_plan_select_dialog_confirm_delete">Are you sure you want to delete the trip plan?</string>
+    <string name="trip_plan_select_dialog_deleted_message">Trip Plan Deleted</string>
+    <string name="trip_plan_select_dialog_deleted_message1">Trip Plan Deletion Failed</string>
+    <string name="trip_plan_save_dialog_title">Save Trip Plan</string>
+    <string name="trip_plan_save_dialog_saved_message">Trip Plan Saved</string>
+    <string name="trip_plan_save_dialog_save_button">Save</string>
+    <string name="trip_plan_save_dialog_empty_error">Please enter a name of the trip. You can save a trip plan from the trip planner.</string>
+    <string name="trip_plan_save_dialog_message">Please enter a friendly name (e.g., Home) for this trip plan.</string>
 
 </resources>

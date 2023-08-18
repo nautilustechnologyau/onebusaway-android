@@ -15,24 +15,32 @@
  */
 package org.onebusaway.android.ui;
 
+import com.google.android.ads.nativetemplates.TemplateView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 
+import org.onebusaway.android.BuildConfig;
 import org.onebusaway.android.R;
 import org.onebusaway.android.app.Application;
 import org.onebusaway.android.directions.model.Direction;
 import org.onebusaway.android.directions.realtime.RealtimeService;
 import org.onebusaway.android.directions.util.ConversionUtils;
+import org.onebusaway.android.directions.util.CustomAddress;
 import org.onebusaway.android.directions.util.DirectionExpandableListAdapter;
 import org.onebusaway.android.directions.util.DirectionsGenerator;
 import org.onebusaway.android.directions.util.FareUtils;
 import org.onebusaway.android.directions.util.OTPConstants;
+import org.onebusaway.android.directions.util.TripPlanAddresses;
+import org.onebusaway.android.directions.util.TripRequestBuilder;
 import org.onebusaway.android.map.MapParams;
 import org.onebusaway.android.map.googlemapsv2.BaseMapFragment;
+import org.onebusaway.android.provider.ObaContract;
 import org.opentripplanner.api.model.Itinerary;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
@@ -44,10 +52,13 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -55,8 +66,12 @@ import java.util.List;
 import java.util.Locale;
 
 import androidx.annotation.DrawableRes;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+
+import au.mymetro.android.ads.AdsManager;
 
 public class TripResultsFragment extends Fragment {
 
@@ -69,6 +84,7 @@ public class TripResultsFragment extends Fragment {
     private BaseMapFragment mMapFragment;
     private ExpandableListView mDirectionsListView;
     private View mMapFragmentFrame;
+    private FloatingActionButton mSaveTripPlanFab;
     private boolean mShowingMap = false;
 
     private RoutingOptionPicker[] mOptions = new RoutingOptionPicker[3];
@@ -76,6 +92,10 @@ public class TripResultsFragment extends Fragment {
     private Listener mListener;
 
     private Bundle mMapBundle = new Bundle();
+
+    private Bundle mBuilderBundle;
+
+    private AdsManager adsManager;
 
     /**
      * This listener is a helper for the parent activity to handle the sliding panel,
@@ -102,6 +122,9 @@ public class TripResultsFragment extends Fragment {
         mDirectionsFrame = view.findViewById(R.id.directionsFrame);
         mDirectionsListView = (ExpandableListView) view.findViewById(R.id.directionsListView);
         mMapFragmentFrame = view.findViewById(R.id.mapFragment);
+        mSaveTripPlanFab = view.findViewById(R.id.btn_save_trip_plan);
+
+        mBuilderBundle = getArguments();
 
         mOptions[0] = new RoutingOptionPicker(view, R.id.option1LinearLayout, R.id.option1Title, R.id.option1Duration, R.id.option1Interval, R.id.option1Fare);
         mOptions[1] = new RoutingOptionPicker(view, R.id.option2LinearLayout, R.id.option2Title, R.id.option2Duration, R.id.option2Interval, R.id.option2Fare);
@@ -140,6 +163,16 @@ public class TripResultsFragment extends Fragment {
 
         if (mListener != null) {
             mListener.onResultViewCreated(mDirectionsFrame, mDirectionsListView, mMapFragmentFrame);
+        }
+
+        mSaveTripPlanFab.setOnClickListener(v -> {
+            saveTrip();
+        });
+
+        if (BuildConfig.ENABLE_ADMOB) {
+            adsManager = new AdsManager((AppCompatActivity) requireActivity());
+            TemplateView template = view.findViewById(R.id.trip_result_ad_template);
+            adsManager.loadNativeAd(template);
         }
 
         return view;
@@ -232,6 +265,48 @@ public class TripResultsFragment extends Fragment {
         }
 
         getArguments().putBoolean(OTPConstants.SHOW_MAP, mShowingMap);
+    }
+
+    private void saveTrip() {
+        CustomAddress mFromAddress = mBuilderBundle.getParcelable(TripRequestBuilder.FROM_ADDRESS);
+        CustomAddress mToAddress = mBuilderBundle.getParcelable(TripRequestBuilder.TO_ADDRESS);
+        if (mFromAddress != null && mToAddress != null) {
+            final AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
+            builder.setTitle(getString(R.string.trip_plan_save_dialog_title));
+            builder.setMessage(getString(R.string.trip_plan_save_dialog_message));
+            builder.setCancelable(true);
+
+            // Set up the input
+            final View dialogView = LayoutInflater.from(requireActivity()).inflate(R.layout.trip_planner_name_input, null);
+            final EditText input = dialogView.findViewById(R.id.trip_planner_name_txt);
+            input.requestFocus();
+            builder.setView(dialogView);
+            builder.setPositiveButton(getString(R.string.trip_plan_save_dialog_save_button), null);
+            builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.cancel();
+                }
+            });
+            AlertDialog dialog = builder.show();
+            Button button = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            button.setOnClickListener(view1 -> {
+                String planName = input.getText().toString().trim();
+                if(TextUtils.isEmpty(planName)){
+                    input.setError(getString(R.string.trip_plan_save_dialog_empty_error));
+                } else {
+                    TripPlanAddresses tripPlan = new TripPlanAddresses();
+                    tripPlan.setPlanName(planName);
+                    tripPlan.setFromAddress(mFromAddress);
+                    tripPlan.setToAddress(mToAddress);
+                    ObaContract.TripPlans.insertOrUpdate(requireActivity(), tripPlan);
+                    dialog.dismiss();
+                    Toast.makeText(requireActivity(),
+                            getResources().getString(R.string.trip_plan_save_dialog_saved_message),
+                            Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 
     private void initInfoAndMap(int trip) {
