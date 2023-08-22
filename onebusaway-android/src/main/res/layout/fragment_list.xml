@@ -26,8 +26,7 @@
         android:id="@+id/list_frame"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="116dp"
-        app:layout_constraintBottom_toTopOf="@id/search_list_ad_template"
+        app:layout_constraintBottom_toTopOf="@id/list_frame"
         tools:layout_editor_absoluteX="0dp">
 
         <FrameLayout
@@ -47,20 +46,31 @@
                 android:layout_height="match_parent"
                 android:drawSelectorOnTop="false" />
         </FrameLayout>
-    </FrameLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        app:layout_constraintTop_toBottomOf="@id/list_frame"
-        android:gravity="bottom"
-        android:orientation="horizontal">
-        <com.google.android.ads.nativetemplates.TemplateView
-            android:id="@+id/search_list_ad_template"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:gnt_template_type="@layout/gnt_small_template_view"
-            android:visibility="gone"/>
-    </LinearLayout>
+            android:layout_alignParentBottom="true"
+            app:layout_constraintTop_toBottomOf="@id/list_frame"
+            android:layout_gravity="bottom"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:id="@+id/list_view_banner_ad_template"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:visibility="gone"/>
+
+            <com.google.android.ads.nativetemplates.TemplateView
+                android:id="@+id/list_view_native_ad_template"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:gnt_template_type="@layout/gnt_small_template_view"
+                android:visibility="gone"/>
+
+        </LinearLayout>
+    </FrameLayout>
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

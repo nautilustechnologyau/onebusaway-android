@@ -27,11 +27,13 @@ import com.google.android.gms.ads.interstitial.InterstitialAd;
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.google.android.gms.ads.nativead.NativeAd;
 import com.google.android.gms.ads.nativead.NativeAdOptions;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
 import org.onebusaway.android.BuildConfig;
 import org.onebusaway.android.R;
 import org.onebusaway.android.ui.HomeActivity;
 import org.onebusaway.android.util.PreferenceUtils;
+import org.onebusaway.android.util.UIUtils;
 
 import java.util.Date;
 import java.util.Random;
@@ -40,6 +42,8 @@ import au.mymetro.android.ui.RemoveAdsDialogFragment;
 
 public class AdsManager {
     private static final String TAG = "AdsManager";
+
+    private static FirebaseRemoteConfig mFirebaseRemoteConfig;
 
     private static boolean mAudienceNetworkInterstitialAdsEnabled = true;
 
@@ -51,13 +55,29 @@ public class AdsManager {
 
     private static String mMainTopAdsFormat = "banner";
 
+    private static String mArrivalListAdsFormat = "banner";
+
+    private static String mListViewAdsFormat = "native";
+
+    private static String mTripPlanAdsFormat = "native";
+
+    private static String mTripResultAdsFormat = "native";
+
     private static boolean mInterstitialAdShowing = false;
 
     private static long mLastInterstitialAdShowTime = 0L;
 
     private static int mInterstitialAdShowCount = 0;
 
+    private static boolean mShowMainTopAds = true;
+
     private static boolean mShowAdsInArrivalList = true;
+
+    private static boolean mShowAdsInListView = true;
+
+    private static boolean mShowAdsInTripPlan = true;
+
+    private static boolean mShowAdsInTripResult = true;
 
     private static final Random mRandom = new Random();
 
@@ -69,6 +89,7 @@ public class AdsManager {
 
     // Ad views
     private InterstitialAd mAdMobInterstitialAd;
+    private NativeAd mNativeAd;
     private com.facebook.ads.InterstitialAd mAnInterstitialAd;
 
     public AdsManager(AppCompatActivity activity) {
@@ -76,12 +97,41 @@ public class AdsManager {
     }
 
     public void loadMainTopAd(LinearLayout bannerAdView, TemplateView nativeAdView) {
-        if (mMainTopAdsFormat.equals("banner")) {
-            hideAdView(nativeAdView);
+        loadNativeOrBannerAd(bannerAdView, null, nativeAdView, mMainTopAdsFormat, mShowMainTopAds);
+    }
+
+    public void loadArrivalListAd(LinearLayout bannerAdView, TemplateView nativeAdView) {
+        loadNativeOrBannerAd(bannerAdView, null, nativeAdView, mArrivalListAdsFormat, mShowAdsInArrivalList);
+    }
+
+    public void loadListViewAd(LinearLayout bannerAdView, TemplateView nativeAdView) {
+        loadNativeOrBannerAd(bannerAdView, null, nativeAdView, mListViewAdsFormat, mShowAdsInListView);
+    }
+
+    public void loadTripPlanAd(LinearLayout bannerAdView, TemplateView mediumNativeAdView, TemplateView smallNativeAdView) {
+        loadNativeOrBannerAd(bannerAdView, mediumNativeAdView, smallNativeAdView, mTripPlanAdsFormat, mShowAdsInTripPlan);
+    }
+
+    public void loadTripResultAd(LinearLayout bannerAdView, TemplateView nativeAdView) {
+        loadNativeOrBannerAd(bannerAdView, null, nativeAdView, mTripResultAdsFormat, mShowAdsInTripResult);
+    }
+
+    private void loadNativeOrBannerAd(LinearLayout bannerAdView, TemplateView mediumNativeAdView, TemplateView smallNativeAdView, String format, boolean show) {
+        // hide all previous ads view
+        hideAdView(mBannerAdView);
+        hideAdView(mNativeAdView);
+        if (!show) {
+            return;
+        }
+
+        if (format.equals("banner")) {
             loadBannerAd(bannerAdView);
-        } else if (mMainTopAdsFormat.equals("native")) {
-            hideAdView(bannerAdView);
-            loadNativeAd(nativeAdView);
+        } else if (format.equals("native")) {
+            if (mediumNativeAdView != null) {
+                loadMediumNativeAd(mediumNativeAdView, smallNativeAdView);
+            } else {
+                loadSmallNativeAd(smallNativeAdView);
+            }
         }
     }
 
@@ -100,7 +150,8 @@ public class AdsManager {
             showAdView(mNativeAdView);
         }
     }
-    public void loadBannerAd(LinearLayout bannerAdView) {
+
+    private void loadBannerAd(LinearLayout bannerAdView) {
         if (!BuildConfig.ENABLE_ADMOB || bannerAdView == null) {
             return;
         }
@@ -497,7 +548,25 @@ public class AdsManager {
                         .build());
     }
 
-    public void loadNativeAd(TemplateView nativeAdView) {
+    private void loadSmallNativeAd(TemplateView smallNativeAdView) {
+        loadNativeAd(smallNativeAdView);
+    }
+
+    private void loadMediumNativeAd(TemplateView mediumNativeAdView, TemplateView smallNativeAdView) {
+        if (canDisplayMediumNativeAds()) {
+            if (smallNativeAdView != null) {
+                smallNativeAdView.setVisibility(View.GONE);
+            }
+            loadNativeAd(mediumNativeAdView);
+        } else {
+            if (mediumNativeAdView != null) {
+                mediumNativeAdView.setVisibility(View.GONE);
+            }
+            loadNativeAd(smallNativeAdView);
+        }
+    }
+
+    private void loadNativeAd(TemplateView nativeAdView) {
         if (!BuildConfig.ENABLE_ADMOB || nativeAdView == null) {
             return;
         }
@@ -525,8 +594,12 @@ public class AdsManager {
                     .forNativeAd(new NativeAd.OnNativeAdLoadedListener() {
                         @Override
                         public void onNativeAdLoaded(NativeAd nativeAd) {
-                            nativeAdView.setNativeAd(nativeAd);
-                            nativeAdView.setVisibility(View.VISIBLE);
+                            if (mNativeAd != null && mNativeAd != nativeAd) {
+                                mNativeAd.destroy();
+                            }
+                            mNativeAd = nativeAd;
+                            mNativeAdView.setNativeAd(mNativeAd);
+                            mNativeAdView.setVisibility(View.VISIBLE);
                         }
                     })
                     .withNativeAdOptions(adOptions)
@@ -541,6 +614,14 @@ public class AdsManager {
         if (mAnInterstitialAd != null) {
             mAnInterstitialAd.destroy();
         }
+
+        if (mNativeAd != null) {
+            mNativeAd.destroy();
+        }
+    }
+
+    private boolean canDisplayMediumNativeAds() {
+        return !UIUtils.isSmallDisplay(mActivity);
     }
 
     public static boolean isAudienceNetworkInterstitialAdsEnabled() {
@@ -589,5 +670,35 @@ public class AdsManager {
 
     public static void setShowAdsInArrivalList(boolean mShowAdsInArrivalList) {
         AdsManager.mShowAdsInArrivalList = mShowAdsInArrivalList;
+    }
+
+    public static void setRemoteConfig(FirebaseRemoteConfig config) {
+        mFirebaseRemoteConfig = config;
+
+        if (mFirebaseRemoteConfig != null) {
+            mAudienceNetworkInterstitialAdsEnabled = mFirebaseRemoteConfig.getBoolean("enable_audience_network_interstitial_ads");
+            mAdmobInterstitialAdsEnabled = mFirebaseRemoteConfig.getBoolean("enable_admob_interstitial_ads");
+            mAudienceNetworkBannerAdsEnabled = mFirebaseRemoteConfig.getBoolean("enable_audience_network_banner_ads");
+            mAdmobBannerAdsEnabled = mFirebaseRemoteConfig.getBoolean("enable_admob_banner_ads");
+
+            mShowMainTopAds = mFirebaseRemoteConfig.getBoolean("show_main_top_ads");
+            mMainTopAdsFormat = mFirebaseRemoteConfig.getString("main_top_ads_format");
+
+            mShowAdsInArrivalList = mFirebaseRemoteConfig.getBoolean("show_ads_in_arrival_list");
+            mArrivalListAdsFormat = mFirebaseRemoteConfig.getString("arrival_list_ads_format");
+
+            mShowAdsInListView = mFirebaseRemoteConfig.getBoolean("show_ads_in_list_view");
+            mListViewAdsFormat = mFirebaseRemoteConfig.getString("list_view_ads_format");
+
+            mShowAdsInTripPlan = mFirebaseRemoteConfig.getBoolean("show_ads_in_trip_plan");
+            mTripPlanAdsFormat = mFirebaseRemoteConfig.getString("trip_plan_ads_format");
+
+            mShowAdsInTripResult = mFirebaseRemoteConfig.getBoolean("show_ads_in_trip_result");
+            mTripResultAdsFormat = mFirebaseRemoteConfig.getString("trip_result_ads_format");
+        }
+    }
+
+    public static boolean hasRemoteConfigInitialised() {
+        return mFirebaseRemoteConfig != null;
     }
 }

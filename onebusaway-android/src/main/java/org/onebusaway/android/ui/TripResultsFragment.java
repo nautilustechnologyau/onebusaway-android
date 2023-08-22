@@ -171,8 +171,9 @@ public class TripResultsFragment extends Fragment {
 
         if (BuildConfig.ENABLE_ADMOB) {
             adsManager = new AdsManager((AppCompatActivity) requireActivity());
-            TemplateView template = view.findViewById(R.id.trip_result_ad_template);
-            adsManager.loadNativeAd(template);
+            TemplateView template = view.findViewById(R.id.trip_result_small_native_ad_template);
+            LinearLayout banner = view.findViewById(R.id.trip_result_banner_ad_template);
+            adsManager.loadTripResultAd(banner, template);
         }
 
         return view;

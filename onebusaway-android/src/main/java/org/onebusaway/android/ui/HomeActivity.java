@@ -92,6 +92,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Observer;
 
 import com.android.billingclient.api.Purchase;
+import com.google.android.ads.nativetemplates.TemplateView;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -1935,12 +1936,7 @@ public class HomeActivity extends AppCompatActivity
 
     private void updateConfigFromRemoteConfig() {
         if (mFirebaseRemoteConfig != null) {
-            AdsManager.setAudienceNetworkInterstitialAdsEnabled(mFirebaseRemoteConfig.getBoolean("enable_audience_network_interstitial_ads"));
-            AdsManager.setAdmobInterstitialAdsEnabled(mFirebaseRemoteConfig.getBoolean("enable_admob_interstitial_ads"));
-            AdsManager.setAudienceNetworkBannerAdsEnabled(mFirebaseRemoteConfig.getBoolean("enable_audience_network_banner_ads"));
-            AdsManager.setAdmobBannerAdsEnabled(mFirebaseRemoteConfig.getBoolean("enable_admob_banner_ads"));
-            AdsManager.setMainTopAdsFormat(mFirebaseRemoteConfig.getString("main_top_ads_format"));
-            AdsManager.setShowAdsInArrivalList(mFirebaseRemoteConfig.getBoolean("show_ads_in_arrival_list"));
+            AdsManager.setRemoteConfig(mFirebaseRemoteConfig);
             mShowRateitDialog = mFirebaseRemoteConfig.getBoolean("show_rateit_dialog");
         }
     }
@@ -2235,9 +2231,6 @@ public class HomeActivity extends AppCompatActivity
         };
 
         showHideArrivalListAds();
-        if (BuildConfig.ENABLE_ADMOB) {
-            mArrivalListAdsManager.loadBannerAd(findViewById(R.id.arrivalsAdView));
-        }
     }
 
     /**
@@ -2500,13 +2493,8 @@ public class HomeActivity extends AppCompatActivity
             return;
         }
 
-        if (AdsManager.isShowAdsInArrivalList()) {
-            mArrivalListAdsManager.loadBannerAd(findViewById(R.id.arrivalsAdView));
-        } else {
-            View v = findViewById(R.id.arrivalsAdView);
-            if (v != null) {
-                v.setVisibility(View.GONE);
-            }
-        }
+        LinearLayout banner = findViewById(R.id.arrival_list_banner_ads_view);
+        TemplateView nativeSmall = findViewById(R.id.arrival_list_native_small_ads_view);
+        mArrivalListAdsManager.loadArrivalListAd(banner, nativeSmall);
     }
 }

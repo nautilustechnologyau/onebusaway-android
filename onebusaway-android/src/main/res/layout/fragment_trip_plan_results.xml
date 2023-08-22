@@ -201,8 +201,14 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:orientation="horizontal">
+        <LinearLayout
+            android:id="@+id/trip_result_banner_ad_template"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="gone"/>
         <com.google.android.ads.nativetemplates.TemplateView
-            android:id="@+id/trip_result_ad_template"
+            android:id="@+id/trip_result_small_native_ad_template"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:visibility="gone"

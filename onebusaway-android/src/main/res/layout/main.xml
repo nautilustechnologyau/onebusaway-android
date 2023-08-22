@@ -216,7 +216,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/main_top_banner_ad_container"
-                        android:layout_margin="8dp"
+                        android:layout_margin="4dp"
                         card_view:cardBackgroundColor="@color/cardview_light_background"
                         card_view:cardUseCompatPadding="true"
                         card_view:cardElevation="4dp"
@@ -303,17 +303,23 @@
                 <include layout="@layout/arrivals_list_header" />
 
                 <LinearLayout
-                    android:id="@+id/arrivalsAdView"
+                    android:id="@+id/arrival_list_ads_view_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal" />
-                <!--
-                <com.google.android.ads.nativetemplates.TemplateView
-                    android:id="@+id/my_template"
-                    app:gnt_template_type="@layout/gnt_small_template_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-                    -->
+                    android:orientation="horizontal" >
+                    <LinearLayout
+                        android:id="@+id/arrival_list_banner_ads_view"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:visibility="gone"/>
+                    <com.google.android.ads.nativetemplates.TemplateView
+                        android:id="@+id/arrival_list_native_small_ads_view"
+                        app:gnt_template_type="@layout/gnt_small_template_view"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"/>
+                </LinearLayout>
 
                 <!-- Content of bottom sliding panel -->
                 <LinearLayout

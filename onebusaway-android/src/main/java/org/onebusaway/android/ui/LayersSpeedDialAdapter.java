@@ -28,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import org.onebusaway.android.R;
 import org.onebusaway.android.map.googlemapsv2.LayerInfo;
 import org.onebusaway.android.util.LayerUtils;
+import org.onebusaway.android.util.UIUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,13 +61,23 @@ public class LayersSpeedDialAdapter extends SpeedDialMenuAdapter {
      */
     private List<LayerActivationListener> layerActivationListeners = new ArrayList<>();
 
-    private int mLayerCount = 6;
+    private int mLayerCount = 5;
 
     public LayersSpeedDialAdapter(Context context) {
         this.context = context;
+
+        if (UIUtils.isSmallDisplay(context)) {
+            if (LayerUtils.isBikeshareLayerVisible()) {
+                mLayerCount = 2;
+            } else {
+                mLayerCount = 3;
+            }
+        }
+
         if (LayerUtils.isBikeshareLayerVisible()) {
             mLayerCount++;
         }
+
         setupLayers();
         activatedLayers = new Boolean[mLayerCount];
 
@@ -81,16 +92,25 @@ public class LayersSpeedDialAdapter extends SpeedDialMenuAdapter {
         layers = new LayerInfo[mLayerCount];
 
         int i = 0;
+
         if (LayerUtils.isBikeshareLayerVisible()) {
-            layers[i++] =  LayerUtils.bikeshareLayerInfo;
+            layers[i++] = LayerUtils.bikeshareLayerInfo;
         }
 
-        layers[i++] = LayerUtils.mapstyleGrayscaleLayerInfo;
-        layers[i++] = LayerUtils.mapstyleNightLayerInfo;
-        layers[i++] = LayerUtils.mapstyleRetroLayerInfo;
-        layers[i++] = LayerUtils.mapstyleAubergineLayerInfo;
-        layers[i++] = LayerUtils.mapstyleDarkLayerInfo;
-        layers[i] = LayerUtils.mapstyleStandardLayerInfo;
+        if (UIUtils.isSmallDisplay(context)) {
+            layers[i++] = LayerUtils.mapstyleStandardLayerInfo;
+            layers[i++] = LayerUtils.mapstyleNightLayerInfo;
+            if (!LayerUtils.isBikeshareLayerVisible()) {
+                layers[i] = LayerUtils.mapstyleRetroLayerInfo;
+            }
+        } else {
+            layers[i++] = LayerUtils.mapstyleStandardLayerInfo;
+            layers[i++] = LayerUtils.mapstyleNightLayerInfo;
+            layers[i++] = LayerUtils.mapstyleRetroLayerInfo;
+            layers[i++] = LayerUtils.mapstyleAubergineLayerInfo;
+            layers[i] = LayerUtils.mapstyleGrayscaleLayerInfo;
+        }
+
         // layers[i] = LayerUtils.mapstyleSilverLayerInfo;
     }
 
@@ -217,16 +237,25 @@ public class LayersSpeedDialAdapter extends SpeedDialMenuAdapter {
 
     private void refreshActiveLayerStates() {
         int i = 0;
+
         if (LayerUtils.isBikeshareLayerVisible()) {
             activatedLayers[i++] = LayerUtils.isBikeshareLayerVisible();
         }
 
-        activatedLayers[i++] = LayerUtils.isMapstyleGrayscaleLayerVisible();
-        activatedLayers[i++] = LayerUtils.isMapstyleNightLayerVisible();
-        activatedLayers[i++] = LayerUtils.isMapstyleRetroLayerVisible();
-        activatedLayers[i++] = LayerUtils.isMapstyleAubergineLayerVisible();
-        activatedLayers[i++] = LayerUtils.isMapstyleDarkLayerVisible();
-        activatedLayers[i] = LayerUtils.isMapstyleStandardLayerVisible();
+        if (UIUtils.isSmallDisplay(context)) {
+            activatedLayers[i++] = LayerUtils.isMapstyleStandardLayerVisible();
+            activatedLayers[i++] = LayerUtils.isMapstyleNightLayerVisible();
+            if (!LayerUtils.isBikeshareLayerVisible()) {
+                activatedLayers[i] = LayerUtils.isMapstyleRetroLayerVisible();
+            }
+        } else {
+            activatedLayers[i++] = LayerUtils.isMapstyleStandardLayerVisible();
+            activatedLayers[i++] = LayerUtils.isMapstyleNightLayerVisible();
+            activatedLayers[i++] = LayerUtils.isMapstyleRetroLayerVisible();
+            activatedLayers[i++] = LayerUtils.isMapstyleAubergineLayerVisible();
+            activatedLayers[i] = LayerUtils.isMapstyleGrayscaleLayerVisible();
+        }
+
         // activatedLayers[i] = LayerUtils.isMapstyleSilverLayerVisible();
     }
 

@@ -211,12 +211,23 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:orientation="horizontal">
-
+        <LinearLayout
+            android:id="@+id/trip_plan_banner_ad_template"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="gone"/>
         <com.google.android.ads.nativetemplates.TemplateView
-            android:id="@+id/trip_plan_ad_template"
+            android:id="@+id/trip_plan_medium_native_ad_template"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:gnt_template_type="@layout/gnt_medium_template_view"
+            android:visibility="gone"/>
+        <com.google.android.ads.nativetemplates.TemplateView
+            android:id="@+id/trip_plan_small_native_ad_template"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:gnt_template_type="@layout/gnt_small_template_view"
             android:visibility="gone"/>
     </LinearLayout>
 </RelativeLayout>

@@ -43,6 +43,7 @@ import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -276,8 +277,10 @@ public class TripPlanFragment extends Fragment {
 
         if (BuildConfig.ENABLE_ADMOB) {
             adsManager = new AdsManager((AppCompatActivity) requireActivity());
-            TemplateView template = view.findViewById(R.id.trip_plan_ad_template);
-            adsManager.loadNativeAd(template);
+            TemplateView mediumTemplate = view.findViewById(R.id.trip_plan_medium_native_ad_template);
+            TemplateView smallTemplate = view.findViewById(R.id.trip_plan_small_native_ad_template);
+            LinearLayout banner = view.findViewById(R.id.trip_plan_banner_ad_template);
+            adsManager.loadTripPlanAd(banner, mediumTemplate, smallTemplate);
         }
 
         // Start: default from address is Current Location, to address is unset

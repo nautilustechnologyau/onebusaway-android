@@ -23,6 +23,7 @@ import android.widget.TextView;
 import org.jetbrains.annotations.NotNull;
 import org.onebusaway.android.map.googlemapsv2.LayerInfo;
 import org.onebusaway.android.util.LayerUtils;
+import org.onebusaway.android.util.UIUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,6 +60,10 @@ public class StopSpeedDialAdapter extends SpeedDialMenuAdapter {
 
     public StopSpeedDialAdapter(Context context) {
         this.context = context;
+        if (UIUtils.isSmallDisplay(context)) {
+            mLayerCount = 2;
+        }
+
         setupLayers();
     }
 
@@ -70,10 +75,14 @@ public class StopSpeedDialAdapter extends SpeedDialMenuAdapter {
         layers = new LayerInfo[mLayerCount];
 
         int i = 0;
-        layers[i++] = LayerUtils.stopReportIssueLayerInfo;
-        layers[i++] = LayerUtils.stopHideAlertLayerInfo;
+
         layers[i++] = LayerUtils.stopFilterRouteLayerInfo;
-        layers[i] = LayerUtils.stopInfoLayerInfo;
+        layers[i++] = LayerUtils.stopInfoLayerInfo;
+
+        if (!UIUtils.isSmallDisplay(context)) {
+            layers[i++] = LayerUtils.stopReportIssueLayerInfo;
+            layers[i] = LayerUtils.stopHideAlertLayerInfo;
+        }
     }
 
     @Override
