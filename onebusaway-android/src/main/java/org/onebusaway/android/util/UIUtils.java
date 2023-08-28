@@ -2142,6 +2142,6 @@ public final class UIUtils {
     public static boolean isSmallDisplay(Context context) {
         DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
         float dpHeight = displayMetrics.heightPixels / displayMetrics.density;
-        return dpHeight < 600.00;
+        return dpHeight < 650.00;
     }
 }

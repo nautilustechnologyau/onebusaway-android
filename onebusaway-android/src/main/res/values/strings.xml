@@ -1248,14 +1248,15 @@
 
     <!-- Trip Plan Dialogs -->
     <string name="trip_plan_select_dialog_title">Select Trip Plan</string>
-    <string name="trip_plan_select_dialog_empty_message">There is no trip plan saved.</string>
+    <string name="trip_plan_select_dialog_empty_message">There is no trip plan saved. You can save a trip plan from the trip planner.</string>
     <string name="trip_plan_select_dialog_confirm_delete">Are you sure you want to delete the trip plan?</string>
     <string name="trip_plan_select_dialog_deleted_message">Trip Plan Deleted</string>
     <string name="trip_plan_select_dialog_deleted_message1">Trip Plan Deletion Failed</string>
     <string name="trip_plan_save_dialog_title">Save Trip Plan</string>
     <string name="trip_plan_save_dialog_saved_message">Trip Plan Saved</string>
     <string name="trip_plan_save_dialog_save_button">Save</string>
-    <string name="trip_plan_save_dialog_empty_error">Please enter a name of the trip. You can save a trip plan from the trip planner.</string>
+    <string name="trip_plan_save_dialog_empty_error">Trip plan name cannot be empty.</string>
     <string name="trip_plan_save_dialog_message">Please enter a friendly name (e.g., Home) for this trip plan.</string>
-
+    <string name="trip_plan_input_text_hint">Trip Plan Name</string>
+    <string name="trip_plan_trip_planner_not_available">Trip planner is not available for this region.</string>
 </resources>

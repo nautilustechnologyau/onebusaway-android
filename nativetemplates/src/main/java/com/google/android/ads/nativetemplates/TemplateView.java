@@ -51,8 +51,8 @@ public class TemplateView extends FrameLayout {
   private Button callToActionView;
   private ConstraintLayout background;
 
-  private static final String MEDIUM_TEMPLATE = "medium_template";
-  private static final String SMALL_TEMPLATE = "small_template";
+  public static final String MEDIUM_TEMPLATE = "medium_template";
+  public static final String SMALL_TEMPLATE = "small_template";
 
   public TemplateView(Context context) {
     super(context);

@@ -113,6 +113,27 @@ public class ListFragment extends Fragment {
             TemplateView template = root.findViewById(R.id.list_view_native_ad_template);
             LinearLayout banner = root.findViewById(R.id.list_view_banner_ad_template);
             adsManager.loadListViewAd(banner, template);
+
+            // listener to when ads height changed so that we can set
+            // the bottom padding of list to show all items
+            LinearLayout adsViewLayout = root.findViewById(R.id.list_view_ads_container);
+            if (adsViewLayout != null) {
+                adsViewLayout.addOnLayoutChangeListener(
+                        (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+                    int heightWas = oldBottom - oldTop; // Bottom exclusive, top inclusive
+                    if (v.getHeight() != heightWas) {
+                        // Height has changed
+                        View listView = root.findViewById(R.id.listContainer);
+                        if (listView != null) {
+                            listView.setPadding(
+                                    listView.getPaddingLeft(),
+                                    listView.getPaddingTop(),
+                                    listView.getPaddingRight(),
+                                    bottom - top);
+                        }
+                    }
+                });
+            }
         }
         return root;
     }

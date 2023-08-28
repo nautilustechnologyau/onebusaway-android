@@ -58,9 +58,13 @@ public class StopSpeedDialAdapter extends SpeedDialMenuAdapter {
 
     private int mLayerCount = 4;
 
+    private boolean mSmallDisplay;
+
     public StopSpeedDialAdapter(Context context) {
         this.context = context;
-        if (UIUtils.isSmallDisplay(context)) {
+        this.mSmallDisplay = UIUtils.isSmallDisplay(context);
+
+        if (mSmallDisplay) {
             mLayerCount = 2;
         }
 
@@ -79,7 +83,7 @@ public class StopSpeedDialAdapter extends SpeedDialMenuAdapter {
         layers[i++] = LayerUtils.stopFilterRouteLayerInfo;
         layers[i++] = LayerUtils.stopInfoLayerInfo;
 
-        if (!UIUtils.isSmallDisplay(context)) {
+        if (!mSmallDisplay) {
             layers[i++] = LayerUtils.stopReportIssueLayerInfo;
             layers[i] = LayerUtils.stopHideAlertLayerInfo;
         }

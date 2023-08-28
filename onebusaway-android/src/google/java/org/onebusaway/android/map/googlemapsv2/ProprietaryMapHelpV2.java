@@ -26,6 +26,7 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 
@@ -41,6 +42,7 @@ import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 
 import org.onebusaway.android.R;
+import org.onebusaway.android.app.Application;
 import org.onebusaway.android.directions.util.CustomAddress;
 import org.onebusaway.android.io.elements.ObaRegion;
 
@@ -163,6 +165,14 @@ public class ProprietaryMapHelpV2 {
 
         @Override
         public void onClick(View v) {
+            if (!Application.isOTPEnabled()) {
+                Toast.makeText(mActivity,
+                        mActivity.getString(R.string.trip_plan_trip_planner_not_available),
+                        Toast.LENGTH_SHORT
+                ).show();
+                return;
+            }
+
             Intent intent = null;
             List<Place.Field> fields = Arrays.asList(Place.Field.ID,Place.Field.NAME,Place.Field.LAT_LNG);
             Autocomplete.IntentBuilder builder =

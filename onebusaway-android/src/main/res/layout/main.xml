@@ -35,7 +35,7 @@
             app:umanoFadeColor="@android:color/transparent"
             app:umanoInitialState="hidden"
             app:umanoPanelHeight="@dimen/arrival_header_height_two_arrivals"
-            app:umanoParallaxOffset="100dp"
+            app:umanoParallaxOffset="0dp"
             app:umanoShadowHeight="5dp">
 
             <!-- MAIN CONTENT -->

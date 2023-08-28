@@ -158,6 +158,9 @@ public class TripPlanActivity extends AppCompatActivity implements TripRequest.C
             fragment = new TripPlanFragment();
             fragment.setArguments(bundle);
             fragment.setListener(this);
+            if (source == OTPConstants.Source.EXTERNAL_ACTIVITY) {
+                fragment.setFromMainSearch(true);
+            }
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.trip_plan_fragment_container, fragment, TripPlanFragment.TAG).commit();
         } else {

@@ -137,6 +137,8 @@ public class TripPlanFragment extends Fragment {
 
     private TripPlanHelper tripPlanHelper;
 
+    private boolean mFromMainSearch = false;
+
     // Create view, initialize state
     @SuppressLint("MissingPermission")
     @Override
@@ -269,18 +271,20 @@ public class TripPlanFragment extends Fragment {
             }
         });
 
-        tripPlanHelper = new TripPlanHelper(requireActivity());
-        tripPlanHelper.setTripPlanListItemSelectedListener(this::onTripPlanSelected);
-        mLoadTripPlanButton.setOnClickListener(v -> {
-            tripPlanHelper.loadTrips();
-        });
+        if (!mFromMainSearch) {
+            tripPlanHelper = new TripPlanHelper(requireActivity());
+            tripPlanHelper.setTripPlanListItemSelectedListener(this::onTripPlanSelected);
+            mLoadTripPlanButton.setOnClickListener(v -> {
+                tripPlanHelper.loadTrips();
+            });
 
-        if (BuildConfig.ENABLE_ADMOB) {
-            adsManager = new AdsManager((AppCompatActivity) requireActivity());
-            TemplateView mediumTemplate = view.findViewById(R.id.trip_plan_medium_native_ad_template);
-            TemplateView smallTemplate = view.findViewById(R.id.trip_plan_small_native_ad_template);
-            LinearLayout banner = view.findViewById(R.id.trip_plan_banner_ad_template);
-            adsManager.loadTripPlanAd(banner, mediumTemplate, smallTemplate);
+            if (BuildConfig.ENABLE_ADMOB) {
+                adsManager = new AdsManager((AppCompatActivity) requireActivity());
+                TemplateView mediumTemplate = view.findViewById(R.id.trip_plan_medium_native_ad_template);
+                TemplateView smallTemplate = view.findViewById(R.id.trip_plan_small_native_ad_template);
+                LinearLayout banner = view.findViewById(R.id.trip_plan_banner_ad_template);
+                adsManager.loadTripPlanAd(banner, mediumTemplate, smallTemplate);
+            }
         }
 
         // Start: default from address is Current Location, to address is unset
@@ -674,6 +678,10 @@ public class TripPlanFragment extends Fragment {
         mToAddressTextArea.setText(mToAddress.toString());
 
         checkRequestAndSubmit();
+    }
+
+    public void setFromMainSearch(boolean fromMainSearch) {
+        mFromMainSearch = fromMainSearch;
     }
 }
 

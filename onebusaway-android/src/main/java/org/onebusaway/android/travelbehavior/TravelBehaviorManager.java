@@ -15,6 +15,7 @@
  */
 package org.onebusaway.android.travelbehavior;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -224,7 +225,7 @@ public class TravelBehaviorManager {
     }
 
     private void showEmailDialog(String email) {
-        LayoutInflater inflater = ((AppCompatActivity) mActivityContext).getLayoutInflater();
+        LayoutInflater inflater = ((Activity) mActivityContext).getLayoutInflater();
         final View editTextView = inflater.inflate(R.layout.travel_behavior_email_dialog, null);
         EditText emailEditText = editTextView.findViewById(R.id.tb_email_edittext);
         EditText emailEditTextConfirm = editTextView.findViewById(R.id.tb_email_edittext_confirm);
@@ -261,11 +262,13 @@ public class TravelBehaviorManager {
 
     private void checkPermissions() {
         if (!PermissionUtils.hasGrantedAllPermissions(mApplicationContext, TravelBehaviorConstants.PERMISSIONS)) {
-            HomeActivity homeActivity = (HomeActivity) mActivityContext;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                // When targeting Android 11 and up, BACKGROUND_LOCATION and ACTIVITY_RECOGNITION_PERMISSION must be requested independently of all other permissions
-                // Request activity permission here, and then background location the subsequent callback set up in HomeActivity
-                homeActivity.requestPhysicalActivityPermission();
+            if (mActivityContext instanceof HomeActivity) {
+                HomeActivity homeActivity = (HomeActivity) mActivityContext;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    // When targeting Android 11 and up, BACKGROUND_LOCATION and ACTIVITY_RECOGNITION_PERMISSION must be requested independently of all other permissions
+                    // Request activity permission here, and then background location the subsequent callback set up in HomeActivity
+                    homeActivity.requestPhysicalActivityPermission();
+                }
             }
         }
     }
@@ -292,14 +295,14 @@ public class TravelBehaviorManager {
         Futures.addCallback(listenableFuture, new FutureCallback<WorkInfo>() {
             @Override
             public void onSuccess(@NullableDecl WorkInfo result) {
-                AppCompatActivity activity = (AppCompatActivity) mActivityContext;
+                Activity activity = (Activity) mActivityContext;
                 activity.runOnUiThread(() -> Toast.makeText(mApplicationContext, R.string.travel_behavior_enroll_success,
                         Toast.LENGTH_LONG).show());
             }
 
             @Override
             public void onFailure(Throwable t) {
-                AppCompatActivity activity = (AppCompatActivity) mActivityContext;
+                Activity activity = (Activity) mActivityContext;
                 activity.runOnUiThread(() -> Toast.makeText(mApplicationContext, R.string.travel_behavior_enroll_fail,
                         Toast.LENGTH_LONG).show());
             }

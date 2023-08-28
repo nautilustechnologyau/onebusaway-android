@@ -2,11 +2,11 @@
 <defaults>
   <entry>
     <key>enable_audience_network_interstitial_ads</key>
-    <value>true</value>
+    <value>false</value>
   </entry>
   <entry>
     <key>enable_admob_interstitial_ads</key>
-    <value>true</value>
+    <value>false</value>
   </entry>
   <entry>
     <key>enable_admob_banner_ads</key>
@@ -14,6 +14,50 @@
   </entry>
   <entry>
     <key>enable_audience_network_banner_ads</key>
+    <value>true</value>
+  </entry>
+  <entry>
+    <key>arrival_list_ads_format</key>
+    <value>banner</value>
+  </entry>
+  <entry>
+    <key>list_view_ads_format</key>
+    <value>banner</value>
+  </entry>
+  <entry>
+    <key>main_top_ads_format</key>
+    <value>banner</value>
+  </entry>
+  <entry>
+    <key>trip_plan_ads_format</key>
+    <value>banner</value>
+  </entry>
+  <entry>
+    <key>trip_result_ads_format</key>
+    <value>banner</value>
+  </entry>
+  <entry>
+    <key>show_ads_in_list_view</key>
+    <value>true</value>
+  </entry>
+  <entry>
+    <key>show_ads_in_trip_plan</key>
+    <value>true</value>
+  </entry>
+  <entry>
+    <key>show_ads_in_trip_result</key>
+    <value>true</value>
+  </entry>
+  <entry>
+    <key>show_main_top_ads</key>
+    <value>true</value>
+  </entry>
+  <entry>
+    <key>show_ads_in_arrival_list</key>
+    <value>false</value>
+  </entry>
+  <entry>
+    <key>show_rateit_dialog</key>
     <value>true</value>
   </entry>
 </defaults>

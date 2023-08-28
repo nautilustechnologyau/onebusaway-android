@@ -615,6 +615,19 @@ public class Application extends MultiDexApplication {
                 || !TextUtils.isEmpty(Application.get().getCustomOtpApiUrl()));
     }
 
+    public static boolean isOTPEnabled() {
+        ObaRegion currentRegion = Application.get().getCurrentRegion();
+        if (currentRegion != null) {
+            if (!TextUtils.isEmpty(currentRegion.getOtpBaseUrl())||
+                    !TextUtils.isEmpty(Application.get().getCustomOtpApiUrl())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
     private void createNotificationChannels() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel1 = new NotificationChannel(

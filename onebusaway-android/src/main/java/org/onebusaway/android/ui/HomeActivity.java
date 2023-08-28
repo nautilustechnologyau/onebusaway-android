@@ -87,6 +87,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Observer;
@@ -488,7 +489,7 @@ public class HomeActivity extends AppCompatActivity
         // check if update available
         checkUpdate();
 
-        setUpAutocomplete();
+        setupMainSearch();
     }
 
     @Override
@@ -502,7 +503,7 @@ public class HomeActivity extends AppCompatActivity
         Boolean isTalkBackEnabled = am.isTouchExplorationEnabled();
         ObaAnalytics.setAccessibility(mFirebaseAnalytics, isTalkBackEnabled);
 
-        mTopAdsManager.loadMainTopAd(findViewById(R.id.main_top_banner_ad_view), findViewById(R.id.main_top_native_ad_view));
+        // mTopAdsManager.loadMainTopAd(findViewById(R.id.main_top_banner_ad_view), findViewById(R.id.main_top_native_ad_view));
     }
 
     @Override
@@ -753,9 +754,9 @@ public class HomeActivity extends AppCompatActivity
 
         checkDisplayZoomControls();
 
-        if (BuildConfig.ENABLE_ADMOB) {
-            mTopAdsManager.loadMainTopAd(findViewById(R.id.main_top_banner_ad_view), findViewById(R.id.main_top_native_ad_view));
-        }
+        //if (BuildConfig.ENABLE_ADMOB) {
+        //    mTopAdsManager.loadMainTopAd(findViewById(R.id.main_top_banner_ad_view), findViewById(R.id.main_top_native_ad_view));
+        //}
     }
 
     private void showStarredStopsRoutesFragment() {
@@ -1430,6 +1431,7 @@ public class HomeActivity extends AppCompatActivity
         }
         updateLayersFab();
         updateStopFab();
+        showHideMainSearch();
     }
 
     private void setupZoomButtons() {
@@ -1476,16 +1478,18 @@ public class HomeActivity extends AppCompatActivity
             mStopFab.show();
         }
 
-        if (mPlanTripFab != null) {
+        if (mPlanTripFab != null && Application.isOTPEnabled()) {
             mPlanTripFab.show();
         }
     }
 
     private void hideStopFab() {
         if (mStopFab != null && mStopFab.isShown()) {
+            mStopFab.closeSpeedDialMenu();
             mStopFab.hide(false);
         }
         if (mPlanTripFab != null && mPlanTripFab.isShown()) {
+            mPlanTripFab.closeSpeedDialMenu();
             mPlanTripFab.hide(false);
         }
     }
@@ -1608,6 +1612,8 @@ public class HomeActivity extends AppCompatActivity
                     for (String purchasedProductId : purchase.getProducts()) {
                         if (ADS_FREE_PRODUCT_ID.equals(purchasedProductId)) {
                             mAdsFreeVersion = true;
+                            mTopAdsManager.loadMainTopAd(findViewById(R.id.main_top_banner_ad_view), findViewById(R.id.main_top_native_ad_view));
+                            showHideArrivalListAds();
                             break;
                         }
                     }
@@ -1616,10 +1622,6 @@ public class HomeActivity extends AppCompatActivity
         }
 
         PreferenceUtils.saveBoolean(ADS_FREE_VERSION, mAdsFreeVersion);
-
-        mTopAdsManager.loadMainTopAd(findViewById(R.id.main_top_banner_ad_view), findViewById(R.id.main_top_native_ad_view));
-
-        showHideArrivalListAds();
     }
 
     public void onMarkerClicked(Marker marker) {
@@ -1739,8 +1741,14 @@ public class HomeActivity extends AppCompatActivity
     synchronized private void moveFabsLocation() {
         moveFabLocation(mFabMyLocation, MY_LOC_DEFAULT_BOTTOM_MARGIN);
         moveFabLocation(mLayersFab, LAYERS_FAB_DEFAULT_BOTTOM_MARGIN);
-        moveFabLocation(mStopFab, LAYERS_FAB_DEFAULT_BOTTOM_MARGIN);
-        moveFabLocation(mPlanTripFab, STOP_FAB_DEFAULT_BOTTOM_MARGIN);
+
+        if (Application.isOTPEnabled()) {
+            moveFabLocation(mStopFab, LAYERS_FAB_DEFAULT_BOTTOM_MARGIN);
+            moveFabLocation(mPlanTripFab, STOP_FAB_DEFAULT_BOTTOM_MARGIN);
+        } else {
+            moveFabLocation(mStopFab, STOP_FAB_DEFAULT_BOTTOM_MARGIN);
+        }
+
         moveFabLocation(mZoomInFab, MY_LOC_DEFAULT_BOTTOM_MARGIN + 88);
         moveFabLocation(mZoomOutFab, MY_LOC_DEFAULT_BOTTOM_MARGIN + 208);
     }
@@ -1827,7 +1835,7 @@ public class HomeActivity extends AppCompatActivity
             mStopFab.setVisibility(View.VISIBLE);
         }
 
-        if (mPlanTripFab != null && mPlanTripFab.getVisibility() != View.VISIBLE) {
+        if (mPlanTripFab != null && mPlanTripFab.getVisibility() != View.VISIBLE && Application.isOTPEnabled()) {
             mPlanTripFab.setVisibility(View.VISIBLE);
         }
     }
@@ -1921,7 +1929,6 @@ public class HomeActivity extends AppCompatActivity
                         Log.d(TAG, "Updated remote config fetched");
                         if (task.isSuccessful()) {
                             updateConfigFromRemoteConfig();
-                            mTopAdsManager.loadMainTopAd(findViewById(R.id.main_top_banner_ad_view), findViewById(R.id.main_top_native_ad_view));
                         }
                     }
                 });
@@ -1937,6 +1944,8 @@ public class HomeActivity extends AppCompatActivity
     private void updateConfigFromRemoteConfig() {
         if (mFirebaseRemoteConfig != null) {
             AdsManager.setRemoteConfig(mFirebaseRemoteConfig);
+            mTopAdsManager.loadMainTopAd(findViewById(R.id.main_top_banner_ad_view), findViewById(R.id.main_top_native_ad_view));
+            showHideArrivalListAds();
             mShowRateitDialog = mFirebaseRemoteConfig.getBoolean("show_rateit_dialog");
         }
     }
@@ -2012,19 +2021,21 @@ public class HomeActivity extends AppCompatActivity
         mStopFab.setContentCoverEnabled(false);
         mStopFab.hide(true);
 
-        mPlanTripFab = findViewById(R.id.btnPlanTrip);
+        if (Application.isOTPEnabled()) {
+            mPlanTripFab = findViewById(R.id.btnPlanTrip);
 
-        ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) mPlanTripFab
-                .getLayoutParams();
-        STOP_FAB_DEFAULT_BOTTOM_MARGIN = p.bottomMargin;
+            ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) mPlanTripFab
+                    .getLayoutParams();
+            STOP_FAB_DEFAULT_BOTTOM_MARGIN = p.bottomMargin;
 
-        mPlanTripFab.setButtonIconResource(R.drawable.ic_navigation);
-        mPlanTripFab.setButtonBackgroundColour(ContextCompat.getColor(this, R.color.theme_primary));
-        mPlanTripFab.setContentCoverEnabled(false);
-        mPlanTripFab.hide(true);
-        mPlanTripFab.setOnClickListener(v -> {
-            planTripFromStop();
-        });
+            mPlanTripFab.setButtonIconResource(R.drawable.ic_navigation);
+            mPlanTripFab.setButtonBackgroundColour(ContextCompat.getColor(this, R.color.theme_primary));
+            mPlanTripFab.setContentCoverEnabled(false);
+            mPlanTripFab.hide(true);
+            mPlanTripFab.setOnClickListener(v -> {
+                planTripFromStop();
+            });
+        }
     }
 
     @Override
@@ -2085,7 +2096,6 @@ public class HomeActivity extends AppCompatActivity
         }
         mStopFab.rebuildSpeedDialMenu();
     }
-
 
     private void setupSlidingPanel() {
         mSlidingPanel = findViewById(R.id.bottom_sliding_layout);
@@ -2373,7 +2383,29 @@ public class HomeActivity extends AppCompatActivity
         super.onDestroy();
     }
 
-    private void setUpAutocomplete() {
+    private void showHideMainSearch() {
+        CardView searchView = findViewById(R.id.main_search);
+
+        if (searchView == null) {
+            return;
+        }
+
+        if (Application.isOTPEnabled()) {
+            searchView.setVisibility(View.VISIBLE);
+        } else {
+            searchView.setVisibility(View.GONE);
+        }
+    }
+
+    private void setupMainSearch() {
+        showHideMainSearch();
+
+        CardView searchView = findViewById(R.id.main_search);
+
+        if (searchView == null) {
+            return;
+        }
+
         ObaRegion region = Application.get().getCurrentRegion();
 
         ImageButton tripPlanListBtn = findViewById(R.id.trip_plan_list_btn);
@@ -2381,10 +2413,24 @@ public class HomeActivity extends AppCompatActivity
         tripPlanHelper.setTripPlanListItemSelectedListener(new TripPlanHelper.TripPlanListItemSelectedListener() {
             @Override
             public void onTripPlanListItemSelected(TripPlanAddresses tripPlan) {
+                if (!Application.isOTPEnabled()) {
+                    Toast.makeText(getApplicationContext(),
+                            getString(R.string.trip_plan_trip_planner_not_available),
+                            Toast.LENGTH_SHORT
+                    ).show();
+                    return;
+                }
                 startTripPlanActivity(tripPlan.getFromAddress(), tripPlan.getToAddress());
             }
         });
         tripPlanListBtn.setOnClickListener(v -> {
+            if (!Application.isOTPEnabled()) {
+                Toast.makeText(getApplicationContext(),
+                        getString(R.string.trip_plan_trip_planner_not_available),
+                        Toast.LENGTH_SHORT
+                ).show();
+                return;
+            }
             tripPlanHelper.loadTrips();
         });
 
@@ -2401,6 +2447,15 @@ public class HomeActivity extends AppCompatActivity
         // Set up autocomplete with Pelias geocoder
         tv.setAdapter(new PlacesAutoCompleteAdapter(this, R.layout.geocode_result, region));
         tv.setOnItemClickListener((parent, view, position, id) -> {
+            if (!Application.isOTPEnabled()) {
+                tv.dismissDropDown();
+                Toast.makeText(getApplicationContext(),
+                        getString(R.string.trip_plan_trip_planner_not_available),
+                        Toast.LENGTH_SHORT
+                ).show();
+                return;
+            }
+
             CustomAddress fromAddr = makeAddressFromLocation();
             CustomAddress toAddr = (CustomAddress) parent.getAdapter().getItem(position);
 
@@ -2470,6 +2525,14 @@ public class HomeActivity extends AppCompatActivity
     }
 
     private void planTripFromStop() {
+        if (!Application.isOTPEnabled()) {
+            Toast.makeText(this,
+                    getString(R.string.trip_plan_trip_planner_not_available),
+                    Toast.LENGTH_SHORT
+            ).show();
+            return;
+        }
+
         if (mFocusedStop != null) {
             CustomAddress fromAddress = CustomAddress.getEmptyAddress();
             fromAddress.setAddressLine(0, mFocusedStop.getName());

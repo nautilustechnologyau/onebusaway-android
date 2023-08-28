@@ -63,19 +63,14 @@ public class LayersSpeedDialAdapter extends SpeedDialMenuAdapter {
 
     private int mLayerCount = 5;
 
+    private final boolean mSmallDisplay;
+
     public LayersSpeedDialAdapter(Context context) {
         this.context = context;
+        this.mSmallDisplay = UIUtils.isSmallDisplay(context);
 
-        if (UIUtils.isSmallDisplay(context)) {
-            if (LayerUtils.isBikeshareLayerVisible()) {
-                mLayerCount = 2;
-            } else {
-                mLayerCount = 3;
-            }
-        }
-
-        if (LayerUtils.isBikeshareLayerVisible()) {
-            mLayerCount++;
+        if (mSmallDisplay) {
+            mLayerCount = 3;
         }
 
         setupLayers();
@@ -97,7 +92,7 @@ public class LayersSpeedDialAdapter extends SpeedDialMenuAdapter {
             layers[i++] = LayerUtils.bikeshareLayerInfo;
         }
 
-        if (UIUtils.isSmallDisplay(context)) {
+        if (mSmallDisplay) {
             layers[i++] = LayerUtils.mapstyleStandardLayerInfo;
             layers[i++] = LayerUtils.mapstyleNightLayerInfo;
             if (!LayerUtils.isBikeshareLayerVisible()) {
@@ -108,7 +103,9 @@ public class LayersSpeedDialAdapter extends SpeedDialMenuAdapter {
             layers[i++] = LayerUtils.mapstyleNightLayerInfo;
             layers[i++] = LayerUtils.mapstyleRetroLayerInfo;
             layers[i++] = LayerUtils.mapstyleAubergineLayerInfo;
-            layers[i] = LayerUtils.mapstyleGrayscaleLayerInfo;
+            if (!LayerUtils.isBikeshareLayerVisible()) {
+                layers[i] = LayerUtils.mapstyleGrayscaleLayerInfo;
+            }
         }
 
         // layers[i] = LayerUtils.mapstyleSilverLayerInfo;
@@ -242,9 +239,10 @@ public class LayersSpeedDialAdapter extends SpeedDialMenuAdapter {
             activatedLayers[i++] = LayerUtils.isBikeshareLayerVisible();
         }
 
-        if (UIUtils.isSmallDisplay(context)) {
+        if (mSmallDisplay) {
             activatedLayers[i++] = LayerUtils.isMapstyleStandardLayerVisible();
             activatedLayers[i++] = LayerUtils.isMapstyleNightLayerVisible();
+            // add this layer if bikeshare is not enabled
             if (!LayerUtils.isBikeshareLayerVisible()) {
                 activatedLayers[i] = LayerUtils.isMapstyleRetroLayerVisible();
             }
@@ -253,7 +251,10 @@ public class LayersSpeedDialAdapter extends SpeedDialMenuAdapter {
             activatedLayers[i++] = LayerUtils.isMapstyleNightLayerVisible();
             activatedLayers[i++] = LayerUtils.isMapstyleRetroLayerVisible();
             activatedLayers[i++] = LayerUtils.isMapstyleAubergineLayerVisible();
-            activatedLayers[i] = LayerUtils.isMapstyleGrayscaleLayerVisible();
+            // add this layer if bikeshare is not enabled
+            if (!LayerUtils.isBikeshareLayerVisible()) {
+                activatedLayers[i] = LayerUtils.isMapstyleGrayscaleLayerVisible();
+            }
         }
 
         // activatedLayers[i] = LayerUtils.isMapstyleSilverLayerVisible();

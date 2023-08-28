@@ -45,13 +45,23 @@ public class AdsManager {
 
     private static FirebaseRemoteConfig mFirebaseRemoteConfig;
 
-    private static boolean mAudienceNetworkInterstitialAdsEnabled = true;
+    private static boolean mAudienceNetworkInterstitialAdsEnabled = false;
 
-    private static boolean mAudienceNetworkBannerAdsEnabled = true;
+    private static boolean mAudienceNetworkBannerAdsEnabled = false;
 
-    private static boolean mAdmobInterstitialAdsEnabled = true;
+    private static boolean mAdmobInterstitialAdsEnabled = false;
 
-    private static boolean mAdmobBannerAdsEnabled = true;
+    private static boolean mAdmobBannerAdsEnabled = false;
+
+    private static boolean mShowMainTopAds = false;
+
+    private static boolean mShowAdsInArrivalList = false;
+
+    private static boolean mShowAdsInListView = false;
+
+    private static boolean mShowAdsInTripPlan = false;
+
+    private static boolean mShowAdsInTripResult = false;
 
     private static String mMainTopAdsFormat = "banner";
 
@@ -69,25 +79,13 @@ public class AdsManager {
 
     private static int mInterstitialAdShowCount = 0;
 
-    private static boolean mShowMainTopAds = true;
-
-    private static boolean mShowAdsInArrivalList = true;
-
-    private static boolean mShowAdsInListView = true;
-
-    private static boolean mShowAdsInTripPlan = true;
-
-    private static boolean mShowAdsInTripResult = true;
-
     private static final Random mRandom = new Random();
 
-    private AppCompatActivity mActivity;
-
-    private LinearLayout mBannerAdView;
-
-    private TemplateView mNativeAdView;
+    private final AppCompatActivity mActivity;
 
     // Ad views
+    private LinearLayout mBannerAdView;
+    private TemplateView mNativeAdView;
     private InterstitialAd mAdMobInterstitialAd;
     private NativeAd mNativeAd;
     private com.facebook.ads.InterstitialAd mAnInterstitialAd;
@@ -582,15 +580,7 @@ public class AdsManager {
         if (adsFreeVersion) {
             nativeAdView.setVisibility(View.GONE);
         } else {
-            VideoOptions videoOptions = new VideoOptions.Builder()
-                    .setStartMuted(false)
-                    .build();
-
-            NativeAdOptions adOptions = new NativeAdOptions.Builder()
-                    .setVideoOptions(videoOptions)
-                    .setRequestMultipleImages(true)
-                    .build();
-            AdLoader adLoader = new AdLoader.Builder(mActivity, mActivity.getResources().getString(R.string.admob_native_unit_id))
+            AdLoader.Builder builder = new AdLoader.Builder(mActivity, mActivity.getResources().getString(R.string.admob_native_unit_id))
                     .forNativeAd(new NativeAd.OnNativeAdLoadedListener() {
                         @Override
                         public void onNativeAdLoaded(NativeAd nativeAd) {
@@ -601,9 +591,24 @@ public class AdsManager {
                             mNativeAdView.setNativeAd(mNativeAd);
                             mNativeAdView.setVisibility(View.VISIBLE);
                         }
-                    })
-                    .withNativeAdOptions(adOptions)
-                    .build();
+                    });
+
+            AdLoader adLoader;
+            if (TemplateView.MEDIUM_TEMPLATE.equals(mNativeAdView.getTemplateTypeName())) {
+                VideoOptions videoOptions = new VideoOptions.Builder()
+                        .setStartMuted(false)
+                        .build();
+
+                NativeAdOptions adOptions = new NativeAdOptions.Builder()
+                        .setVideoOptions(videoOptions)
+                        .setRequestMultipleImages(true)
+                        .build();
+
+                adLoader = builder.withNativeAdOptions(adOptions)
+                        .build();
+            } else {
+                adLoader = builder.build();
+            }
 
             adLoader.loadAd(new AdRequest.Builder().build());
 

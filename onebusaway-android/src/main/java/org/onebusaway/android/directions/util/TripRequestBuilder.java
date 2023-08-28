@@ -256,7 +256,11 @@ public class TripRequestBuilder {
             otpBaseUrl = app.getCustomOtpApiUrl();
             Log.d(TAG, "Using custom OTP API URL set by user '" + otpBaseUrl + "'.");
         } else {
-            otpBaseUrl = app.getCurrentRegion().getOtpBaseUrl();
+            if (app.getCurrentRegion() != null) {
+                otpBaseUrl = app.getCurrentRegion().getOtpBaseUrl();
+            } else {
+                return null;
+            }
         }
         try {
             // URI.parse() doesn't tell us if the scheme is missing, so use URL() instead (#126)
