@@ -32,7 +32,6 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.work.Constraints;
 import androidx.work.Data;
@@ -51,7 +50,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.onebusaway.android.R;
 import org.onebusaway.android.app.Application;
 import org.onebusaway.android.io.ObaAnalytics;
@@ -294,7 +293,7 @@ public class TravelBehaviorManager {
                 getWorkInfoById(workRequest.getId());
         Futures.addCallback(listenableFuture, new FutureCallback<WorkInfo>() {
             @Override
-            public void onSuccess(@NullableDecl WorkInfo result) {
+            public void onSuccess(@Nullable WorkInfo result) {
                 Activity activity = (Activity) mActivityContext;
                 activity.runOnUiThread(() -> Toast.makeText(mApplicationContext, R.string.travel_behavior_enroll_success,
                         Toast.LENGTH_LONG).show());
