@@ -16,94 +16,85 @@
 -->
 <resources>
     <string-array name="main_help_options">
-        <item>Show Tutorial</item>
-        <item>Legend</item>
-        <item>What\'s New?</item>
-        <item>Supported Agencies</item>
-        <item>Twitter Feed</item>
-        <item>Contact Us</item>
+        <item>Skorzystaj z samouczka</item>
+        <item>Legenda</item>
+        <item>Co nowego w tej wersji</item>
+        <item>Obsługiwani przewoźnicy</item>
+        <item>Twitter</item>
+        <item>Kontakt</item>
     </string-array>
     <string-array name="main_help_options_no_contact_us">
-        <item>Show Tutorial</item>
-        <item>Legend</item>
-        <item>What\'s New?</item>
-        <item>Supported Agencies</item>
-        <item>Twitter Feed</item>
+        <item>Skorzystaj z samouczka</item>
+        <item>Legenda</item>
+        <item>Co nowego w tej wersji</item>
+        <item>Obsługiwani przewoźnicy</item>
+        <item>Twitter</item>
     </string-array>
     <string-array name="route_favorite_options">
-        <item>This stop</item>
-        <item>All stops</item>
+        <item>Ten przystanek</item>
+        <item>Wszystkie przystanki</item>
     </string-array>
     <string-array name="sort_stops">
-        <item>Name</item>
-        <item>Most frequently used</item>
-    </string-array>
-    <string-array name="sort_routes">
-        <item>Name</item>
-        <item>Most frequently used</item>
+        <item>Nazwa</item>
+        <item>Najczęsciej używane</item>
     </string-array>
     <string-array name="sort_reminders">
-        <item>Name</item>
-        <item>Time</item>
+        <item>Nazwa</item>
+        <item>Tiempo</item>
     </string-array>
     <string-array name="sort_arrivals">
-        <item>Estimated arrival</item>
-        <item>Route</item>
+        <item>Szacowany przyjazd</item>
+        <item>Linia</item>
     </string-array>
     <string-array name="search_stop_options">
-        <item>Show arrivals</item>
-        <item>Show on map</item>
+        <item>Pokaż przyjazdy</item>
+        <item>Pokaż na mapie</item>
     </string-array>
     <string-array name="search_route_options">
-        <item>Show list of stops</item>
-        <item>Show on map</item>
+        <item>Pokaż listę przystanków</item>
+        <item>Pokaż na mapie</item>
     </string-array>
     <string-array name="reminder_time">
-        <item>No reminder</item>
-        <item>1 minute</item>
-        <item>3 minutes</item>
-        <item>5 minutes</item>
-        <item>10 minutes</item>
-        <item>15 minutes</item>
-        <item>20 minutes</item>
-        <item>25 minutes</item>
-        <item>30 minutes</item>
+        <item>Sin recordatorio</item>
+        <item>1 minuta</item>
+        <item>3 minuty</item>
+        <item>5 minut</item>
+        <item>10 minut</item>
+        <item>15 minut</item>
+        <item>20 minut</item>
+        <item>25 minut</item>
+        <item>30 minut</item>
     </string-array>
     <string-array name="reminder_days">
-        <item>Monday</item>
-        <item>Tuesday</item>
-        <item>Wednesday</item>
-        <item>Thursday</item>
-        <item>Friday</item>
-        <item>Saturday</item>
-        <item>Sunday</item>
+        <item>Poniedziałek</item>
+        <item>Wtorek</item>
+        <item>Środa</item>
+        <item>Czwartek</item>
+        <item>Piątek</item>
+        <item>Sobota</item>
+        <item>Niedziela</item>
     </string-array>
     <string-array name="report_stop_problem_code">
-        <item>Choose a problem</item>
-        <item>Stop name is wrong</item>
-        <item>Stop number is wrong</item>
-        <item>Location is wrong</item>
-        <item>Route or trip is missing</item>
-        <item>Something else</item>
+        <item>Wybierz</item>
+        <item>Nieprawidłowa nazwa przystanku</item>
+        <item>Nieprawidłowy numer przystanku</item>
+        <item>Zła lokalizacja</item>
+        <item>Brakuje linii lub kursu</item>
+        <item>Coś innego</item>
     </string-array>
     <string-array name="report_trip_problem_code_bus">
-        <item>Choose a problem</item>
-        <item>The bus never came</item>
-        <item>It came earlier than predicted</item>
-        <item>It came later than predicted</item>
-        <item>Wrong destination shown</item>
-        <item>The bus doesn\'t stop here</item>
-        <item>Something else</item>
+        <item>Wybierz</item>
+        <item>Nie przyjechał w ógole</item>
+        <item>Przyjechał wcześniej niż powinien</item>
+        <item>Przyjechał później niż powinien</item>
+        <item>Wyświetlał zły kierunek</item>
+        <item>Nie zatrzymuje się tutaj</item>
+        <item>Coś innego</item>
     </string-array>
     <string-array name="preferred_units_options">
         <item>@string/preferences_preferred_units_option_automatic</item>
         <item>@string/preferences_preferred_units_option_metric</item>
         <item>@string/preferences_preferred_units_option_imperial</item>
-    </string-array>
-    <string-array name="app_theme_options">
-        <item>@string/preferences_app_theme_option_system_default</item>
-        <item>@string/preferences_app_theme_option_light</item>
-        <item>@string/preferences_app_theme_option_dark</item>
     </string-array>
     <string-array name="arrival_info_style_options">
         <item>@string/preferences_arrival_info_style_options_a</item>
@@ -113,37 +104,37 @@
     <!-- Spoken directions based on 16 compass points, but pointing from the user's current location
          towards the selected bus stop instead of N/S/E/W. -->
     <string-array name="spoken_compass_directions">
-        <item>straight ahead</item>
+        <item>prosto</item>
         <!-- North -->
-        <item>slight left</item>
+        <item>lekko w lewo</item>
         <!-- NNE -->
-        <item>slight left</item>
+        <item>lekko w lewo</item>
         <!-- NE -->
-        <item>left</item>
+        <item>w lewo</item>
         <!-- ENE -->
-        <item>left</item>
+        <item>w lewo</item>
         <!-- East -->
-        <item>behind you to left</item>
+        <item>za Tobą w lewo</item>
         <!-- ESE -->
-        <item>behind you to left</item>
+        <item>za Tobą w lewo</item>
         <!-- SE -->
-        <item>behind you to left</item>
+        <item>za Tobą w lewo</item>
         <!-- SSE -->
-        <item>straight behind you</item>
+        <item>za Tobą prosto</item>
         <!-- South -->
-        <item>behind you to right</item>
+        <item>za Tobą w prawo</item>
         <!-- SSW -->
-        <item>behind you to right</item>
+        <item>za Tobą w prawo</item>
         <!-- SW -->
-        <item>behind you to right</item>
+        <item>za Tobą w prawo</item>
         <!-- WSW -->
-        <item>right</item>
+        <item>w prawo</item>
         <!-- West -->
-        <item>right</item>
+        <item>w prawo</item>
         <!-- WNW -->
-        <item>slight right</item>
+        <item>lekko w prawo</item>
         <!-- NW -->
-        <item>slight right</item>
+        <item>lekko w prawo</item>
         <!-- NNW -->
     </string-array>
     <!-- Issue reporting -->
@@ -195,29 +186,29 @@
     </array>
 
     <string-array name="report_stop_issue_tutorial_desc">
-        <item>Click on the bus stop, that you want to report.</item>
-        <item>Then select report problem section from options.</item>
-        <item>Submit your bus stop related problem.</item>
+        <item>Kliknij na przystanku, wobec którego chcesz wysłać raport.</item>
+        <item>Następnie wybierz rodzaj raportu.</item>
+        <item>Wyślij zgłoszenie związane z przystankiem.</item>
     </string-array>
 
     <string-array name="report_stop_transit_category_keywords">
-        <item>transit</item>
+        <item>komunikacja</item>
         <item>\u0020bus\u0020</item> <!-- Include spaces to not match as part of another word -->
-        <item>stop</item>
-        <item>route/trip is missing</item>
-        <item>passenger</item>
-        <item>onebusaway</item>
+        <item>przystanek</item>
+        <item>brakuje linii/kursu</item>
+        <item>pasazer</item>
+        <item>kiedybus</item>
     </string-array>
 
     <string-array name="report_trip_transit_category_keywords">
-        <item>arrival</item>
-        <item>schedule</item>
+        <item>podróż</item>
+        <item>przyjazd</item>
     </string-array>
 
     <string-array name="report_stop_id_field_keywords">
-        <item>stop</item>
-        <item>id</item>
-        <item>bus</item>
+        <item>przystanek</item>
+        <item>identyfikator</item>
+        <item>autobus</item>
     </string-array>
 
     <string-array name="transit_mode_array">
@@ -232,5 +223,4 @@
         <item>@string/trip_plan_leaving</item>
         <item>@string/trip_plan_arriving</item>
     </string-array>
-
 </resources>

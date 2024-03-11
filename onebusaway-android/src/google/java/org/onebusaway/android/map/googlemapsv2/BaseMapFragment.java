@@ -16,34 +16,6 @@
  */
 package org.onebusaway.android.map.googlemapsv2;
 
-import static org.onebusaway.android.util.PermissionUtils.LOCATION_PERMISSIONS;
-import static org.onebusaway.android.util.PermissionUtils.LOCATION_PERMISSION_REQUEST;
-import static org.onebusaway.android.util.UIUtils.canManageDialog;
-
-import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.app.Dialog;
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.graphics.drawable.Drawable;
-import android.location.Location;
-import android.os.Bundle;
-import android.os.Handler;
-import android.provider.Settings;
-import android.text.TextUtils;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.CheckBox;
-import android.widget.Toast;
-
-import androidx.appcompat.app.AlertDialog;
-import androidx.core.graphics.drawable.DrawableCompat;
-import androidx.fragment.app.DialogFragment;
-
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -51,6 +23,7 @@ import com.google.android.gms.maps.LocationSource;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -58,6 +31,10 @@ import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.maps.model.StampStyle;
+import com.google.android.gms.maps.model.StrokeStyle;
+import com.google.android.gms.maps.model.StyleSpan;
+import com.google.android.gms.maps.model.TextureStyle;
 import com.google.android.gms.maps.model.VisibleRegion;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
@@ -91,6 +68,27 @@ import org.onebusaway.android.util.PreferenceUtils;
 import org.onebusaway.android.util.UIUtils;
 import org.opentripplanner.routing.bike_rental.BikeRentalStation;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.Dialog;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.content.res.Configuration;
+import android.graphics.drawable.Drawable;
+import android.location.Location;
+import android.os.Bundle;
+import android.os.Handler;
+import android.provider.Settings;
+import android.text.TextUtils;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.CheckBox;
+import android.widget.Toast;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -98,6 +96,14 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import au.mymetro.android.ui.SingleLiveEvent;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.graphics.drawable.DrawableCompat;
+import androidx.fragment.app.DialogFragment;
+
+import static org.onebusaway.android.util.PermissionUtils.LOCATION_PERMISSIONS;
+import static org.onebusaway.android.util.PermissionUtils.LOCATION_PERMISSION_REQUEST;
+import static org.onebusaway.android.util.UIUtils.canManageDialog;
 
 /**
  * The MapFragment class is split into two basic modes:
@@ -144,6 +150,7 @@ public class BaseMapFragment extends SupportMapFragment
 
     // Use fully-qualified class name to avoid import statement, because it interferes with scripted
     // copying of Maps API v2 classes between Google/Amazon build flavors (see #254)
+    // TODO: We've eliminated Amazon Fire support. Let's reverse this.
     private com.google.android.gms.maps.GoogleMap mMap;
 
     private String mFocusStopId;
@@ -394,11 +401,12 @@ public class BaseMapFragment extends SupportMapFragment
         mMap.setOnMarkerClickListener(mapClickListeners);
         mMap.setOnMapClickListener(mapClickListeners);
 
-        // for fixed region we may need to set the map camera to the centre
-        // this is useful if the user choose not to enable location service
-        if (BuildConfig.USE_FIXED_REGION) {
-            LatLng latLng = new LatLng(BuildConfig.FIXED_REGION_MAP_CENTRE_LAT, BuildConfig.FIXED_REGION_MAP_CENTRE_LON);
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, BuildConfig.FIXED_REGION_MAP_ZOOM_LEVEL));
+        if (inDarkMode()) {
+            mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(getContext(), R.raw.dark_map));
+        } else {
+            // When in light mode, just remove POIs.
+            String removePOIStyle = "[{\"featureType\":\"poi\",\"elementType\":\"all\",\"stylers\":[{\"visibility\":\"off\"}]}]";
+            mMap.setMapStyle(new MapStyleOptions(removePOIStyle));
         }
 
         initMap(mLastSavedInstanceState);
@@ -418,6 +426,13 @@ public class BaseMapFragment extends SupportMapFragment
         } catch (Exception e) {
             Log.e(TAG, "Can't find style. Error: ", e);
         }
+    }
+
+    private boolean inDarkMode() {
+        return AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES || (
+                AppCompatDelegate.getDefaultNightMode() != AppCompatDelegate.MODE_NIGHT_NO &&
+                        (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+        );
     }
 
     private void initMap(Bundle savedInstanceState) {
@@ -455,6 +470,8 @@ public class BaseMapFragment extends SupportMapFragment
             }
             initMapState(args);
         }
+
+
     }
 
     private void initMapState(Bundle args) {
@@ -1122,12 +1139,14 @@ public class BaseMapFragment extends SupportMapFragment
                 mLineOverlay.clear();
             }
             PolylineOptions lineOptions;
+            StampStyle polylineArrow = TextureStyle.newBuilder(BitmapDescriptorFactory.fromResource(R.drawable.ic_navigation_expand_more)).build();
+            StyleSpan polylineArrowSpan = new StyleSpan(StrokeStyle.colorBuilder(lineOverlayColor).stamp(polylineArrow).build());
 
             int totalPoints = 0;
 
             for (ObaShape s : shapes) {
                 lineOptions = new PolylineOptions();
-                lineOptions.color(lineOverlayColor);
+                lineOptions.addSpan(polylineArrowSpan);
 
                 for (Location l : s.getPoints()) {
                     lineOptions.add(MapHelpV2.makeLatLng(l));

@@ -157,7 +157,7 @@ public class SituationDialogFragment extends DialogFragment {
                     }
                 });
 
-        final androidx.appcompat.app.AlertDialog dialog = builder.create();
+        final AlertDialog dialog = builder.create();
         dialog.show();
 
         // Set the title, description, and URL (if provided)

@@ -74,6 +74,7 @@ import edu.usf.cutr.open311client.Open311Manager;
 import edu.usf.cutr.open311client.models.Open311Option;
 
 import static com.google.android.gms.location.LocationServices.getFusedLocationProviderClient;
+import static org.onebusaway.android.util.UIUtils.setAppTheme;
 
 public class Application extends MultiDexApplication {
 
@@ -491,6 +492,7 @@ public class Application extends MultiDexApplication {
         }
 
         checkArrivalStylePreferenceDefault();
+        checkDarkMode();
 
         // Get the current app version.
         PackageManager pm = getPackageManager();
@@ -533,6 +535,15 @@ public class Application extends MultiDexApplication {
                     Log.d(TAG, "Using arrival info style B (Cards) as default preference");
                     break;
             }
+        }
+    }
+
+    private void checkDarkMode() {
+        String appThemePrefKey = getResources()
+                .getString(R.string.preference_key_app_theme);
+        String appThemePref = mPrefs.getString(appThemePrefKey, null);
+        if (appThemePref != null) {
+            setAppTheme(appThemePref);
         }
     }
 

@@ -96,20 +96,18 @@
                     android:visibility="gone"/>
 
                 <com.google.android.material.floatingactionbutton.FloatingActionButton
-                    android:id="@+id/btnMyLocation"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:layout_alignParentBottom="true"
-                    android:layout_marginLeft="@dimen/fab_margin"
-                    android:layout_marginRight="@dimen/fab_margin"
-                    android:layout_marginBottom="@dimen/fab_margin1"
-                    android:contentDescription="@string/map_option_mylocation"
-                    android:src="@drawable/ic_maps_my_location"
-                    app:backgroundTint="@color/theme_primary"
-                    app:elevation="6dp"
-                    app:pressedTranslationZ="12dp"
-                    tools:ignore="ImageContrastCheck" />
+                        android:id="@+id/btnMyLocation"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginRight="@dimen/fab_margin_horizontal"
+                        android:layout_marginLeft="@dimen/fab_margin_horizontal"
+                        android:layout_marginBottom="@dimen/fab_margin_vertical"
+                        android:src="@drawable/ic_maps_my_location"
+                        android:contentDescription="@string/map_option_mylocation"
+                        app:elevation="6dp"
+                        app:pressedTranslationZ="12dp"/>
 
                 <uk.co.markormesher.android_fab.FloatingActionButton
                     android:id="@+id/layersSpeedDial"

@@ -20,6 +20,7 @@ package org.onebusaway.android.ui;
 import static org.onebusaway.android.util.PermissionUtils.RESTORE_BACKUP_PERMISSION_REQUEST;
 import static org.onebusaway.android.util.PermissionUtils.SAVE_BACKUP_PERMISSION_REQUEST;
 import static org.onebusaway.android.util.PermissionUtils.STORAGE_PERMISSIONS;
+import static org.onebusaway.android.util.UIUtils.setAppTheme;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -46,6 +47,7 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 
@@ -118,6 +120,8 @@ public class PreferencesActivity extends PreferenceActivity
     //Save initial value so we can compare to current value in onDestroy()
 
     ListPreference preferredUnits;
+
+    ListPreference mThemePref;
 
     private FirebaseAnalytics mFirebaseAnalytics;
 
@@ -193,6 +197,10 @@ public class PreferencesActivity extends PreferenceActivity
         preferredUnits = (ListPreference) findPreference(
                 getString(R.string.preference_key_preferred_units));
 
+        mThemePref = (ListPreference) findPreference(
+                getString(R.string.preference_key_app_theme));
+        mThemePref.setOnPreferenceChangeListener(this);
+
         settings.registerOnSharedPreferenceChangeListener(this);
 
         PreferenceScreen preferenceScreen = getPreferenceScreen();
@@ -261,6 +269,7 @@ public class PreferencesActivity extends PreferenceActivity
 
         changePreferenceSummary(getString(R.string.preference_key_region));
         changePreferenceSummary(getString(R.string.preference_key_preferred_units));
+        changePreferenceSummary(getString(R.string.preference_key_app_theme));
         changePreferenceSummary(getString(R.string.preference_key_otp_api_url));
 
         // Remove preferences for notifications if no trip planning
@@ -325,6 +334,9 @@ public class PreferencesActivity extends PreferenceActivity
         } else if (preferenceKey
                 .equalsIgnoreCase(getString(R.string.preference_key_preferred_units))) {
             preferredUnits.setSummary(preferredUnits.getValue());
+        } else if (preferenceKey
+                .equalsIgnoreCase(getString(R.string.preference_key_app_theme))) {
+            mThemePref.setSummary(mThemePref.getValue());
         } else if (preferenceKey
                 .equalsIgnoreCase(getString(R.string.preference_key_otp_api_url))) {
             String customOtpApiUrl = Application.get().getCustomOtpApiUrl();
@@ -594,6 +606,11 @@ public class PreferencesActivity extends PreferenceActivity
         } else if (key.equalsIgnoreCase(getString(R.string.preference_key_preferred_units))) {
             // Change the preferred units description
             changePreferenceSummary(key);
+        } else if (key.equalsIgnoreCase(getString(R.string.preference_key_app_theme))) {
+            // Change the app theme preference description
+            changePreferenceSummary(key);
+            // Update the app theme
+            setAppTheme(settings.getString(key, getString(R.string.preferences_app_theme_option_system_default)));
         } else if (key.equalsIgnoreCase(getString(R.string.preference_key_auto_select_region))) {
             //Analytics
             boolean autoSelect = settings
@@ -629,14 +646,24 @@ public class PreferencesActivity extends PreferenceActivity
      * @return true if the provided apiUrl could be a valid URL, false if it could not
      */
     private boolean validateUrl(String apiUrl) {
-        try {
-            // URI.parse() doesn't tell us if the scheme is missing, so use URL() instead (#126)
-            URL url = new URL(apiUrl);
-        } catch (MalformedURLException e) {
+        if (!apiUrl.startsWith("http")) {
             // Assume HTTPS scheme if none is provided
             apiUrl = getString(R.string.https_prefix) + apiUrl;
         }
-        return Patterns.WEB_URL.matcher(apiUrl).matches();
+
+        URL url = null;
+        try {
+            // URI.parse() doesn't tell us if the scheme is missing, so use URL() instead (#126)
+            url = new URL(apiUrl);
+        } catch (MalformedURLException e) {
+            return false;
+        }
+
+        if (url.getHost().equals("localhost")) {
+            return true;
+        } else {
+            return Patterns.WEB_URL.matcher(apiUrl).matches();
+        }
     }
 
     /**

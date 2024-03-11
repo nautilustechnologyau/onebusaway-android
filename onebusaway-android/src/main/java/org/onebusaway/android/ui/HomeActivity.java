@@ -17,6 +17,11 @@
  */
 package org.onebusaway.android.ui;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import static com.google.android.play.core.install.model.AppUpdateType.FLEXIBLE;
 import static com.google.android.play.core.install.model.AppUpdateType.IMMEDIATE;
 import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_ACTIVITY_FEED;
@@ -34,7 +39,7 @@ import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_
 import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_SEND_FEEDBACK;
 import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_SETTINGS;
 import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_SIGN_IN;
-import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_STARRED_STOPS;
+import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_STARRED_ROUTES;
 import static org.onebusaway.android.ui.NavigationDrawerFragment.NavigationDrawerCallbacks;
 import static org.onebusaway.android.util.PermissionUtils.BACKGROUND_LOCATION_PERMISSION_REQUEST;
 import static org.onebusaway.android.util.PermissionUtils.LOCATION_PERMISSIONS;
@@ -42,6 +47,35 @@ import static au.mymetro.android.billing.BillingClientLifecycle.ADS_FREE_PRODUCT
 import static uk.co.markormesher.android_fab.FloatingActionButton.POSITION_BOTTOM;
 import static uk.co.markormesher.android_fab.FloatingActionButton.POSITION_END;
 import static uk.co.markormesher.android_fab.FloatingActionButton.POSITION_START;
+
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
+
+import org.onebusaway.android.BuildConfig;
+import org.onebusaway.android.R;
+import org.onebusaway.android.app.Application;
+import org.onebusaway.android.io.ObaAnalytics;
+import org.onebusaway.android.io.elements.ObaRegion;
+import org.onebusaway.android.io.elements.ObaRoute;
+import org.onebusaway.android.io.elements.ObaStop;
+import org.onebusaway.android.io.request.ObaArrivalInfoResponse;
+import org.onebusaway.android.map.MapModeController;
+import org.onebusaway.android.map.MapParams;
+import org.onebusaway.android.map.googlemapsv2.BaseMapFragment;
+import org.onebusaway.android.map.googlemapsv2.LayerInfo;
+import org.onebusaway.android.region.ObaRegionsTask;
+import org.onebusaway.android.report.ui.ReportActivity;
+import org.onebusaway.android.travelbehavior.TravelBehaviorManager;
+import org.onebusaway.android.travelbehavior.constants.TravelBehaviorConstants;
+import org.onebusaway.android.travelbehavior.utils.TravelBehaviorUtils;
+import org.onebusaway.android.tripservice.TripService;
+import org.onebusaway.android.util.FragmentUtils;
+import org.onebusaway.android.util.LocationUtils;
+import org.onebusaway.android.util.PermissionUtils;
+import org.onebusaway.android.util.PreferenceUtils;
+import org.onebusaway.android.util.RegionUtils;
+import org.onebusaway.android.util.ShowcaseViewUtils;
+import org.onebusaway.android.util.UIUtils;
+import org.opentripplanner.routing.bike_rental.BikeRentalStation;
 
 import android.Manifest;
 import android.app.Dialog;
@@ -82,6 +116,13 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -94,13 +135,9 @@ import androidx.lifecycle.Observer;
 
 import com.android.billingclient.api.Purchase;
 import com.google.android.ads.nativetemplates.TemplateView;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.play.core.appupdate.AppUpdateInfo;
 import com.google.android.play.core.appupdate.AppUpdateManager;
@@ -109,53 +146,18 @@ import com.google.android.play.core.install.InstallStateUpdatedListener;
 import com.google.android.play.core.install.model.AppUpdateType;
 import com.google.android.play.core.install.model.InstallStatus;
 import com.google.android.play.core.install.model.UpdateAvailability;
-import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.remoteconfig.ConfigUpdate;
 import com.google.firebase.remoteconfig.ConfigUpdateListener;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigException;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
-import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
-import org.onebusaway.android.BuildConfig;
-import org.onebusaway.android.R;
-import org.onebusaway.android.app.Application;
 import org.onebusaway.android.directions.util.CustomAddress;
 import org.onebusaway.android.directions.util.OTPConstants;
 import org.onebusaway.android.directions.util.PlacesAutoCompleteAdapter;
 import org.onebusaway.android.directions.util.TripPlanAddresses;
 import org.onebusaway.android.directions.util.TripRequestBuilder;
-import org.onebusaway.android.io.ObaAnalytics;
-import org.onebusaway.android.io.elements.ObaRegion;
-import org.onebusaway.android.io.elements.ObaRoute;
-import org.onebusaway.android.io.elements.ObaStop;
-import org.onebusaway.android.io.request.ObaArrivalInfoResponse;
-import org.onebusaway.android.map.MapModeController;
-import org.onebusaway.android.map.MapParams;
-import org.onebusaway.android.map.googlemapsv2.BaseMapFragment;
-import org.onebusaway.android.map.googlemapsv2.LayerInfo;
 import org.onebusaway.android.map.googlemapsv2.ProprietaryMapHelpV2;
-import org.onebusaway.android.region.ObaRegionsTask;
-import org.onebusaway.android.report.ui.ReportActivity;
-import org.onebusaway.android.travelbehavior.TravelBehaviorManager;
-import org.onebusaway.android.travelbehavior.constants.TravelBehaviorConstants;
-import org.onebusaway.android.travelbehavior.utils.TravelBehaviorUtils;
-import org.onebusaway.android.tripservice.TripService;
-import org.onebusaway.android.util.FragmentUtils;
-import org.onebusaway.android.util.LocationUtils;
-import org.onebusaway.android.util.PermissionUtils;
-import org.onebusaway.android.util.PreferenceUtils;
-import org.onebusaway.android.util.RegionUtils;
-import org.onebusaway.android.util.ShowcaseViewUtils;
-import org.onebusaway.android.util.UIUtils;
-import org.opentripplanner.routing.bike_rental.BikeRentalStation;
-
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Random;
 
 import au.mymetro.android.ads.AdsManager;
@@ -270,7 +272,15 @@ public class HomeActivity extends AppCompatActivity
      */
     private int mCurrentNavDrawerPosition = -1;
 
+    /**
+     * Fragments that can be selected as main content via the NavigationDrawer
+     */
+    MyStarredStopsFragment mMyStarredStopsFragment;
+    MyStarredRoutesFragment mMyStarredRoutesFragment;
+
     BaseMapFragment mMapFragment;
+
+    MyRemindersFragment mMyRemindersFragment;
 
     /**
      * Control which menu options are shown per fragment menu groups
@@ -602,17 +612,17 @@ public class HomeActivity extends AppCompatActivity
                     ObaAnalytics.reportUiEvent(mFirebaseAnalytics, getString(R.string.analytics_label_region_select), null);
                 }
                 break;
-            case NAVDRAWER_ITEM_STARRED_STOPS:
-                if (mCurrentNavDrawerPosition != NAVDRAWER_ITEM_STARRED_STOPS) {
-                    showStarredStopsRoutesFragment();
-                    ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
-                            getString(R.string.analytics_label_button_press_star),
-                            null);
-                    mCurrentNavDrawerPosition = NAVDRAWER_ITEM_NEARBY;
-                }
-                break;
+//            case NAVDRAWER_ITEM_STARRED_STOPS:
+//                if (mCurrentNavDrawerPosition != NAVDRAWER_ITEM_STARRED_STOPS) {
+//                    showStarredStopsRoutesFragment();
+//                    ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+//                            getString(R.string.analytics_label_button_press_star),
+//                            null);
+//                    mCurrentNavDrawerPosition = NAVDRAWER_ITEM_NEARBY;
+//                }
+//                break;
             case NAVDRAWER_ITEM_MY_REMINDERS:
-                if (mCurrentNavDrawerPosition != NAVDRAWER_ITEM_STARRED_STOPS) {
+                if (mCurrentNavDrawerPosition != NAVDRAWER_ITEM_MY_REMINDERS) {
                     showMyRemindersFragment();
                     mCurrentNavDrawerPosition = NAVDRAWER_ITEM_NEARBY;
                     ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
@@ -620,6 +630,17 @@ public class HomeActivity extends AppCompatActivity
                             null);
                 }
                 break;
+
+            case NAVDRAWER_ITEM_STARRED_ROUTES:
+                if (mCurrentNavDrawerPosition != NAVDRAWER_ITEM_STARRED_ROUTES) {
+                    showStarredRoutesFragment();
+                    mCurrentNavDrawerPosition = item;
+                    ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                            getString(R.string.analytics_label_button_press_star),
+                            null);
+                }
+                break;
+
             // below values are deprecated; fall through to NAVDRAWER_ITEM_NEARBY
             case NAVDRAWER_ITEM_SIGN_IN:
             case NAVDRAWER_ITEM_PROFILE:
@@ -696,6 +717,9 @@ public class HomeActivity extends AppCompatActivity
         /**
          * Hide everything that shouldn't be shown
          */
+        hideStarredRoutesFragment();
+        hideStarredStopsFragment();
+        hideReminderFragment();
         mShowStarredStopsMenu = false;
         mShowStarredRoutesMenu = false;
         /**
@@ -759,14 +783,113 @@ public class HomeActivity extends AppCompatActivity
         //}
     }
 
+    private void showStarredStopsFragment() {
+        FragmentManager fm = getSupportFragmentManager();
+        /**
+         * Hide everything that shouldn't be shown
+         */
+        hideFloatingActionButtons();
+        hideMapProgressBar();
+        hideMapFragment();
+        hideReminderFragment();
+        hideStarredRoutesFragment();
+        hideSlidingPanel();
+        mShowArrivalsMenu = false;
+        showZoomControls(false);
+
+        /**
+         * Show fragment (we use show instead of replace to keep the map state)
+         */
+        mShowStarredStopsMenu = true;
+        if (mMyStarredStopsFragment == null) {
+            // First check to see if an instance of MyStarredStopsFragment already exists (see #356)
+            mMyStarredStopsFragment = (MyStarredStopsFragment) fm
+                    .findFragmentByTag(MyStarredStopsFragment.TAG);
+
+            if (mMyStarredStopsFragment == null) {
+                // No existing fragment was found, so create a new one
+                Log.d(TAG, "Creating new MyStarredStopsFragment");
+                mMyStarredStopsFragment = new MyStarredStopsFragment();
+                fm.beginTransaction().add(R.id.main_fragment_container, mMyStarredStopsFragment,
+                        MyStarredStopsFragment.TAG).commit();
+            }
+        }
+        fm.beginTransaction().show(mMyStarredStopsFragment).commit();
+        setTitle(getResources().getString(R.string.navdrawer_item_starred_stops));
+    }
+
     private void showStarredStopsRoutesFragment() {
         Intent myIntent = new Intent(this, MyStarredStopsAndRoutesActivity.class);
         startActivity(myIntent);
     }
 
+    private void showStarredRoutesFragment() {
+        FragmentManager fm = getSupportFragmentManager();
+        /**
+         * Hide everything that shouldn't be shown
+         */
+        hideFloatingActionButtons();
+        hideMapProgressBar();
+        hideMapFragment();
+        hideReminderFragment();
+        hideSlidingPanel();
+        hideStarredStopsFragment();
+        mShowArrivalsMenu = false;
+        showZoomControls(false);
+
+        /**
+         * Show fragment (we use show instead of replace to keep the map state)
+         */
+        mShowStarredRoutesMenu = true;
+        if (mMyStarredRoutesFragment == null) {
+            // First check to see if an instance of MyStarredRoutesFragment already exists
+            mMyStarredRoutesFragment = (MyStarredRoutesFragment) fm
+                    .findFragmentByTag(MyStarredRoutesFragment.TAG);
+
+            if (mMyStarredRoutesFragment == null) {
+                // No existing fragment was found, so create a new one
+                Log.d(TAG, "Creating new MyStarredRoutesFragment");
+                mMyStarredRoutesFragment = new MyStarredRoutesFragment();
+                fm.beginTransaction().add(R.id.main_fragment_container, mMyStarredRoutesFragment,
+                        MyStarredRoutesFragment.TAG).commit();
+            }
+        }
+        fm.beginTransaction().show(mMyStarredRoutesFragment).commit();
+        setTitle(getResources().getString(R.string.navdrawer_item_starred_routes));
+    }
+
     private void showMyRemindersFragment() {
-        Intent myIntent = new Intent(this, MyRemindersActivity.class);
-        startActivity(myIntent);
+        FragmentManager fm = getSupportFragmentManager();
+        /**
+         * Hide everything that shouldn't be shown
+         */
+        hideFloatingActionButtons();
+        hideMapProgressBar();
+        hideStarredRoutesFragment();
+        hideStarredStopsFragment();
+        hideMapFragment();
+        hideSlidingPanel();
+        mShowArrivalsMenu = false;
+        mShowStarredStopsMenu = false;
+        showZoomControls(false);
+        /**
+         * Show fragment (we use show instead of replace to keep the map state)
+         */
+        if (mMyRemindersFragment == null) {
+            // First check to see if an instance of MyRemindersFragment already exists (see #356)
+            mMyRemindersFragment = (MyRemindersFragment) fm
+                    .findFragmentByTag(MyRemindersFragment.TAG);
+
+            if (mMyRemindersFragment == null) {
+                // No existing fragment was found, so create a new one
+                Log.d(TAG, "Creating new MyRemindersFragment");
+                mMyRemindersFragment = new MyRemindersFragment();
+                fm.beginTransaction().add(R.id.main_fragment_container, mMyRemindersFragment,
+                        MyRemindersFragment.TAG).commit();
+            }
+        }
+        fm.beginTransaction().show(mMyRemindersFragment).commit();
+        setTitle(getResources().getString(R.string.navdrawer_item_my_reminders));
     }
 
     private void hideMapFragment() {
@@ -774,6 +897,39 @@ public class HomeActivity extends AppCompatActivity
         mMapFragment = (BaseMapFragment) fm.findFragmentByTag(BaseMapFragment.TAG);
         if (mMapFragment != null && !mMapFragment.isHidden()) {
             fm.beginTransaction().hide(mMapFragment).commit();
+        }
+    }
+
+    private void hideStarredStopsFragment() {
+        FragmentManager fm = getSupportFragmentManager();
+        mMyStarredStopsFragment = (MyStarredStopsFragment) fm.findFragmentByTag(
+                MyStarredStopsFragment.TAG);
+        if (mMyStarredStopsFragment != null && !mMyStarredStopsFragment.isHidden()) {
+            fm.beginTransaction().hide(mMyStarredStopsFragment).commit();
+        }
+    }
+
+    private void hideStarredRoutesFragment() {
+        FragmentManager fm = getSupportFragmentManager();
+        mMyStarredRoutesFragment = (MyStarredRoutesFragment) fm.findFragmentByTag(
+                MyStarredRoutesFragment.TAG);
+        if (mMyStarredRoutesFragment != null && !mMyStarredRoutesFragment.isHidden()) {
+            fm.beginTransaction().hide(mMyStarredRoutesFragment).commit();
+        }
+    }
+
+    private void hideReminderFragment() {
+        FragmentManager fm = getSupportFragmentManager();
+        mMyRemindersFragment = (MyRemindersFragment) fm
+                .findFragmentByTag(MyRemindersFragment.TAG);
+        if (mMyRemindersFragment != null && !mMyRemindersFragment.isHidden()) {
+            fm.beginTransaction().hide(mMyRemindersFragment).commit();
+        }
+    }
+
+    private void hideSlidingPanel() {
+        if (mSlidingPanel != null) {
+            mSlidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
         }
     }
 

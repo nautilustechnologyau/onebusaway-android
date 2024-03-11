@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2010-2017 Paul Watts (paulcwatts@gmail.com),
- * University of South  Florida (sjbarbeau@gmail.com)
+ * Copyright (C) 2012-2015 Paul Watts (paulcwatts@gmail.com), University of South Florida
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +12,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Modifications copyright (C) 2023 Millan Philipose, University of Washington.
+ * This file is adapted from MyStarredStopsFragment, to display starred routes rather than stops.
  */
 package org.onebusaway.android.ui;
+
+import com.google.firebase.analytics.FirebaseAnalytics;
+
+import org.onebusaway.android.R;
+import org.onebusaway.android.app.Application;
+import org.onebusaway.android.io.ObaAnalytics;
+import org.onebusaway.android.provider.ObaContract;
+import org.onebusaway.android.util.PreferenceUtils;
+import org.onebusaway.android.util.ShowcaseViewUtils;
 
 import android.content.DialogInterface;
 import android.database.Cursor;
@@ -32,43 +43,30 @@ import android.view.ViewGroup;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
 import androidx.appcompat.app.AlertDialog;
-import androidx.cursoradapter.widget.SimpleCursorAdapter;
 import androidx.loader.content.CursorLoader;
 import androidx.loader.content.Loader;
-
-import com.google.firebase.analytics.FirebaseAnalytics;
-
-import org.onebusaway.android.R;
-import org.onebusaway.android.app.Application;
-import org.onebusaway.android.io.ObaAnalytics;
-import org.onebusaway.android.provider.ObaContract;
-import org.onebusaway.android.util.PreferenceUtils;
 
 public class MyStarredRoutesFragment extends MyRouteListFragmentBase {
 
     public static final String TAG = "MyStarredRoutesFragment";
-    public static final String TAB_NAME = "starred";
+    public static final String TAB_NAME = "starred_rts";
 
     private static String sortBy;
 
     private FirebaseAnalytics mFirebaseAnalytics;
 
     @Override
-    protected SimpleCursorAdapter newAdapter() {
-        return QueryUtils.RouteList.newFavoriteAdapter(getActivity());
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+            Bundle savedInstanceState) {
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(getContext());
         return super.onCreateView(inflater, container, savedInstanceState);
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        // Set the sort by clause, in case its the first execution and none is set
-        final int currentRouteOrder = PreferenceUtils.getRouteSortOrderFromPreferences();
+        // Set the sort by clause, in case its the first execution and none is set.
+        // We use the same sorting preference (name vs most recent) as is used for sorting routes.
+        final int currentRouteOrder = PreferenceUtils.getStopSortOrderFromPreferences();
         setSortByClause(currentRouteOrder);
 
         return new CursorLoader(getActivity(),
@@ -87,12 +85,6 @@ public class MyStarredRoutesFragment extends MyRouteListFragmentBase {
         setHasOptionsMenu(true);
     }
 
-
-    @Override
-    public void onHiddenChanged(boolean hidden) {
-        super.onHiddenChanged(hidden);
-    }
-
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v,
                                     ContextMenuInfo menuInfo) {
@@ -101,13 +93,14 @@ public class MyStarredRoutesFragment extends MyRouteListFragmentBase {
     }
 
     @Override
-    public boolean onContextItemSelected(android.view.MenuItem item) {
+    public boolean onContextItemSelected(MenuItem item) {
         AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
         switch (item.getItemId()) {
             case CONTEXT_MENU_DELETE:
                 final String id = QueryUtils.RouteList.getId(getListView(), info.position);
                 final Uri uri = Uri.withAppendedPath(ObaContract.Routes.CONTENT_URI, id);
                 ObaContract.Routes.markAsFavorite(getActivity(), uri, false);
+                ObaContract.RouteHeadsignFavorites.markAsFavorite(getActivity(), id, null, null, false);
                 return true;
             default:
                 return super.onContextItemSelected(item);
@@ -123,22 +116,23 @@ public class MyStarredRoutesFragment extends MyRouteListFragmentBase {
     public boolean onOptionsItemSelected(MenuItem item) {
         final int id = item.getItemId();
         if (id == R.id.clear_starred) {
-            new MyStarredRoutesFragment.ClearDialog()
+            new ClearDialog()
                     .show(getActivity().getSupportFragmentManager(), "confirm_clear_starred_routes");
             return true;
-        } else if (id == R.id.sort_routes) {
+        } else if (id == R.id.sort_stops) {
+            ShowcaseViewUtils.doNotShowTutorial(ShowcaseViewUtils.TUTORIAL_STARRED_STOPS_SORT);
             showSortByDialog();
         }
         return false;
     }
 
     private void showSortByDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.CustomAlertDialog);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(R.string.menu_option_sort_by);
 
-        final int currentRouteOrder = PreferenceUtils.getRouteSortOrderFromPreferences();
+        final int currentRouteOrder = PreferenceUtils.getStopSortOrderFromPreferences();
 
-        builder.setSingleChoiceItems(R.array.sort_routes, currentRouteOrder,
+        builder.setSingleChoiceItems(R.array.sort_stops, currentRouteOrder,
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int index) {
                         // If the user picked a different option, change the sort order
@@ -158,18 +152,19 @@ public class MyStarredRoutesFragment extends MyRouteListFragmentBase {
 
     /**
      * Sets the "sort by" string for ordering the routes, based on the given index of
-     * R.array.sort_routes.  It also saves the sort by order to preferences.
+     * R.array.sort_stops.  It also saves the sort by order to preferences.
      *
-     * @param index the index of R.array.sort_routes that should be set
+     * @param index the index of R.array.sort_stops that should be set
      */
     private void setSortByClause(int index) {
         switch (index) {
             case 0:
                 // Sort by name
                 Log.d(TAG, "Sort by name");
-                sortBy = ObaContract.Routes.SHORTNAME + " asc";
+                sortBy = "length(" + ObaContract.Routes.SHORTNAME + "), "
+                        + ObaContract.Routes.SHORTNAME + " asc";
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
-                        getString(R.string.analytics_label_sort_by_name_routes),
+                        getString(R.string.analytics_label_sort_by_name_stops),
                         null);
                 break;
             case 1:
@@ -177,14 +172,14 @@ public class MyStarredRoutesFragment extends MyRouteListFragmentBase {
                 Log.d(TAG, "Sort by frequently used");
                 sortBy = ObaContract.Routes.USE_COUNT + " desc";
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
-                        getString(R.string.analytics_label_sort_by_mfu_routes),
+                        getString(R.string.analytics_label_sort_by_mfu_stops),
                         null);
                 break;
         }
         // Set the sort option to preferences
-        final String[] sortOptions = getResources().getStringArray(R.array.sort_routes);
+        final String[] sortOptions = getResources().getStringArray(R.array.sort_stops);
         PreferenceUtils.saveString(getResources()
-                        .getString(R.string.preference_key_default_route_sort),
+                        .getString(R.string.preference_key_default_stop_sort),
                 sortOptions[index]);
     }
 
@@ -198,6 +193,7 @@ public class MyStarredRoutesFragment extends MyRouteListFragmentBase {
         @Override
         protected void doClear() {
             ObaContract.Routes.markAsFavorite(getActivity(), ObaContract.Routes.CONTENT_URI, false);
+            ObaContract.RouteHeadsignFavorites.clearAllFavorites(getActivity());
             ObaAnalytics.reportUiEvent(FirebaseAnalytics.getInstance(getContext()),
                     getString(R.string.analytics_label_edit_field_bookmark_delete),
                     null);

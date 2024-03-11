@@ -11,6 +11,8 @@
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
      See the License for the specific language governing permissions and
      limitations under the License.
+
+     Modifications copyright (C) 2023 Millan Philipose (millan.j.philipose@gmail.com)
 -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -56,7 +58,8 @@
             android:maxLines="1"/>
         <TextView
             android:id="@+id/long_name"
-            style="@style/Line2Text"
+            android:gravity="center_vertical"
+            style="@style/Line1Text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </LinearLayout>

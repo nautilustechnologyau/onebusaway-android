@@ -23,6 +23,7 @@
     <!-- Navigation Drawer -->
     <string name="navdrawer_item_nearby">Nearby</string>
     <string name="navdrawer_item_starred_stops">Starred stops</string>
+    <string name="navdrawer_item_starred_routes">Starred routes</string>
     <string name="navdrawer_item_my_reminders">My reminders</string>
     <string name="navdrawer_item_settings">Settings</string>
     <string name="navdrawer_item_help">Help</string>
@@ -103,16 +104,7 @@
     <string name="map_option_search">Search</string>
     <string name="main_help_title">Help</string>
     <string name="main_help_whatsnew_title">What\'s New?</string>
-    <string name="main_help_whatsnew">&#8226;\u0020
-        <b>Real-time occupancy for WMATA</b>
-        - See how many passengers are on supported vehicles in real-time for the Washington, D.C. region.\n&#8226;\u0020
-        <b>Options to hide all alerts</b>
-        - New menu option to hide all alerts for a stop in one tap, and a new Settings option to hide all alerts by default.\n&#8226;\u0020
-        <b>Italian translation</b>
-        - Thanks Eleonora Fabbri!\n&#8226;\u0020
-        <b>Bug fixes and improvements</b>
-        - See https://bit.ly/oba-android-releases
-    </string>
+    <string name="main_help_whatsnew">• <b>Bug fixes</b> Several bug fixes and fit and finish improvements. - See https://bit.ly/oba-android-releases</string>
     <string name="main_help_close">Close</string>
     <string name="main_help_legend_title">Legend</string>
     <string name="main_help_legend_ontime">Green means \"On time\"</string>
@@ -373,9 +365,10 @@
     <string name="my_no_starred_stops">You have no starred stops.\n\nYou can add a star to a stop on
         the arrivals screen by tapping on the star next to the stop name.
     </string>
+    <string name="my_no_starred_routes">You have no starred routes.\n\nYou can add a star to a route
+        on the arrivals screen by tapping on the star next to the route number.
+    </string>
     <string name="my_no_recent_routes">You have no recent routes.</string>
-    <string name="my_no_starred_routes">You have no starred routes.\n\nYou can add a star to a route on
-        the arrivals screen by tapping on the star next to the route name.</string>
     <string name="route_favorite_options_title_star">Star Route \"%s\" for:</string>
     <string name="route_favorite_options_title_unstar">Remove star from \"%s\" for:</string>
 
@@ -458,6 +451,10 @@
     <string name="trip_info_option_showroute">Show Route</string>
     <string name="trip_info_option_showstop">Show Stop</string>
     <string name="trip_info_separator">-</string>
+    <string name="trip_info_grant_exact_alarms_permission_title">Permission Needed</string>
+    <string name="trip_info_grant_exact_alarms_permission_message">You must grant the app permission to schedule a reminder.</string>
+    <string name="trip_info_grant_exact_alarms_permission_positive_button">Grant Permission</string>
+    <string name="trip_info_grant_exact_alarms_permission_negative_button">Cancel</string>
 
     <!-- Occupancy -->
     <string name="historically_full">Historically full</string>
@@ -624,6 +621,11 @@
     <string name="preferences_preferred_units_option_automatic">Automatic</string>
     <string name="preferences_preferred_units_option_metric">Metric (km, m)</string>
     <string name="preferences_preferred_units_option_imperial">Imperial (mi, ft)</string>
+
+    <string name="preferences_app_theme_title">App Theme</string>
+    <string name="preferences_app_theme_option_system_default">System Default</string>
+    <string name="preferences_app_theme_option_light">Light Theme</string>
+    <string name="preferences_app_theme_option_dark">Dark Theme</string>
 
     <string name="preferences_show_negative_arrivals_title">Show departed buses</string>
     <string name="preferences_show_negative_arrivals_summary">Include buses that just left as
@@ -883,69 +885,95 @@
 
     <!-- Permissions -->
     <string name="location_permissions_title">Location permissions</string>
-    <string name="location_permissions_message">We recommend allowing location use while the app is
-        running to show your real-time position on the map and automatically select your OneBusAway
-        region for your local transit agency. This location data is not collected by OneBusAway.
-
-        \n\nAlternately, you can manually select your region if you choose not to allow
-        location permissions.
-    </string>
+    <string name="location_permissions_message">To enhance your experience, enable location use to:\n- Display your real-time position on the map.\n- Automatically set your local transit agency.\n\nYour location data is not collected by us. Alternatively, you may manually select your region without enabling location permissions.</string>
     <string name="no_thanks">No thanks</string>
 
     <string name="storage_permissions_title">Access to device storage is required</string>
     <string name="storage_permissions_message">To backup or restore your data, OneBusAway needs permission to access your local device storage.</string>
 
     <!-- About -->
+    <string name="application_version">Version</string>
     <string name="title_activity_about">About</string>
-    <string name="about_text">
-        "Find out more about the OneBusAway open-source project at https://onebusaway.org.\n\n"
+    <string name="about_content"><![CDATA[
+    <html>
+  <body>
+    <h1 style="color: #4caf50"><b>Welcome to OneBusAway!</b></h1>
 
-        "*** Code ***\n\n"
+    <p>
+        OneBusAway is made by a team of volunteers and relies upon
+        the dedication, passion, and talents of its open source contributors.
+    </p>
+    <h2><b>Code Contributors:</b></h2>
+    <p>
+      Our dedicated contributors improve the app\'s functionality and user
+      experience:
+    </p>
 
-        "We'd like to thank the following who have contributed code to OneBusAway Android:\n\n"
+    <ul>
+      <li><b>Paul Watts</b></li>
+      <li><b>Brian Ferris</b></li>
+      <li><b>Daniel Welsh</b></li>
+      <li><b>Arno Hart</b></li>
+      <li><b>Sean Barbeau</b></li>
+      <li><b>York Region Transit</b></li>
+      <li><b>Ben Du</b></li>
+      <li><b>Cagri Cetin</b></li>
+      <li><b>Mike Karabushin</b></li>
+      <li><b>Aziz Batihk</b></li>
+      <li><b>Charles Bond</b></li>
+      <li>
+        <b
+          >Hillsborough Area Regional Transit (via Simon Jacobs at Cambridge
+          Systematics)</b
+        >
+      </li>
+      <li><b>Bridgette Eichelberger</b></li>
+      <li><b>Rodrigo Carvalho (Google Summer of Code 2017)</b></li>
+      <li><b>Steve Moritani</b></li>
+      <li><b>Ellen Conley</b></li>
+    </ul>
+    <h2><b>Translations:</b></h2>
+    <p>
+      Thanks to our translators, OneBusAway is
+      accessible worldwide:
+    </p>
+    <ul>
+      <li><b>Ari Rusakko</b></li>
+      <li><b>Eleonora Fabbri</b></li>
+      <li><b>Edgar Andrés Moncada Taborda</b></li>
+    </ul>
+    <h2><b>Image Credits:</b></h2>
+    <p>
+      Thanks to the designers who created images used
+      in the vehicle icons, which were uploaded to the Noun Project under CC BY
+      3.0 (https://creativecommons.org/licenses/by/3.0/us/):
+    </p>
+    <ul>
+      <li>Arrow by <b>Zlatko Najdenovski</b>, MK</li>
+      <li>Map Marker by <b>Housin Aziz</b>, SE</li>
+      <li>Incognito by <b>Christopher Schreiner</b></li>
+      <li>Flag Triangle by <b>Austin Andrews</b></li>
+    </ul>
+    <h2>
+      <b>Join the Journey: Contribute to Our App!</b>
+      </h2>
+    <p>
+      Check out our project on GitHub at https://github.com/OneBusAway/onebusaway-android.
+      <p>
+        Find out more about the OneBusAway open-source project at https://onebusaway.org .</p>
+        <p>
+        Special thanks to Google for the visually stunning material design icons(https://github.com/google/material-design-icons),
+        which add a touch of elegance to our app. Their generosity in licensing
+        these icons under Apache v2.0(https://www.apache.org/licenses/LICENSE-2.0) has greatly enriched our user experience.
+      </p>
+      <p>
 
-        "* Paul Watts\n"
-        "* Brian Ferris\n"
-        "* Daniel Welsh\n"
-        "* Arno Hart\n"
-        "* Sean Barbeau\n"
-        "* York Region Transit\n"
-        "* Ben Du\n"
-        "* Cagri Cetin\n"
-        "* Mike Karabushin\n"
-        "* Aziz Batihk\n"
-        "* Charles Bond\n"
-        "* Hillsborough Area Regional Transit (via Simon Jacobs at Cambridge Systematics)\n"
-        "* Bridgette Eichelberger\n"
-        "* Rodrigo Carvalho (Google Summer of Code 2017)\n"
-        "* Steve Moritani\n"
-        "* Ellen Conley\n\n"
-
-        "Want to contribute to this app? Check it out on Github at
-        https://github.com/OneBusAway/onebusaway-android.\n\n"
-
-        "*** Translations ***\n\n"
-
-        "We'd like to thank those who have contributed translations to OneBusAway Android:\n\n"
-
-        "* Ari Rusakko\n"
-        "* Eleonora Fabbri\n"
-        "* Edgar Andrés Moncada Taborda\n\n"
-
-        "*** Images ***\n\n"
-
-        "Thanks to the designers who created images used in the vehicle icons, which were uploaded "
-        "to the Noun Project under CC BY 3.0 (https://creativecommons.org/licenses/by/3.0/us/):\n\n"
-
-        "* Arrow by Zlatko Najdenovski, MK\n"
-        "* Map Marker by Housin Aziz, SE\n"
-        "* Incognito by Christopher Schreiner\n"
-        "* Flag Triangle by Austin Andrews\n\n"
-
-        "Thanks to Google for the material design icons
-        (https://github.com/google/material-design-icons), "
-        "licensed under Apache v2.0 (https://www.apache.org/licenses/LICENSE-2.0).\n\n"
-    </string>
+    <p>
+      Explore our app and embark on a seamless transit journey with OneBusAway!
+    </p>
+  </body>
+</html>
+  ]]></string>
 
     <!-- Trip Planner strings -->
 
@@ -1216,7 +1244,6 @@
     <string name="travel_behavior_dialog_opt_out_title">Opt out of study?</string>
     <string name="travel_behavior_dialog_opt_out_message">If you opt out of the research study, we won\'t receive any more information about your travel behavior to help improve public transit.</string>
     <string name="cancel">Cancel</string>
-
     <!-- Rate app -->
     <string name="navdrawer_item_rate_app">Rate OneBusAway</string>
     <string name="rate_title">Enjoying OneBusAway?</string>

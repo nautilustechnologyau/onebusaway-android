@@ -15,8 +15,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.onebusaway.android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <permission
             android:name="${applicationId}.permission.TRIP_SERVICE"
@@ -50,6 +49,8 @@
     <!--
     <uses-feature android:name="android.hardware.camera" android:required="true" />
     -->
+    <!-- For notifications, POST_NOTIFICATIONS is required when targeting Android 12 or higher-->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
     <application
         android:allowBackup="false"
