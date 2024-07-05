@@ -45,6 +45,7 @@ import org.onebusaway.android.io.request.ObaRoutesForLocationResponse;
 import org.onebusaway.android.io.request.ObaStopsForLocationRequest;
 import org.onebusaway.android.io.request.ObaStopsForLocationResponse;
 import org.onebusaway.android.util.ArrayAdapter;
+import org.onebusaway.android.util.DBUtil;
 import org.onebusaway.android.util.LocationUtils;
 import org.onebusaway.android.util.UIUtils;
 
@@ -198,6 +199,7 @@ public class SearchResultsFragment extends ListFragment
 
         builder.setItems(R.array.search_route_options, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
+                DBUtil.addRouteToDB(getActivity(),route);
                 switch (which) {
                     case 0:
                         // Show on list
@@ -207,6 +209,7 @@ public class SearchResultsFragment extends ListFragment
                         // Show on map
                         HomeActivity.start(getActivity(), routeId);
                         break;
+
                 }
             }
         });

@@ -833,6 +833,8 @@ public class ArrivalsListFragment extends ListFragment
         if (mListener != null) {
             handled = mListener.onShowRouteOnMapSelected(arrivalInfo);
         }
+        // Save to recent routes
+        DBUtil.addRouteToDB(getActivity(),arrivalInfo);
         // If the event hasn't been handled by the listener, start a new activity
         if (!handled) {
             HomeActivity.start(getActivity(), arrivalInfo.getInfo().getRouteId());
@@ -1438,6 +1440,10 @@ public class ArrivalsListFragment extends ListFragment
     }
 
     private void goToTripDetails(ArrivalInfo stop) {
+
+        // Save to recent routes
+        DBUtil.addRouteToDB(getActivity(),stop);
+
         TripDetailsActivity.start(getActivity(),
                 stop.getInfo().getTripId(), stop.getInfo().getStopId(),
                 TripDetailsListFragment.SCROLL_MODE_STOP);
