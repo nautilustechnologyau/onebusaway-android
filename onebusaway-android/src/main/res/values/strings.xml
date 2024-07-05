@@ -686,7 +686,6 @@
     <string name="preferences_restore_loading">Restoring from storage&#8230;</string>
     <string name="preferences_db_restored">Restore successful! Please restart OneBusAway.</string>
     <string name="preferences_db_restore_error">Unable to restore: %1$s</string>
-
     <string name="preferences_experimental_regions_title">Experimental regions</string>
     <string name="preferences_experimental_regions_summary">Enables regions that may be unstable
     </string>
@@ -1272,6 +1271,7 @@
     <string name="remove_ads_dlg_btn_neutral">Remind Me Later</string>
     <string name="analytics_label_button_press_remove_ads">remove_ads</string>
     <string name="analytics_label_button_press_buy_ads_free_subscription">buy_ads_free_subscription</string>
+    <string name="interstitial_ads_dialog">An interstitial ad will be played shortly. Please support us by viewing this ad. If you do not want to see ads please consider purchasing ads free subscription.</string>
 
     <!-- Trip Plan Dialogs -->
     <string name="trip_plan_select_dialog_title">Select Trip Plan</string>

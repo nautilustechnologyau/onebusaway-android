@@ -292,6 +292,9 @@ public class NavigationDrawerFragment extends Fragment {
             @Override
             public void onDrawerClosed(View drawerView) {
                 super.onDrawerClosed(drawerView);
+                if (mCallbacks != null) {
+                    mCallbacks.onNavigationDrawerClosed();
+                }
                 if (!isAdded()) {
                     return;
                 }
@@ -302,6 +305,9 @@ public class NavigationDrawerFragment extends Fragment {
             @Override
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
+                if (mCallbacks != null) {
+                    mCallbacks.onNavigationDrawerOpened();
+                }
                 if (!isAdded()) {
                     return;
                 }
@@ -435,6 +441,10 @@ public class NavigationDrawerFragment extends Fragment {
          * Called when an item in the navigation drawer is selected.
          */
         void onNavigationDrawerItemSelected(int position);
+
+        void onNavigationDrawerClosed();
+
+        void onNavigationDrawerOpened();
     }
 
     /** Populates the navigation drawer with the appropriate items. */

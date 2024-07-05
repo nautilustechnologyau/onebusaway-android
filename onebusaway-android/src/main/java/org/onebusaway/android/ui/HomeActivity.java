@@ -602,6 +602,16 @@ public class HomeActivity extends AppCompatActivity
         goToNavDrawerItem(position);
     }
 
+    @Override
+    public void onNavigationDrawerClosed() {
+        mTopAdsManager.showMainTopAd();
+    }
+
+    @Override
+    public void onNavigationDrawerOpened() {
+        mTopAdsManager.hideMainTopAd();
+    }
+
     private void goToNavDrawerItem(int item) {
         // Update the main content by replacing fragments
         switch (item) {
@@ -656,14 +666,18 @@ public class HomeActivity extends AppCompatActivity
                 }
                 break;
             case NAVDRAWER_ITEM_PLAN_TRIP:
+                boolean adPlayed = false;
                 if (BuildConfig.ENABLE_ADMOB) {
-                    mTopAdsManager.loadInterstitialAd(false, "Plan a trip", mMarkerClickedCount);
+                    adPlayed = mTopAdsManager.loadInterstitialAd(false, "Plan a trip", mMarkerClickedCount);
                 }
-                Intent planTrip = new Intent(HomeActivity.this, TripPlanActivity.class);
-                startActivity(planTrip);
-                ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
-                        getString(R.string.analytics_label_button_press_trip_plan),
-                        null);
+
+                if (!adPlayed) {
+                    Intent planTrip = new Intent(HomeActivity.this, TripPlanActivity.class);
+                    startActivity(planTrip);
+                    ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                            getString(R.string.analytics_label_button_press_trip_plan),
+                            null);
+                }
                 break;
             case NAVDRAWER_ITEM_PAY_FARE:
                 UIUtils.launchPayMyFareApp(this);
