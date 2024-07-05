@@ -1,5 +1,7 @@
 package au.mymetro.android.ads;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
@@ -29,6 +31,7 @@ import com.google.android.gms.ads.nativead.NativeAd;
 import com.google.android.gms.ads.nativead.NativeAdOptions;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
+import org.apache.commons.lang3.StringUtils;
 import org.onebusaway.android.BuildConfig;
 import org.onebusaway.android.R;
 import org.onebusaway.android.ui.HomeActivity;
@@ -45,13 +48,29 @@ public class AdsManager {
 
     private static FirebaseRemoteConfig mFirebaseRemoteConfig;
 
+    private static String mAdsNetwork = "admob";
+
+    private static String mAdmobBannerUnitId = "";
+
+    private static String mAdmobInterstitialUnitId = "";
+
+    private static String mAdmobNativeUnitId = "";
+
+    private static String mMetaBannerPlacementId = "";
+
+    private static String mMetaInterstitialPlacementId = "";
+
+    private static boolean mDisableAdMobBannerAds = false;
+
+    private static boolean mDisableAdMobInterstitialAds = true;
+
     private static boolean mAudienceNetworkInterstitialAdsEnabled = false;
 
     private static boolean mAudienceNetworkBannerAdsEnabled = false;
 
-    private static boolean mAdmobInterstitialAdsEnabled = false;
+    private static boolean mInterstitialAdsEnabled = false;
 
-    private static boolean mAdmobBannerAdsEnabled = false;
+    private static boolean mBannerAdsEnabled = false;
 
     private static boolean mShowMainTopAds = false;
 
@@ -201,11 +220,16 @@ public class AdsManager {
     }
 
     private void loadAdmobBannerAds(LinearLayout bannerAdLayoutView) {
-        if (!mAdmobBannerAdsEnabled) {
+        if (!mBannerAdsEnabled) {
             return;
         }
 
         if (bannerAdLayoutView == null) {
+            return;
+        }
+
+        if (mAdsNetwork.equalsIgnoreCase("meta") || mDisableAdMobBannerAds) {
+            loadAudienceNetworkBannerAds(bannerAdLayoutView);
             return;
         }
 
@@ -218,7 +242,7 @@ public class AdsManager {
         bannerAdLayoutView.addView(admobAdView);
         AdSize adSize = getAdSize();
         admobAdView.setAdSize(adSize);
-        admobAdView.setAdUnitId(mActivity.getResources().getString(R.string.admob_banner_unit_id));
+        admobAdView.setAdUnitId(getAdmobBannerUnitId());
         admobAdView.setAdListener(new AdListener() {
             @Override
             public void onAdLoaded() {
@@ -252,7 +276,7 @@ public class AdsManager {
             return;
         }
 
-        String placementId = mActivity.getResources().getString(R.string.an_banner_placement_id);
+        String placementId = getMetaBannerPlacementId();
         if (BuildConfig.DEBUG) {
             placementId = "IMG_16_9_APP_INSTALL#" + placementId;
         }
@@ -364,32 +388,35 @@ public class AdsManager {
         }
     }
 
-    public void loadInterstitialAd(boolean showAlways, String initiator, int markerClickedCount) {
+    public boolean loadInterstitialAd(boolean showAlways, String initiator, int markerClickedCount) {
         if (!BuildConfig.ENABLE_ADMOB) {
-            return;
+            return false;
         }
 
         boolean adsFreeVersion = PreferenceUtils.getBoolean(HomeActivity.ADS_FREE_VERSION, false);
         if (adsFreeVersion) {
-            return;
+            return false;
         }
 
         if (BuildConfig.DEBUG) {
             Random rand = new Random(System.currentTimeMillis());
             if (rand.nextInt(100) % 10 != 0) {
-                return;
+                return false;
             }
+//            if (rand.nextBoolean()) {
+//                return false;
+//            }
         }
 
         if (!showAlways && !BuildConfig.DEBUG) {
             if ((initiator == null) && (markerClickedCount % 5 != 0)) {
-                return;
+                return false;
             }
 
             float hitPercent = 0.7f; // 30% of the time it will show ad
             Log.d(TAG, "Ad hit percentage: " + hitPercent);
             if (mRandom.nextFloat() > hitPercent) {
-                return;
+                return false;
             }
 
             if (mLastInterstitialAdShowTime > 0) {
@@ -397,7 +424,7 @@ public class AdsManager {
                 long duration = now - mLastInterstitialAdShowTime;
                 // don't show add too frequently. at least 60 secs gap.
                 if (duration < 60000) {
-                    return;
+                    return false;
                 }
             }
         }
@@ -405,69 +432,89 @@ public class AdsManager {
         // we will not show ad first time on home screen
         if ("Nearby".equals(initiator) && mInterstitialAdShowCount == 0) {
             mInterstitialAdShowCount++;
-            return;
+            return false;
         }
 
-        loadAdMobInterstitialAd();
+        return loadAdMobInterstitialAd();
     }
 
-    private void loadAdMobInterstitialAd() {
-        if (!mAdmobInterstitialAdsEnabled) {
-            return;
+    private boolean loadAdMobInterstitialAd() {
+        if (!mInterstitialAdsEnabled) {
+            return false;
         }
         // an add is showing, don't show again
         if (mInterstitialAdShowing) {
-            return;
+            return false;
         }
 
-        AdRequest adRequest = new AdRequest.Builder().build();
-        InterstitialAd.load(mActivity, mActivity.getResources().getString(R.string.admob_interstitial_unit_id), adRequest,
-                new InterstitialAdLoadCallback() {
-                    @Override
-                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
-                        // The mInterstitialAd reference will be null until
-                        // an ad is loaded.
-                        mAdMobInterstitialAd = interstitialAd;
-                        // Log.i(TAG, "onAdLoaded");
-                        Log.d(TAG, "Banner adapter class name: " + interstitialAd.getResponseInfo().getMediationAdapterClassName());
-                        mAdMobInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
+        // show dialog to inform user that an add will be displayed now
+        AlertDialog.Builder builder = new AlertDialog.Builder(mActivity, R.style.CustomAlertDialog);
+        builder.setMessage(mActivity.getString(
+                R.string.interstitial_ads_dialog));
+        builder.setCancelable(false);
+        builder.setPositiveButton(mActivity.getString(R.string.ok),
+            new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    if (mAdsNetwork.equalsIgnoreCase("meta") || mDisableAdMobInterstitialAds) {
+                        loadAudienceNetworkInterstitialAds();
+                        return;
+                    }
+
+                    AdRequest adRequest = new AdRequest.Builder().build();
+                    InterstitialAd.load(mActivity, getAdmobInterstitialUnitId(), adRequest,
+                        new InterstitialAdLoadCallback() {
                             @Override
-                            public void onAdDismissedFullScreenContent() {
-                                // Called when ad is dismissed.
-                                // Set the ad reference to null so you don't show the ad a second time.
-                                Log.d(TAG, "Ad dismissed fullscreen content.");
-                                mAdMobInterstitialAd = null;
-                                mInterstitialAdShowing = false;
-                                RemoveAdsDialogFragment.show(mActivity, mActivity.getSupportFragmentManager());
+                            public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+                                // The mInterstitialAd reference will be null until
+                                // an ad is loaded.
+                                mAdMobInterstitialAd = interstitialAd;
+                                // Log.i(TAG, "onAdLoaded");
+                                Log.d(TAG, "Banner adapter class name: " + interstitialAd.getResponseInfo().getMediationAdapterClassName());
+                                mAdMobInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
+                                    @Override
+                                    public void onAdDismissedFullScreenContent() {
+                                        // Called when ad is dismissed.
+                                        // Set the ad reference to null so you don't show the ad a second time.
+                                        Log.d(TAG, "Ad dismissed fullscreen content.");
+                                        mAdMobInterstitialAd = null;
+                                        mInterstitialAdShowing = false;
+                                        RemoveAdsDialogFragment.show(mActivity, mActivity.getSupportFragmentManager());
+                                    }
+
+                                    @Override
+                                    public void onAdFailedToShowFullScreenContent(AdError adError) {
+                                        // Called when ad fails to show.
+                                        Log.e(TAG, "AdMob onAdFailedToShowFullScreenContent(): " + adError.getMessage());
+                                        mAdMobInterstitialAd = null;
+                                        mInterstitialAdShowing = false;
+                                        loadAudienceNetworkInterstitialAds();
+                                    }
+                                });
+                                if (!mInterstitialAdShowing) {
+                                    mInterstitialAdShowing = true;
+                                    mInterstitialAdShowCount++;
+                                    mLastInterstitialAdShowTime = new Date().getTime();
+                                    mAdMobInterstitialAd.show(mActivity);
+                                }
                             }
 
                             @Override
-                            public void onAdFailedToShowFullScreenContent(AdError adError) {
-                                // Called when ad fails to show.
-                                Log.e(TAG, "AdMob onAdFailedToShowFullScreenContent(): " + adError.getMessage());
+                            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                                // Handle the error
+                                Log.d(TAG, "AdMob onAdFailedToLoad: " + loadAdError.toString());
                                 mAdMobInterstitialAd = null;
                                 mInterstitialAdShowing = false;
                                 loadAudienceNetworkInterstitialAds();
                             }
                         });
-                        if (!mInterstitialAdShowing) {
-                            mInterstitialAdShowing = true;
-                            mInterstitialAdShowCount++;
-                            mLastInterstitialAdShowTime = new Date().getTime();
-                            mAdMobInterstitialAd.show(mActivity);
-                        }
-                    }
 
-                    @Override
-                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                        // Handle the error
-                        Log.d(TAG, "AdMob onAdFailedToLoad: " + loadAdError.toString());
-                        mAdMobInterstitialAd = null;
-                        mInterstitialAdShowing = false;
-                        loadAudienceNetworkInterstitialAds();
-                    }
-                });
+                    dialog.dismiss();
+                }
+            });
+        AlertDialog d = builder.create();
+        d.show();
 
+        return true;
     }
 
     void loadAudienceNetworkInterstitialAds() {
@@ -479,7 +526,7 @@ public class AdsManager {
         if (mInterstitialAdShowing) {
             return;
         }
-        String placementId = mActivity.getResources().getString(R.string.an_interstitial_placement_id);
+        String placementId = getMetaInterstitialPlacementId();
         if (BuildConfig.DEBUG) {
             placementId = "CAROUSEL_IMG_SQUARE_APP_INSTALL#" + placementId;
         }
@@ -580,7 +627,7 @@ public class AdsManager {
         if (adsFreeVersion) {
             nativeAdView.setVisibility(View.GONE);
         } else {
-            AdLoader.Builder builder = new AdLoader.Builder(mActivity, mActivity.getResources().getString(R.string.admob_native_unit_id))
+            AdLoader.Builder builder = new AdLoader.Builder(mActivity, getAdmobNativeUnitId())
                     .forNativeAd(new NativeAd.OnNativeAdLoadedListener() {
                         @Override
                         public void onNativeAdLoaded(NativeAd nativeAd) {
@@ -645,20 +692,20 @@ public class AdsManager {
         AdsManager.mAudienceNetworkBannerAdsEnabled = value;
     }
 
-    public static boolean isAdmobInterstitialAdsEnabled() {
-        return mAdmobInterstitialAdsEnabled;
+    public static boolean isInterstitialAdsEnabled() {
+        return mInterstitialAdsEnabled;
     }
 
-    public static void setAdmobInterstitialAdsEnabled(boolean value) {
-        AdsManager.mAdmobInterstitialAdsEnabled = value;
+    public static void setInterstitialAdsEnabled(boolean value) {
+        AdsManager.mInterstitialAdsEnabled = value;
     }
 
-    public static boolean isAdmobBannerAdsEnabled() {
-        return mAdmobBannerAdsEnabled;
+    public static boolean isBannerAdsEnabled() {
+        return mBannerAdsEnabled;
     }
 
-    public static void setAdmobBannerAdsEnabled(boolean value) {
-        AdsManager.mAdmobBannerAdsEnabled = value;
+    public static void setBannerAdsEnabled(boolean value) {
+        AdsManager.mBannerAdsEnabled = value;
     }
 
     public static String getMainTopAdsFormat() {
@@ -677,14 +724,66 @@ public class AdsManager {
         AdsManager.mShowAdsInArrivalList = mShowAdsInArrivalList;
     }
 
+    private String getAdmobBannerUnitId() {
+        if (StringUtils.isEmpty(mAdmobBannerUnitId)) {
+            return mActivity.getResources().getString(R.string.admob_banner_unit_id);
+        } else {
+            return mAdmobBannerUnitId;
+        }
+    }
+
+    private String getAdmobInterstitialUnitId() {
+        if (StringUtils.isEmpty(mAdmobInterstitialUnitId)) {
+            return mActivity.getResources().getString(R.string.admob_interstitial_unit_id);
+        } else {
+            return mAdmobInterstitialUnitId;
+        }
+    }
+
+    private String getAdmobNativeUnitId() {
+        if (StringUtils.isEmpty(mAdmobNativeUnitId)) {
+            return mActivity.getResources().getString(R.string.admob_native_unit_id);
+        } else {
+            return mAdmobNativeUnitId;
+        }
+    }
+
+    private String getMetaBannerPlacementId() {
+        if (StringUtils.isEmpty(mMetaBannerPlacementId)) {
+            return mActivity.getResources().getString(R.string.an_banner_placement_id);
+        } else {
+            return mMetaBannerPlacementId;
+        }
+    }
+
+    private String getMetaInterstitialPlacementId() {
+        if (StringUtils.isEmpty(mMetaInterstitialPlacementId)) {
+            return mActivity.getResources().getString(R.string.an_interstitial_placement_id);
+        } else {
+            return mMetaInterstitialPlacementId;
+        }
+    }
+
     public static void setRemoteConfig(FirebaseRemoteConfig config) {
         mFirebaseRemoteConfig = config;
 
         if (mFirebaseRemoteConfig != null) {
+            mAdsNetwork = mFirebaseRemoteConfig.getString("ads_network");
+
+            mAdmobBannerUnitId = mFirebaseRemoteConfig.getString("admob_banner_unit_id");
+            mAdmobInterstitialUnitId = mFirebaseRemoteConfig.getString("admob_interstitial_unit_id");
+            mAdmobNativeUnitId = mFirebaseRemoteConfig.getString("admob_native_unit_id");
+
+            mMetaBannerPlacementId = mFirebaseRemoteConfig.getString("meta_banner_placement_id");
+            mMetaInterstitialPlacementId = mFirebaseRemoteConfig.getString("meta_interstitial_placement_id");
+
+            mDisableAdMobInterstitialAds = mFirebaseRemoteConfig.getBoolean("disable_admob_interstitial_ads");
+            mDisableAdMobBannerAds = mFirebaseRemoteConfig.getBoolean("disable_admob_banner_ads");
+
             mAudienceNetworkInterstitialAdsEnabled = mFirebaseRemoteConfig.getBoolean("enable_audience_network_interstitial_ads");
-            mAdmobInterstitialAdsEnabled = mFirebaseRemoteConfig.getBoolean("enable_admob_interstitial_ads");
+            mInterstitialAdsEnabled = mFirebaseRemoteConfig.getBoolean("enable_admob_interstitial_ads");
             mAudienceNetworkBannerAdsEnabled = mFirebaseRemoteConfig.getBoolean("enable_audience_network_banner_ads");
-            mAdmobBannerAdsEnabled = mFirebaseRemoteConfig.getBoolean("enable_admob_banner_ads");
+            mBannerAdsEnabled = mFirebaseRemoteConfig.getBoolean("enable_admob_banner_ads");
 
             mShowMainTopAds = mFirebaseRemoteConfig.getBoolean("show_main_top_ads");
             mMainTopAdsFormat = mFirebaseRemoteConfig.getString("main_top_ads_format");
