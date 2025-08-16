@@ -2,6 +2,7 @@ package au.mymetro.android.billing;
 
 import android.app.Activity;
 import android.app.Application;
+import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -22,6 +23,7 @@ import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.PurchasesResponseListener;
 import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.android.billingclient.api.QueryProductDetailsParams;
+import com.android.billingclient.api.QueryProductDetailsResult;
 import com.android.billingclient.api.QueryPurchasesParams;
 import com.google.common.collect.ImmutableList;
 
@@ -98,7 +100,7 @@ public class BillingClientLifecycle implements DefaultLifecycleObserver, Purchas
         // after ending the previous connection to the Google Play Store in onDestroy().
         billingClient = BillingClient.newBuilder(mApp)
                 .setListener(this)
-                .enablePendingPurchases() // Not used for subscriptions.
+                .enableAutoServiceReconnection()
                 .build();
         if (!billingClient.isReady()) {
             Log.d(TAG, "BillingClient: Start connection...");
@@ -145,9 +147,11 @@ public class BillingClientLifecycle implements DefaultLifecycleObserver, Purchas
      * parts of the app to use the {@link ProductDetails} to show SKU information and make purchases.
      */
     @Override
-    public void onProductDetailsResponse(@NonNull BillingResult billingResult, @NonNull List<ProductDetails> productDetailsList) {
+    public void onProductDetailsResponse(@NonNull BillingResult billingResult, @NonNull QueryProductDetailsResult queryProductDetailsResult) {
         if (billingResult == null) {
-            Log.wtf(TAG, "onProductDetailsResponse: null BillingResult");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
+                Log.wtf(TAG, "onProductDetailsResponse: null BillingResult");
+            }
             return;
         }
 
@@ -157,7 +161,7 @@ public class BillingClientLifecycle implements DefaultLifecycleObserver, Purchas
             case BillingClient.BillingResponseCode.OK:
                 Log.i(TAG, "onProductDetailsResponse: " + responseCode + " " + debugMessage);
                 final int expectedProductDetailsCount = LIST_OF_PRODUCT_IDS.size();
-                if (productDetailsList == null) {
+                if (queryProductDetailsResult == null) {
                     productsWithProductDetails.postValue(Collections.<String, ProductDetails>emptyMap());
                     Log.e(TAG, "onProductDetailsResponse: " +
                             "Expected " + expectedProductDetailsCount + ", " +
@@ -166,7 +170,7 @@ public class BillingClientLifecycle implements DefaultLifecycleObserver, Purchas
                             "in the Google Play Console.");
                 } else {
                     Map<String, ProductDetails> newProductDetailList = new HashMap<String, ProductDetails>();
-                    for (ProductDetails skuDetails : productDetailsList) {
+                    for (ProductDetails skuDetails : queryProductDetailsResult.getProductDetailsList()) {
                         newProductDetailList.put(skuDetails.getProductId(), skuDetails);
                     }
                     productsWithProductDetails.postValue(newProductDetailList);
@@ -198,7 +202,9 @@ public class BillingClientLifecycle implements DefaultLifecycleObserver, Purchas
             case BillingClient.BillingResponseCode.ITEM_ALREADY_OWNED:
             case BillingClient.BillingResponseCode.ITEM_NOT_OWNED:
             default:
-                Log.wtf(TAG, "onProductDetailsResponse: " + responseCode + " " + debugMessage);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
+                    Log.wtf(TAG, "onProductDetailsResponse: " + responseCode + " " + debugMessage);
+                }
         }
     }
 
@@ -234,7 +240,9 @@ public class BillingClientLifecycle implements DefaultLifecycleObserver, Purchas
     @Override
     public void onPurchasesUpdated(@NonNull BillingResult billingResult, @Nullable List<Purchase> purchases) {
         if (billingResult == null) {
-            Log.wtf(TAG, "onPurchasesUpdated: null BillingResult");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
+                Log.wtf(TAG, "onPurchasesUpdated: null BillingResult");
+            }
             return;
         }
         int responseCode = billingResult.getResponseCode();

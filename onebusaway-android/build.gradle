@@ -19,7 +19,8 @@ import org.apache.tools.ant.filters.ConcatFilter
 
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+// apply plugin: 'kotlin-android-extensions'
 apply plugin: 'com.google.gms.google-services'
 
 repositories {
@@ -35,18 +36,18 @@ repositories {
         // CUTR Releases
         url "https://github.com/CUTR-at-USF/cutr-mvn-repo/raw/master/snapshots"
     }
-    google()
     mavenCentral()
+    maven { url 'https://jitpack.io' }
 }
 
 android {
-    compileSdkVersion 33
+    compileSdkVersion 35
 
     defaultConfig {
-        minSdkVersion 19
-        targetSdkVersion 33
-        versionCode 164
-        versionName "4.0.3"
+        minSdkVersion 21
+        targetSdkVersion 35
+        versionCode 166
+        versionName "4.0.5"
 
         multiDexEnabled true
 
@@ -453,7 +454,9 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
     testOptions {
         unitTests.includeAndroidResources true
     }
@@ -461,6 +464,8 @@ android {
     useLibrary 'android.test.runner'
     useLibrary 'android.test.base'
     useLibrary 'android.test.mock'
+    namespace 'org.onebusaway.android'
+    testNamespace 'org.onebusaway.android'
 }
 
 /**
@@ -534,7 +539,8 @@ dependencies {
     implementation 'commons-io:commons-io:2.4'
     implementation 'org.apache.commons:commons-lang3:3.0'
     // Open311 client library
-    implementation 'edu.usf.cutr:open311client:1.0.10'
+    implementation 'com.github.OneBusAway:open311-client:1.0.10'
+    // implementation 'edu.usf.cutr:open311client:1.0.10'
     // JSON data binding for OBA REST API responses
     implementation 'com.fasterxml.jackson.core:jackson-core:2.12.4'
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.12.4'
@@ -542,7 +548,8 @@ dependencies {
     // Bottom sliding panel
     implementation 'com.sothree.slidinguppanel:library:3.3.0'
     // For floating action button speed dial
-    implementation ('uk.co.markormesher:android-fab:2.2.0')
+    implementation 'com.github.OneBusAway:android-fab:2.4.1'
+    // implementation ('uk.co.markormesher:android-fab:2.2.0')
     // For sorting alphanumeric route names
     implementation 'org.onebusaway.util:comparators:1.0.0'
     // For tutorial (ShowcaseView) library
@@ -550,7 +557,8 @@ dependencies {
     // POJOs used for full data-binding via Jackson
     implementation 'edu.usf.cutr.opentripplanner.android:opentripplanner-pojos:1.0.0-SNAPSHOT'
     // Pelias for point-of-interest search and geocoding for trip planning origin and destination
-    implementation 'edu.usf.cutr:pelias-client-library:1.1.0'
+    implementation 'com.github.OneBusAway:pelias-client-library:v1.1.0'
+    // implementation 'edu.usf.cutr:pelias-client-library:1.1.0'
     // Google Play Services Maps (only for Google flavor)
     googleImplementation 'com.google.android.gms:play-services-maps:18.1.0'
     // Google Play Services Places is required by ProprietaryMapHelpV2 (only for Google flavor)
@@ -581,7 +589,7 @@ dependencies {
     implementation project(':nativetemplates')
 
     // Billing
-    implementation 'com.android.billingclient:billing:6.1.0'
+    implementation 'com.android.billingclient:billing:8.0.0'
 
     // App update
     implementation 'com.google.android.play:app-update:2.1.0'
