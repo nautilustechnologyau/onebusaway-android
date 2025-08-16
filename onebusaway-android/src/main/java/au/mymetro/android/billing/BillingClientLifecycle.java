@@ -16,12 +16,14 @@ import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingFlowParams;
 import com.android.billingclient.api.BillingResult;
+import com.android.billingclient.api.PendingPurchasesParams;
 import com.android.billingclient.api.ProductDetails;
 import com.android.billingclient.api.ProductDetailsResponseListener;
 import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.PurchasesResponseListener;
 import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.android.billingclient.api.QueryProductDetailsParams;
+import com.android.billingclient.api.QueryProductDetailsResult;
 import com.android.billingclient.api.QueryPurchasesParams;
 import com.google.common.collect.ImmutableList;
 
@@ -30,6 +32,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import au.mymetro.android.ui.SingleLiveEvent;
 
@@ -67,7 +70,7 @@ public class BillingClientLifecycle implements DefaultLifecycleObserver, Purchas
 
     private static volatile BillingClientLifecycle INSTANCE;
 
-    private Application mApp;
+    private final Application mApp;
     private BillingClient billingClient;
     private boolean mLoading = false;
 
@@ -87,7 +90,7 @@ public class BillingClientLifecycle implements DefaultLifecycleObserver, Purchas
     }
 
     @Override
-    public void onCreate(LifecycleOwner owner) {
+    public void onCreate(@NonNull LifecycleOwner owner) {
         if (this.mLoading) {
             return;
         }
@@ -96,18 +99,19 @@ public class BillingClientLifecycle implements DefaultLifecycleObserver, Purchas
         // Create a new BillingClient in onCreate().
         // Since the BillingClient can only be used once, we need to create a new instance
         // after ending the previous connection to the Google Play Store in onDestroy().
+        PendingPurchasesParams params = PendingPurchasesParams.newBuilder()
+                .enableOneTimeProducts()
+                .build();
         billingClient = BillingClient.newBuilder(mApp)
                 .setListener(this)
-                .enablePendingPurchases() // Not used for subscriptions.
+                .enablePendingPurchases(params)
+                .enableAutoServiceReconnection()
                 .build();
-        if (!billingClient.isReady()) {
-            Log.d(TAG, "BillingClient: Start connection...");
-            billingClient.startConnection(this);
-        }
+        billingClient.startConnection(this);
     }
 
     @Override
-    public void onDestroy(LifecycleOwner owner) {
+    public void onDestroy(@NonNull LifecycleOwner owner) {
         this.mLoading = false;
         Log.d(TAG, "ON_DESTROY");
         if (billingClient.isReady()) {
@@ -145,41 +149,27 @@ public class BillingClientLifecycle implements DefaultLifecycleObserver, Purchas
      * parts of the app to use the {@link ProductDetails} to show SKU information and make purchases.
      */
     @Override
-    public void onProductDetailsResponse(@NonNull BillingResult billingResult, @NonNull List<ProductDetails> productDetailsList) {
-        if (billingResult == null) {
-            Log.wtf(TAG, "onProductDetailsResponse: null BillingResult");
-            return;
-        }
-
+    public void onProductDetailsResponse(@NonNull BillingResult billingResult, @NonNull QueryProductDetailsResult queryProductDetailsResult) {
         int responseCode = billingResult.getResponseCode();
         String debugMessage = billingResult.getDebugMessage();
         switch (responseCode) {
             case BillingClient.BillingResponseCode.OK:
                 Log.i(TAG, "onProductDetailsResponse: " + responseCode + " " + debugMessage);
                 final int expectedProductDetailsCount = LIST_OF_PRODUCT_IDS.size();
-                if (productDetailsList == null) {
-                    productsWithProductDetails.postValue(Collections.<String, ProductDetails>emptyMap());
+                HashMap<String, ProductDetails> newProductDetailList = new HashMap<String, ProductDetails>();
+                for (ProductDetails skuDetails : queryProductDetailsResult.getProductDetailsList()) {
+                    newProductDetailList.put(skuDetails.getProductId(), skuDetails);
+                }
+                productsWithProductDetails.postValue(newProductDetailList);
+                int productDetailsCount = newProductDetailList.size();
+                if (productDetailsCount == expectedProductDetailsCount) {
+                    Log.i(TAG, "onProductDetailsResponse: Found " + productDetailsCount + " ProductDetails");
+                } else {
                     Log.e(TAG, "onProductDetailsResponse: " +
                             "Expected " + expectedProductDetailsCount + ", " +
-                            "Found null ProductDetails. " +
-                            "Check to see if the Product IDs you requested are correctly published " +
+                            "Found " + productDetailsCount + " ProductDetails. " +
+                            "Check to see if the product IDs you requested are correctly published " +
                             "in the Google Play Console.");
-                } else {
-                    Map<String, ProductDetails> newProductDetailList = new HashMap<String, ProductDetails>();
-                    for (ProductDetails skuDetails : productDetailsList) {
-                        newProductDetailList.put(skuDetails.getProductId(), skuDetails);
-                    }
-                    productsWithProductDetails.postValue(newProductDetailList);
-                    int productDetailsCount = newProductDetailList.size();
-                    if (productDetailsCount == expectedProductDetailsCount) {
-                        Log.i(TAG, "onProductDetailsResponse: Found " + productDetailsCount + " ProductDetails");
-                    } else {
-                        Log.e(TAG, "onProductDetailsResponse: " +
-                                "Expected " + expectedProductDetailsCount + ", " +
-                                "Found " + productDetailsCount + " ProductDetails. " +
-                                "Check to see if the product IDs you requested are correctly published " +
-                                "in the Google Play Console.");
-                    }
                 }
                 break;
             case BillingClient.BillingResponseCode.SERVICE_DISCONNECTED:
@@ -233,10 +223,6 @@ public class BillingClientLifecycle implements DefaultLifecycleObserver, Purchas
      */
     @Override
     public void onPurchasesUpdated(@NonNull BillingResult billingResult, @Nullable List<Purchase> purchases) {
-        if (billingResult == null) {
-            Log.wtf(TAG, "onPurchasesUpdated: null BillingResult");
-            return;
-        }
         int responseCode = billingResult.getResponseCode();
         String debugMessage = billingResult.getDebugMessage();
         Log.d(TAG, String.format("onPurchasesUpdated: %s %s",responseCode, debugMessage));
@@ -295,7 +281,7 @@ public class BillingClientLifecycle implements DefaultLifecycleObserver, Purchas
     /**
      * Log the number of purchases that are acknowledge and not acknowledged.
      * <p>
-     * https://developer.android.com/google/play/billing/billing_library_releases_notes#2_0_acknowledge
+     * <a href="https://developer.android.com/google/play/billing/billing_library_releases_notes#2_0_acknowledge">...</a>
      * <p>
      * When the purchase is first received, it will not be acknowledge.
      * This application sends the purchase token to the server for registration. After the
@@ -319,7 +305,7 @@ public class BillingClientLifecycle implements DefaultLifecycleObserver, Purchas
     /**
      * Log the number of purchases that are acknowledge and not acknowledged.
      * <p>
-     * https://developer.android.com/google/play/billing/billing_library_releases_notes#2_0_acknowledge
+     * <a href="https://developer.android.com/google/play/billing/billing_library_releases_notes#2_0_acknowledge">...</a>
      * <p>
      * When the purchase is first received, it will not be acknowledge.
      * This application sends the purchase token to the server for registration. After the
@@ -380,17 +366,20 @@ public class BillingClientLifecycle implements DefaultLifecycleObserver, Purchas
     }
 
     public int launchBillingFlow(Activity activity, String productId) {
-        ProductDetails productDetails = productsWithProductDetails.getValue().get(productId);
-        BillingFlowParams.ProductDetailsParams.Builder builder = BillingFlowParams.ProductDetailsParams.newBuilder();
-        builder = builder.setProductDetails(productDetails);
+        ProductDetails productDetails = Objects.requireNonNull(productsWithProductDetails.getValue()).get(productId);
+        assert productDetails != null;
+        BillingFlowParams.ProductDetailsParams.Builder builder =
+                BillingFlowParams.ProductDetailsParams.newBuilder()
+                        .setProductDetails(productDetails);
 
         // TODO: process offers
         // to get an offer token, call ProductDetails.getSubscriptionOfferDetails()
         // for a list of offers that are available to the user
         List<ProductDetails.SubscriptionOfferDetails> offers = productDetails.getSubscriptionOfferDetails();
+        assert offers != null;
         builder = builder.setOfferToken(offers.get(0).getOfferToken());
 
-        ImmutableList productDetailsParamsList =
+        ImmutableList<BillingFlowParams.ProductDetailsParams> productDetailsParamsList =
                 ImmutableList.of(builder.build());
 
         BillingFlowParams billingFlowParams = BillingFlowParams.newBuilder()
@@ -418,7 +407,7 @@ public class BillingClientLifecycle implements DefaultLifecycleObserver, Purchas
     /**
      * Acknowledge a purchase.
      * <p>
-     * https://developer.android.com/google/play/billing/billing_library_releases_notes#2_0_acknowledge
+     * <a href="https://developer.android.com/google/play/billing/billing_library_releases_notes#2_0_acknowledge">...</a>
      * <p>
      * Apps should acknowledge the purchase after confirming that the purchase token
      * has been associated with a user. This app only acknowledges purchases after
@@ -443,7 +432,7 @@ public class BillingClientLifecycle implements DefaultLifecycleObserver, Purchas
                 .build();
         billingClient.acknowledgePurchase(params, new AcknowledgePurchaseResponseListener() {
             @Override
-            public void onAcknowledgePurchaseResponse(BillingResult billingResult) {
+            public void onAcknowledgePurchaseResponse(@NonNull BillingResult billingResult) {
                 int responseCode = billingResult.getResponseCode();
                 String debugMessage = billingResult.getDebugMessage();
                 Log.d(TAG, "acknowledgePurchase: " + responseCode + " " + debugMessage);
