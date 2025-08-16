@@ -39,7 +39,7 @@ import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_
 import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_SEND_FEEDBACK;
 import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_SETTINGS;
 import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_SIGN_IN;
-import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_STARRED_ROUTES;
+import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_STARRED_STOPS;
 import static org.onebusaway.android.ui.NavigationDrawerFragment.NavigationDrawerCallbacks;
 import static org.onebusaway.android.util.PermissionUtils.BACKGROUND_LOCATION_PERMISSION_REQUEST;
 import static org.onebusaway.android.util.PermissionUtils.LOCATION_PERMISSIONS;
@@ -182,27 +182,6 @@ import au.mymetro.android.ads.AdsManager;
 import au.mymetro.android.billing.BillingClientLifecycle;
 import au.mymetro.android.ui.RateItDialogFragment;
 import au.mymetro.android.ui.RemoveAdsActivity;
-
-
-import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_ACTIVITY_FEED;
-import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_HELP;
-import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_MY_REMINDERS;
-import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_NEARBY;
-import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_OPEN_SOURCE;
-import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_PAY_FARE;
-import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_PINS;
-import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_PLAN_TRIP;
-import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_PROFILE;
-import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_SEND_FEEDBACK;
-import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_SETTINGS;
-import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_SIGN_IN;
-import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_STARRED_ROUTES;
-import static org.onebusaway.android.ui.NavigationDrawerFragment.NAVDRAWER_ITEM_STARRED_STOPS;
-import static org.onebusaway.android.ui.NavigationDrawerFragment.NavigationDrawerCallbacks;
-import static org.onebusaway.android.util.PermissionUtils.LOCATION_PERMISSIONS;
-import static uk.co.markormesher.android_fab.FloatingActionButton.POSITION_BOTTOM;
-import static uk.co.markormesher.android_fab.FloatingActionButton.POSITION_END;
-import static uk.co.markormesher.android_fab.FloatingActionButton.POSITION_START;
 
 public class HomeActivity extends AppCompatActivity
         implements BaseMapFragment.OnFocusChangedListener,
@@ -678,20 +657,24 @@ public class HomeActivity extends AppCompatActivity
                 if (!BuildConfig.USE_FIXED_REGION) {
                     RegionsActivity.start(this);
                     mCurrentNavDrawerPosition = NAVDRAWER_ITEM_NEARBY;
-                    ObaAnalytics.reportUiEvent(mFirebaseAnalytics, getString(R.string.analytics_label_region_select), null);
+                    ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                            Application.get().getPlausibleInstance(),
+                            PlausibleAnalytics.REPORT_MENU_EVENT_URL,
+                            getString(R.string.analytics_label_region_select),
+                            null);
                 }
                 break;
-//            case NAVDRAWER_ITEM_STARRED_STOPS:
-//                if (mCurrentNavDrawerPosition != NAVDRAWER_ITEM_STARRED_STOPS) {
-//                    showStarredStopsRoutesFragment();
-//                    ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
-//                            Application.get().getPlausibleInstance(),
-//                            PlausibleAnalytics.REPORT_MENU_EVENT_URL,
-//                            getString(R.string.analytics_label_button_press_star),
-//                            null);
-//                    mCurrentNavDrawerPosition = NAVDRAWER_ITEM_NEARBY;
-//                }
-//                break;
+            case NAVDRAWER_ITEM_STARRED_STOPS:
+                if (mCurrentNavDrawerPosition != NAVDRAWER_ITEM_STARRED_STOPS) {
+                    showStarredStopsRoutesFragment();
+                    ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                            Application.get().getPlausibleInstance(),
+                            PlausibleAnalytics.REPORT_MENU_EVENT_URL,
+                            getString(R.string.analytics_label_button_press_star),
+                            null);
+                    mCurrentNavDrawerPosition = NAVDRAWER_ITEM_NEARBY;
+                }
+                break;
             case NAVDRAWER_ITEM_MY_REMINDERS:
                 if (mCurrentNavDrawerPosition != NAVDRAWER_ITEM_MY_REMINDERS) {
                     showMyRemindersFragment();
@@ -704,17 +687,17 @@ public class HomeActivity extends AppCompatActivity
                 }
                 break;
 
-            case NAVDRAWER_ITEM_STARRED_ROUTES:
-                if (mCurrentNavDrawerPosition != NAVDRAWER_ITEM_STARRED_ROUTES) {
-                    showStarredRoutesFragment();
-                    mCurrentNavDrawerPosition = item;
-                    ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
-                            Application.get().getPlausibleInstance(),
-                            PlausibleAnalytics.REPORT_MENU_EVENT_URL,
-                            getString(R.string.analytics_label_button_press_star),
-                            null);
-                }
-                break;
+//            case NAVDRAWER_ITEM_STARRED_ROUTES:
+//                if (mCurrentNavDrawerPosition != NAVDRAWER_ITEM_STARRED_ROUTES) {
+//                    showStarredRoutesFragment();
+//                    mCurrentNavDrawerPosition = item;
+//                    ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+//                            Application.get().getPlausibleInstance(),
+//                            PlausibleAnalytics.REPORT_MENU_EVENT_URL,
+//                            getString(R.string.analytics_label_button_press_star),
+//                            null);
+//                }
+//                break;
 
             // below values are deprecated; fall through to NAVDRAWER_ITEM_NEARBY
             case NAVDRAWER_ITEM_SIGN_IN:
@@ -779,6 +762,8 @@ public class HomeActivity extends AppCompatActivity
             case NAVDRAWER_ITEM_RATE_APP:
                 UIUtils.goToMarket(HomeActivity.this, getPackageName());
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                        Application.get().getPlausibleInstance(),
+                        PlausibleAnalytics.REPORT_MENU_EVENT_URL,
                         getString(R.string.analytics_label_button_press_rate_app),
                         null);
                 break;
@@ -786,6 +771,8 @@ public class HomeActivity extends AppCompatActivity
                 Intent removeAds = new Intent(HomeActivity.this, RemoveAdsActivity.class);
                 startActivity(removeAds);
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                        Application.get().getPlausibleInstance(),
+                        PlausibleAnalytics.REPORT_MENU_EVENT_URL,
                         getString(R.string.analytics_label_button_press_remove_ads),
                         null);
                 break;
@@ -2754,6 +2741,8 @@ public class HomeActivity extends AppCompatActivity
             //planTrip.putExtras(mBuilder.getBundle());
             startActivity(planTrip, mBuilder.getBundle());
             ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                    Application.get().getPlausibleInstance(),
+                    PlausibleAnalytics.REPORT_MENU_EVENT_URL,
                     getString(R.string.analytics_label_button_press_trip_plan),
                     null);
         });
@@ -2804,6 +2793,8 @@ public class HomeActivity extends AppCompatActivity
         planTrip.putExtra(OTPConstants.INTENT_SOURCE, OTPConstants.Source.EXTERNAL_ACTIVITY);
         startActivity(planTrip);
         ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                Application.get().getPlausibleInstance(),
+                PlausibleAnalytics.REPORT_MENU_EVENT_URL,
                 getString(R.string.analytics_label_button_press_trip_plan),
                 null);
     }
@@ -2830,6 +2821,8 @@ public class HomeActivity extends AppCompatActivity
             planTrip.putExtra(OTPConstants.INTENT_SOURCE, OTPConstants.Source.NOTIFICATION);
             startActivity(planTrip);
             ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                    Application.get().getPlausibleInstance(),
+                    PlausibleAnalytics.REPORT_MENU_EVENT_URL,
                     getString(R.string.analytics_label_button_press_trip_plan),
                     null);
         }

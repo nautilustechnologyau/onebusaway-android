@@ -60,10 +60,10 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentStart="true"
                     android:layout_alignParentBottom="true"
-                    android:layout_marginStart="@dimen/fab_margin"
-                    android:layout_marginTop="@dimen/fab_margin"
-                    android:layout_marginEnd="@dimen/fab_margin"
-                    android:layout_marginBottom="@dimen/fab_margin"
+                    android:layout_marginStart="@dimen/fab_margin1"
+                    android:layout_marginTop="@dimen/fab_margin1"
+                    android:layout_marginEnd="@dimen/fab_margin1"
+                    android:layout_marginBottom="@dimen/fab_margin1"
                     android:visibility="gone"/>
 
                 <uk.co.markormesher.android_fab.FloatingActionButton

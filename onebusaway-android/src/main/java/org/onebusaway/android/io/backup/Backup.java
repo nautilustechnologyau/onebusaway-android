@@ -47,7 +47,7 @@ import java.io.OutputStream;
  */
 public final class Backup {
 
-    private static final String FILE_NAME;
+    public static final String FILE_NAME;
 
     private static final String DIRECTORY_NAME;
 
@@ -63,23 +63,6 @@ public final class Backup {
             FILE_NAME = "OneBusAway.backup";
             DIRECTORY_NAME = "OBABackups";
         }
-    }
-
-    private static File getBackup() {
-        File backupDir = getBackupDirectory();
-        return new File(backupDir, FILE_NAME);
-    }
-
-    /**
-     * Performs a backup to the SD card.
-     */
-    public static String backup(Context context) throws IOException {
-        // We need two things:
-        // 1. The path to the database;
-        // 2. The path on the SD card to the backup file.
-        File backupPath = getBackup();
-        FileUtils.copyFile(getDB(context), backupPath);
-        return backupPath.getAbsolutePath();
     }
 
     /**
@@ -139,5 +122,4 @@ public final class Backup {
             }
         }
     }
-
 }

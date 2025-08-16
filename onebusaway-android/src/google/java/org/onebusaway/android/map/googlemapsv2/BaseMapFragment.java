@@ -226,6 +226,8 @@ public class BaseMapFragment extends SupportMapFragment
             case "Grayscale": {
                 applyMapStyle(R.raw.mapstyle_grayscale);
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                        Application.get().getPlausibleInstance(),
+                        PlausibleAnalytics.REPORT_MAP_EVENT_URL,
                         getString(R.string.analytics_layer_mapstyle_grayscale),
                         getString(R.string.analytics_label_mapstyle_grascale_activated));
                 break;
@@ -233,6 +235,8 @@ public class BaseMapFragment extends SupportMapFragment
             case "Night": {
                 applyMapStyle(R.raw.mapstyle_night);
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                        Application.get().getPlausibleInstance(),
+                        PlausibleAnalytics.REPORT_MAP_EVENT_URL,
                         getString(R.string.analytics_layer_mapstyle_night),
                         getString(R.string.analytics_label_mapstyle_night_activated));
                 break;
@@ -240,6 +244,8 @@ public class BaseMapFragment extends SupportMapFragment
             case "Retro": {
                 applyMapStyle(R.raw.mapstyle_retro);
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                        Application.get().getPlausibleInstance(),
+                        PlausibleAnalytics.REPORT_MAP_EVENT_URL,
                         getString(R.string.analytics_layer_mapstyle_retro),
                         getString(R.string.analytics_label_mapstyle_retro_activated));
                 break;
@@ -247,6 +253,8 @@ public class BaseMapFragment extends SupportMapFragment
             case "Aubergine": {
                 applyMapStyle(R.raw.mapstyle_aubergine);
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                        Application.get().getPlausibleInstance(),
+                        PlausibleAnalytics.REPORT_MAP_EVENT_URL,
                         getString(R.string.analytics_layer_mapstyle_aubergine),
                         getString(R.string.analytics_label_mapstyle_aubergine_activated));
                 break;
@@ -254,6 +262,8 @@ public class BaseMapFragment extends SupportMapFragment
             case "Dark": {
                 applyMapStyle(R.raw.mapstyle_dark);
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                        Application.get().getPlausibleInstance(),
+                        PlausibleAnalytics.REPORT_MAP_EVENT_URL,
                         getString(R.string.analytics_layer_mapstyle_dark),
                         getString(R.string.analytics_label_mapstyle_dark_activated));
                 break;
@@ -261,6 +271,8 @@ public class BaseMapFragment extends SupportMapFragment
             case "Standard": {
                 applyMapStyle(R.raw.mapstyle_standard);
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                        Application.get().getPlausibleInstance(),
+                        PlausibleAnalytics.REPORT_MAP_EVENT_URL,
                         getString(R.string.analytics_layer_mapstyle_standard),
                         getString(R.string.analytics_label_mapstyle_standard_activated));
                 break;
@@ -268,6 +280,8 @@ public class BaseMapFragment extends SupportMapFragment
             case "Silver": {
                 applyMapStyle(R.raw.mapstyle_silver);
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                        Application.get().getPlausibleInstance(),
+                        PlausibleAnalytics.REPORT_MAP_EVENT_URL,
                         getString(R.string.analytics_layer_mapstyle_silver),
                         getString(R.string.analytics_label_mapstyle_silver_activated));
                 break;
