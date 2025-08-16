@@ -19,7 +19,7 @@ import org.apache.tools.ant.filters.ConcatFilter
 
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
 apply plugin: 'com.google.gms.google-services'
 
 repositories {
@@ -33,16 +33,17 @@ repositories {
     }
     google()
     mavenCentral()
+    maven { url 'https://jitpack.io' }
 }
 
 android {
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 33
+        targetSdkVersion 34
         versionCode 164
-        versionName "4.0.3"
+        versionName "4.0.4"
 
         multiDexEnabled true
 
@@ -50,6 +51,13 @@ android {
 
         // This enables us to tell when we're running unit tests on CI (#1010 for Travis, #1072 for GitHub)
         buildConfigField("String", "CI", "\"" + System.getenv('CI') + "\"")
+
+        // Configure Java compile options to specify the schema location for Room database to keep track of schema versions
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
+            }
+        }
     }
 
     /**
@@ -107,6 +115,9 @@ android {
             buildConfigField "String", "FIXED_REGION_PAYMENT_WARNING_BODY", "null"
             buildConfigField "boolean", "FIXED_REGION_TRAVEL_BEHAVIOR_DATA_COLLECTION", "false"
             buildConfigField "boolean", "FIXED_REGION_ENROLL_PARTICIPANTS_IN_STUDY", "false"
+            buildConfigField "String", "FIXED_REGION_SIDECAR_BASE_URL", "\"https://onebusaway.co\""
+            buildConfigField "String", "FIXED_REGION_PLAUSIBLE_ANALYTICS_SERVER_URL", "null"
+            buildConfigField "String", "ONESIGNAL_APP_ID", ONESIGNAL_APP_ID
 
             // TODO: set the values for this fixed region
             buildConfigField "boolean", "DISABLE_ADVANCED_PREFERENCE", "false"
@@ -167,6 +178,9 @@ android {
             buildConfigField "String", "FIXED_REGION_PAYMENT_WARNING_BODY", "null"
             buildConfigField "boolean", "FIXED_REGION_TRAVEL_BEHAVIOR_DATA_COLLECTION", "false"
             buildConfigField "boolean", "FIXED_REGION_ENROLL_PARTICIPANTS_IN_STUDY", "false"
+            buildConfigField "String", "FIXED_REGION_SIDECAR_BASE_URL", "null"
+            buildConfigField "String", "FIXED_REGION_PLAUSIBLE_ANALYTICS_SERVER_URL", "null"
+            buildConfigField "String", "ONESIGNAL_APP_ID", ONESIGNAL_APP_ID
 
             // TODO: set the values for this fixed region. check oba section for details
             buildConfigField "boolean", "DISABLE_ADVANCED_PREFERENCE", "false"
@@ -217,6 +231,9 @@ android {
             buildConfigField "String", "FIXED_REGION_PAYMENT_WARNING_BODY", "null"
             buildConfigField "boolean", "FIXED_REGION_TRAVEL_BEHAVIOR_DATA_COLLECTION", "false"
             buildConfigField "boolean", "FIXED_REGION_ENROLL_PARTICIPANTS_IN_STUDY", "false"
+            buildConfigField "String", "FIXED_REGION_SIDECAR_BASE_URL", "null"
+            buildConfigField "String", "FIXED_REGION_PLAUSIBLE_ANALYTICS_SERVER_URL", "null"
+            buildConfigField "String", "ONESIGNAL_APP_ID", ONESIGNAL_APP_ID
 
             // TODO: set the values for this fixed region. check oba section for details
             buildConfigField "boolean", "DISABLE_ADVANCED_PREFERENCE", "false"
@@ -370,10 +387,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
-
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
     testOptions {
         unitTests.includeAndroidResources true
     }
@@ -407,31 +426,39 @@ configurations {
 
 dependencies {
     // Firebase Analytics
-    implementation 'com.google.firebase:firebase-core:21.0.0'
+    implementation 'com.google.firebase:firebase-core:21.1.1'
     implementation 'com.google.firebase:firebase-config:21.4.0'
-    implementation 'com.google.firebase:firebase-analytics:21.0.0'
+    implementation 'com.google.firebase:firebase-analytics:22.1.2'
+    // Plausible Analytics
+    implementation 'com.github.OneBusAway:plausible-android-sdk:3.3'
     // Cloud Firestore (for storing destination alert test data)
-    implementation 'com.google.firebase:firebase-firestore:24.1.2'
-
-    // to fix Google Play warning
-    implementation ('com.google.firebase:firebase-auth:21.0.5') {
-        exclude module: "play-services-safetynet"
+    implementation('com.google.firebase:firebase-firestore:25.1.0') {
+        // Exclude protobuf-lite and protolite-well-known-types to avoid conflicts with GTFS-realtime bindings
+        // See https://github.com/firebase/firebase-android-sdk/issues/5997
+        exclude group: 'com.google.firebase', module: 'protolite-well-known-types'
+        exclude group: 'com.google.protobuf', module: 'protobuf-javalite'
     }
-    implementation 'com.google.firebase:firebase-storage:20.0.1'
+    implementation 'com.google.firebase:firebase-auth:21.0.5'
+    implementation 'com.google.firebase:firebase-storage:21.0.1'
+    // Firebase Crashlytics
+    implementation 'com.google.firebase:firebase-crashlytics:19.2.0'
+    implementation 'com.google.firebase:firebase-crashlytics-buildtools:3.0.2'
     // Google Play Services Location
-    implementation 'com.google.android.gms:play-services-location:19.0.1'
+    implementation 'com.google.android.gms:play-services-location:21.3.0'
+    // OneSignal
+    implementation 'com.onesignal:OneSignal:[5.0.0, 5.99.99]'
     // Support libraries
-    implementation 'androidx.activity:activity:1.4.0'
-    implementation 'androidx.fragment:fragment:1.4.1'
+    implementation 'androidx.activity:activity-ktx:1.9.3'
+    implementation 'androidx.fragment:fragment-ktx:1.8.4'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'com.google.android.material:material:1.8.0'
     implementation 'android.arch.lifecycle:extensions:1.1.1'
     implementation 'android.arch.lifecycle:common-java8:1.1.1'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha3'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'commons-io:commons-io:2.4'
     implementation 'org.apache.commons:commons-lang3:3.0'
     // Open311 client library
-    implementation 'edu.usf.cutr:open311client:1.0.10'
+    implementation 'com.github.OneBusAway:open311-client:1.0.10'
     // JSON data binding for OBA REST API responses
     implementation 'com.fasterxml.jackson.core:jackson-core:2.12.4'
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.12.4'
@@ -439,7 +466,7 @@ dependencies {
     // Bottom sliding panel
     implementation 'com.sothree.slidinguppanel:library:3.3.0'
     // For floating action button speed dial
-    implementation ('uk.co.markormesher:android-fab:2.2.0')
+    implementation 'com.github.OneBusAway:android-fab:2.4.1'
     // For sorting alphanumeric route names
     implementation 'org.onebusaway.util:comparators:1.0.0'
     // For tutorial (ShowcaseView) library
@@ -447,40 +474,35 @@ dependencies {
     // POJOs used for full data-binding via Jackson
     implementation 'edu.usf.cutr.opentripplanner.android:opentripplanner-pojos:1.0.0-SNAPSHOT'
     // Pelias for point-of-interest search and geocoding for trip planning origin and destination
-    implementation 'edu.usf.cutr:pelias-client-library:1.1.0'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.github.OneBusAway:pelias-client-library:v1.1.0'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
     // Google Play Services Maps (only for Google flavor)
-    googleImplementation 'com.google.android.gms:play-services-maps:18.2.0'
+    googleImplementation 'com.google.android.gms:play-services-maps:19.0.0'
     // Google Play Services Places is required by ProprietaryMapHelpV2 (only for Google flavor)
-    //googleImplementation 'com.google.android.libraries.places:places-compat:2.6.0'
-    googleImplementation 'com.google.android.libraries.places:places:2.6.0'
+    googleImplementation 'com.google.android.libraries.places:places-compat:2.6.0'
     // Autocomplete text views with clear button for trip planning
-    // implementation 'com.google.android.material:material:1.1.0'
+    implementation 'com.google.android.material:material:1.12.0'
     // Required to support multidex for minSdkVersion <= 20
     implementation 'androidx.multidex:multidex:2.0.1'
     // Explicit dependency on Gson is now apparently needed
-    implementation 'com.google.code.gson:gson:2.9.0'
+    implementation 'com.google.code.gson:gson:2.10.1'
     // Unit tests - seems like this is still necessary w/ Android X even though useLibrary is declared earlier
-    androidTestImplementation 'androidx.test:runner:1.1.0'
+    androidTestImplementation 'androidx.test:runner:1.6.2'
     // WorkManager (Java only)
-    implementation 'androidx.work:work-runtime:2.7.1'
-    implementation "androidx.concurrent:concurrent-futures:1.0.0-beta01"
+    implementation 'androidx.work:work-runtime:2.9.1'
+    implementation "androidx.concurrent:concurrent-futures:1.2.0"
     implementation "androidx.concurrent:concurrent-listenablefuture:1.0.0-beta01"
     implementation "androidx.concurrent:concurrent-listenablefuture-callback:1.0.0-beta01"
-    implementation "androidx.core:core-ktx:1.7.0"
+    implementation "androidx.core:core-ktx:1.13.1"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-
-    // Google Ad
-    implementation 'com.google.android.gms:play-services-ads:22.6.0'
-    implementation 'com.google.ads.mediation:facebook:6.16.0.0'
-    implementation 'com.facebook.android:audience-network-sdk:6.16.0'
-    implementation project(':nativetemplates')
-
-    // Billing
-    implementation 'com.android.billingclient:billing:6.1.0'
-
-    // App update
-    implementation 'com.google.android.play:app-update:2.1.0'
+    // RoomDB
+    implementation "androidx.room:room-runtime:2.6.1"
+    kapt "androidx.room:room-compiler:2.6.1"
+    implementation "androidx.room:room-ktx:2.6.1"
+    // GTFS Realtime bindings for parsing GTFS-realtime data
+    implementation group: 'org.mobilitydata', name: 'gtfs-realtime-bindings', version: '0.0.8'
+    implementation 'com.google.api.grpc:proto-google-common-protos:2.9.0'
 }
 
 apply plugin:'com.google.gms.google-services'
+apply plugin: 'com.google.firebase.crashlytics'

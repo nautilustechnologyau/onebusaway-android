@@ -52,12 +52,14 @@ import android.widget.TextView;
 
 import androidx.fragment.app.FragmentManager;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import org.onebusaway.android.BuildConfig;
 import org.onebusaway.android.R;
 import org.onebusaway.android.app.Application;
 import org.onebusaway.android.io.ObaAnalytics;
+import org.onebusaway.android.io.PlausibleAnalytics;
 import org.onebusaway.android.io.elements.ObaArrivalInfo;
 import org.onebusaway.android.io.elements.ObaRegion;
 import org.onebusaway.android.io.elements.Occupancy;
@@ -65,6 +67,7 @@ import org.onebusaway.android.io.elements.OccupancyState;
 import org.onebusaway.android.io.elements.Status;
 import org.onebusaway.android.provider.ObaContract;
 import org.onebusaway.android.util.ArrivalInfoUtils;
+import org.onebusaway.android.util.ReminderUtils;
 import org.onebusaway.android.util.UIUtils;
 
 import java.util.ArrayList;
@@ -367,8 +370,10 @@ class ArrivalsListHeader {
         mEtaContainer1 = mView.findViewById(R.id.eta_container1);
         mEtaRouteFavorite1 = (ImageButton) mEtaContainer1.findViewById(R.id.eta_route_favorite);
         mEtaRouteFavorite1.setColorFilter(mView.getResources().getColor(R.color.header_text_color));
+        mEtaRouteFavorite1.setContentDescription(mContext.getString(R.string.arrival_favorite_first_description));
         mEtaReminder1 = (ImageButton) mEtaContainer1.findViewById(R.id.reminder);
         mEtaReminder1.setColorFilter(mView.getResources().getColor(R.color.header_text_color));
+        mEtaReminder1.setContentDescription(mContext.getString(R.string.arrival_reminder_first_description));
         mEtaRouteName1 = (TextView) mEtaContainer1.findViewById(R.id.eta_route_name);
         mEtaRouteDirection1 = (TextView) mEtaContainer1.findViewById(R.id.eta_route_direction);
         mEtaAndMin1 = (RelativeLayout) mEtaContainer1.findViewById(R.id.eta_and_min);
@@ -377,6 +382,7 @@ class ArrivalsListHeader {
         mEtaRealtime1 = (ViewGroup) mEtaContainer1.findViewById(R.id.eta_realtime_indicator);
         mEtaMoreVert1 = (ImageButton) mEtaContainer1.findViewById(R.id.eta_more_vert);
         mEtaMoreVert1.setColorFilter(mView.getResources().getColor(R.color.header_text_color));
+        mEtaMoreVert1.setContentDescription(mContext.getString(R.string.arrival_options_first_description));
         mOccupancyView1 = mEtaContainer1.findViewById(R.id.occupancy);
         mVehicleFeaturesView1 = mEtaContainer1.findViewById(R.id.vehicle_features);
 
@@ -386,8 +392,10 @@ class ArrivalsListHeader {
         mEtaContainer2 = mView.findViewById(R.id.eta_container2);
         mEtaRouteFavorite2 = (ImageButton) mEtaContainer2.findViewById(R.id.eta_route_favorite);
         mEtaRouteFavorite2.setColorFilter(mView.getResources().getColor(R.color.header_text_color));
+        mEtaRouteFavorite2.setContentDescription(mContext.getString(R.string.arrival_favorite_second_description));
         mEtaReminder2 = (ImageButton) mEtaContainer2.findViewById(R.id.reminder);
         mEtaReminder2.setColorFilter(mView.getResources().getColor(R.color.header_text_color));
+        mEtaReminder2.setContentDescription(mContext.getString(R.string.arrival_reminder_second_description));
         mEtaRouteName2 = (TextView) mEtaContainer2.findViewById(R.id.eta_route_name);
         mEtaAndMin2 = (RelativeLayout) mEtaContainer2.findViewById(R.id.eta_and_min);
         mEtaRouteDirection2 = (TextView) mEtaContainer2.findViewById(R.id.eta_route_direction);
@@ -399,6 +407,7 @@ class ArrivalsListHeader {
         mVehicleFeaturesView2 = mEtaContainer2.findViewById(R.id.vehicle_features);
 
         mEtaMoreVert2.setColorFilter(mView.getResources().getColor(R.color.header_text_color));
+        mEtaMoreVert2.setContentDescription(mContext.getString(R.string.arrival_options_second_description));
 
         mProgressBar = (ProgressBar) mView.findViewById(R.id.header_loading_spinner);
         mStopInfo = (ImageButton) mView.findViewById(R.id.stop_info_button);
@@ -442,6 +451,8 @@ class ArrivalsListHeader {
                     //Analytics
                     if (obaRegion.getName() != null) {
                         ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                                Application.get().getPlausibleInstance(),
+                                PlausibleAnalytics.REPORT_ARRIVALS_EVENT_URL,
                                 mContext.getString(R.string.analytics_label_button_press_stopinfo),
                                 null);
                     }
@@ -452,6 +463,7 @@ class ArrivalsListHeader {
         mStopFavorite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                notifyStopFavoriteChanged(mController.isFavoriteStop());
                 mController.setFavoriteStop(!mController.isFavoriteStop());
                 refreshStopFavorite();
             }
@@ -1058,6 +1070,7 @@ class ArrivalsListHeader {
                         @Override
                         public void onSelectionComplete(boolean savedFavorite) {
                             if (savedFavorite) {
+                                notifyRouteFavoriteChanged(isRouteFavorite);
                                 mController.refreshLocal();
                             }
                         }
@@ -1077,8 +1090,11 @@ class ArrivalsListHeader {
                             info1.getRouteId(),
                             info1.getShortName(),
                             mController.getStopName(),
-                            info1.getScheduledDepartureTime(),
-                            info1.getHeadsign());
+                            ReminderUtils.getReminderDepartureTime(info1),
+                            info1.getHeadsign(),
+                            info1.getStopSequence(),
+                            info1.getServiceDate(),
+                            info1.getVehicleId());
                 }
             });
 
@@ -1120,6 +1136,7 @@ class ArrivalsListHeader {
                         @Override
                         public void onSelectionComplete(boolean savedFavorite) {
                             if (savedFavorite) {
+                                notifyRouteFavoriteChanged(isRouteFavorite2);
                                 mController.refreshLocal();
                             }
                         }
@@ -1138,8 +1155,11 @@ class ArrivalsListHeader {
                             info2.getRouteId(),
                             info2.getShortName(),
                             mController.getStopName(),
-                            info2.getScheduledDepartureTime(),
-                            info2.getHeadsign());
+                            ReminderUtils.getReminderDepartureTime(info2),
+                            info2.getHeadsign(),
+                            info2.getStopSequence(),
+                            info2.getServiceDate(),
+                            info2.getVehicleId());
                 }
             });
 
@@ -1519,5 +1539,15 @@ class ArrivalsListHeader {
         } else {
             mProgressBar.setVisibility(View.GONE);
         }
+    }
+
+    private void notifyRouteFavoriteChanged(boolean isRouteSaved) {
+        int message = isRouteSaved ? R.string.route_removed_from_favorites : R.string.route_added_to_favorites;
+        Snackbar.make(mView, message, Snackbar.LENGTH_SHORT).show();
+    }
+
+    private void notifyStopFavoriteChanged(boolean isStopSaved) {
+        int message = isStopSaved ? R.string.stop_removed_from_favorites : R.string.stop_added_to_favorites;
+        Snackbar.make(mView, message, Snackbar.LENGTH_SHORT).show();
     }
 }

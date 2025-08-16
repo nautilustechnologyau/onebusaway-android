@@ -49,7 +49,7 @@ public class ObaProvider extends ContentProvider {
 
     private class OpenHelper extends SQLiteOpenHelper {
 
-        private static final int DATABASE_VERSION = 31;
+        private static final int DATABASE_VERSION = 33;
 
         public OpenHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -309,20 +309,19 @@ public class ObaProvider extends ContentProvider {
             }
 
             if (oldVersion == 30) {
-                db.execSQL(
-                        "CREATE TABLE " +
-                                ObaContract.TripPlans.PATH + " (" +
-                                ObaContract.TripPlans._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                                + ObaContract.TripPlans.REGION_ID + " INTEGER NOT NULL, "
-                                + ObaContract.TripPlans.PLAN_NAME + " VARCHAR NOT NULL, "
-                                + ObaContract.TripPlans.FROM_ADDRESS_LINE1 + " VARCHAR, "
-                                + ObaContract.TripPlans.FROM_ADDRESS_LATITUDE + " DOUBLE NOT NULL, "
-                                + ObaContract.TripPlans.FROM_ADDRESS_LONGITUDE + " DOUBLE NOT NULL, "
-                                + ObaContract.TripPlans.TO_ADDRESS_LINE1 + " VARCHAR, "
-                                + ObaContract.TripPlans.TO_ADDRESS_LATITUDE + " DOUBLE NOT NULL, "
-                                + ObaContract.TripPlans.TO_ADDRESS_LONGITUDE + " DOUBLE NOT NULL " +
-                                ");"
-                );
+                db.execSQL("DROP TABLE IF EXISTS " + ObaContract.Trips.PATH);
+                createTripsTable(db);
+                ++oldVersion;
+            }
+
+            if(oldVersion == 31) {
+                db.execSQL("ALTER TABLE " + ObaContract.Regions.PATH +
+                        " ADD COLUMN " + ObaContract.Regions.SIDECAR_BASE_URL + " VARCHAR DEFAULT 'https://onebusaway.co'");
+                ++oldVersion;
+            }
+            if (oldVersion == 32){
+                db.execSQL("ALTER TABLE " + ObaContract.Regions.PATH +
+                        " ADD COLUMN " + ObaContract.Regions.PLAUSIBLE_ANALYTICS_SERVER_URL + " VARCHAR DEFAULT NULL");
             }
         }
 
@@ -359,6 +358,11 @@ public class ObaProvider extends ContentProvider {
                             ObaContract.Routes.LONGNAME + " VARCHAR, " +
                             ObaContract.Routes.USE_COUNT + " INTEGER NOT NULL" +
                             ");");
+
+            createTripsTable(db);
+        }
+
+        private void createTripsTable(SQLiteDatabase db){
             db.execSQL(
                     "CREATE TABLE " +
                             ObaContract.Trips.PATH + " (" +
@@ -369,7 +373,11 @@ public class ObaProvider extends ContentProvider {
                             ObaContract.Trips.HEADSIGN + " VARCHAR NOT NULL, " +
                             ObaContract.Trips.NAME + " VARCHAR NOT NULL, " +
                             ObaContract.Trips.REMINDER + " INTEGER NOT NULL, " +
-                            ObaContract.Trips.DAYS + " INTEGER NOT NULL" +
+                            ObaContract.Trips.ALARM_DELETE_PATH + " VARCHAR NOT NULL ," +
+                            ObaContract.Trips.SERVICE_DATE + " INTEGER NOT NULL ," +
+                            ObaContract.Trips.STOP_SEQUENCE + " INTEGER NOT NULL ," +
+                            ObaContract.Trips.TRIP_ID + " VARCHAR NOT NULL ," +
+                            ObaContract.Trips.VEHICLE_ID + " VARCHAR NOT NULL " +
                             ");");
         }
 
@@ -536,7 +544,12 @@ public class ObaProvider extends ContentProvider {
         sTripsProjectionMap.put(ObaContract.Trips.HEADSIGN, ObaContract.Trips.HEADSIGN);
         sTripsProjectionMap.put(ObaContract.Trips.NAME, ObaContract.Trips.NAME);
         sTripsProjectionMap.put(ObaContract.Trips.REMINDER, ObaContract.Trips.REMINDER);
-        sTripsProjectionMap.put(ObaContract.Trips.DAYS, ObaContract.Trips.DAYS);
+        sTripsProjectionMap.put(ObaContract.Trips.ALARM_DELETE_PATH, ObaContract.Trips.ALARM_DELETE_PATH);
+        sTripsProjectionMap.put(ObaContract.Trips.TRIP_ID, ObaContract.Trips.TRIP_ID);
+        sTripsProjectionMap.put(ObaContract.Trips.STOP_SEQUENCE, ObaContract.Trips.STOP_SEQUENCE);
+        sTripsProjectionMap.put(ObaContract.Trips.SERVICE_DATE, ObaContract.Trips.SERVICE_DATE);
+        sTripsProjectionMap.put(ObaContract.Trips.VEHICLE_ID, ObaContract.Trips.VEHICLE_ID);
+
         sTripsProjectionMap.put(ObaContract.Trips._COUNT, "count(*)");
 
         sTripAlertsProjectionMap = new HashMap<String, String>();
@@ -584,11 +597,20 @@ public class ObaProvider extends ContentProvider {
         sRegionBoundsProjectionMap.put(ObaContract.RegionBounds.LON_SPAN, ObaContract.RegionBounds.LON_SPAN);
 
         sRegionOpen311ProjectionMap = new HashMap<String, String>();
-        sRegionOpen311ProjectionMap.put(ObaContract.RegionOpen311Servers._ID, ObaContract.RegionOpen311Servers._ID);
-        sRegionOpen311ProjectionMap.put(ObaContract.RegionOpen311Servers.REGION_ID, ObaContract.RegionOpen311Servers.REGION_ID);
-        sRegionOpen311ProjectionMap.put(ObaContract.RegionOpen311Servers.JURISDICTION, ObaContract.RegionOpen311Servers.JURISDICTION);
-        sRegionOpen311ProjectionMap.put(ObaContract.RegionOpen311Servers.API_KEY, ObaContract.RegionOpen311Servers.API_KEY);
-        sRegionOpen311ProjectionMap.put(ObaContract.RegionOpen311Servers.BASE_URL, ObaContract.RegionOpen311Servers.BASE_URL);
+        sRegionOpen311ProjectionMap
+                .put(ObaContract.RegionOpen311Servers._ID, ObaContract.RegionOpen311Servers._ID);
+        sRegionOpen311ProjectionMap
+                .put(ObaContract.RegionOpen311Servers.REGION_ID, ObaContract.RegionOpen311Servers.REGION_ID);
+        sRegionOpen311ProjectionMap
+                .put(ObaContract.RegionOpen311Servers.JURISDICTION, ObaContract.RegionOpen311Servers.JURISDICTION);
+        sRegionOpen311ProjectionMap
+                .put(ObaContract.RegionOpen311Servers.API_KEY, ObaContract.RegionOpen311Servers.API_KEY);
+        sRegionOpen311ProjectionMap
+                .put(ObaContract.RegionOpen311Servers.BASE_URL, ObaContract.RegionOpen311Servers.BASE_URL);
+        sRegionsProjectionMap
+                .put(ObaContract.Regions.SIDECAR_BASE_URL, ObaContract.Regions.SIDECAR_BASE_URL);
+        sRegionsProjectionMap
+                .put(ObaContract.Regions.PLAUSIBLE_ANALYTICS_SERVER_URL, ObaContract.Regions.PLAUSIBLE_ANALYTICS_SERVER_URL);
 
         sTripPlansProjectionMap = new HashMap<String, String>();
         sTripPlansProjectionMap.put(ObaContract.TripPlans._ID, ObaContract.TripPlans._ID);

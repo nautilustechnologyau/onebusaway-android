@@ -25,6 +25,7 @@ import org.onebusaway.android.BuildConfig;
 import org.onebusaway.android.R;
 import org.onebusaway.android.app.Application;
 import org.onebusaway.android.io.elements.ObaRegion;
+import org.onebusaway.android.util.ReminderUtils;
 import org.onebusaway.android.util.PreferenceUtils;
 import org.onebusaway.android.util.RegionUtils;
 import org.onebusaway.android.util.UIUtils;
@@ -455,7 +456,11 @@ public class NavigationDrawerFragment extends Fragment {
         mNavDrawerItems.add(NAVDRAWER_ITEM_REGION);
         mNavDrawerItems.add(NAVDRAWER_ITEM_NEARBY);
         mNavDrawerItems.add(NAVDRAWER_ITEM_STARRED_ROUTES);
-        mNavDrawerItems.add(NAVDRAWER_ITEM_MY_REMINDERS);
+
+        // Add reminders if they should be shown
+        if(ReminderUtils.shouldShowReminders()){
+            mNavDrawerItems.add(NAVDRAWER_ITEM_MY_REMINDERS);
+        }
 
         if (currentRegion != null) {
             if (!TextUtils.isEmpty(currentRegion.getOtpBaseUrl())||

@@ -48,6 +48,9 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
+import com.onebusaway.plausible.android.Plausible;
+import com.onesignal.OneSignal;
+
 import org.onebusaway.android.BuildConfig;
 import org.onebusaway.android.R;
 import org.onebusaway.android.donations.DonationsManager;
@@ -60,7 +63,11 @@ import org.onebusaway.android.ui.NavigationDrawerFragment;
 import org.onebusaway.android.util.BuildFlavorUtils;
 import org.onebusaway.android.util.LocationUtils;
 import org.onebusaway.android.util.PreferenceUtils;
+import org.onebusaway.android.util.ReminderUtils;
+import org.onebusaway.android.widealerts.GtfsAlerts;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -76,6 +83,7 @@ import edu.usf.cutr.open311client.models.Open311Option;
 
 import static com.google.android.gms.location.LocationServices.getFusedLocationProviderClient;
 import static org.onebusaway.android.util.UIUtils.setAppTheme;
+import java.nio.charset.StandardCharsets;
 
 public class Application extends MultiDexApplication {
 
@@ -91,6 +99,8 @@ public class Application extends MultiDexApplication {
     private SharedPreferences mPrefs;
 
     private DonationsManager mDonationsManager;
+
+    private GtfsAlerts mGtfsAlerts;
 
     private static Application mApp;
 
@@ -108,6 +118,8 @@ public class Application extends MultiDexApplication {
     static GeomagneticField mGeomagneticField = null;
 
     private FirebaseAnalytics mFirebaseAnalytics;
+
+    private Plausible mPlausible;
 
     @Override
     public void onCreate() {
@@ -142,7 +154,11 @@ public class Application extends MultiDexApplication {
 
         incrementAppLaunchCount();
 
+        initOneSignal();
+
         mDonationsManager = new DonationsManager(mPrefs, mFirebaseAnalytics, getResources(), getAppLaunchCount());
+
+        mGtfsAlerts = new GtfsAlerts(getApplicationContext());
     }
 
     /**
@@ -172,6 +188,10 @@ public class Application extends MultiDexApplication {
     }
 
     public static DonationsManager getDonationsManager() { return get().mDonationsManager; }
+
+    public static GtfsAlerts getGtfsAlerts() {
+        return get().mGtfsAlerts;
+    }
 
     private static String appLaunchCountPreferencesKey = "appLaunchCountPreferencesKey";
 
@@ -363,6 +383,7 @@ public class Application extends MultiDexApplication {
             if (regionChanged && region.getOtpBaseUrl() != null) {
                 setCustomOtpApiUrl(null);
                 setUseOldOtpApiUrlVersion(false);
+                buildPlausibleInstance(region);
             }
         } else {
             //User must have just entered a custom API URL via Preferences, so clear the region info
@@ -372,6 +393,35 @@ public class Application extends MultiDexApplication {
         // Init the reporting with the new endpoints
         initOpen311(region);
     }
+
+    /**
+     * Return Plausible instance for the application
+     * @return Plausible instance
+     */
+    public Plausible getPlausibleInstance() {
+        if(mPlausible == null) {
+            buildPlausibleInstance(getCurrentRegion());
+        }
+        return mPlausible;
+    }
+
+    /**
+     * Build the Plausible instance for the application
+     * Include the domain and the plausible server url for the current region
+     * @param region
+     */
+    private void buildPlausibleInstance(ObaRegion region) {
+        mPlausible = null;
+        if (region == null || region.getObaBaseUrl() == null || region.getPlausibleAnalyticsServerUrl() == null) return;
+        String domain;
+        try {
+            domain = new URI(region.getObaBaseUrl()).getHost();
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+        mPlausible = new Plausible(this, domain, region.getPlausibleAnalyticsServerUrl());
+    }
+
 
     /**
      * Gets the date at which the region information was last updated, in the number of
@@ -613,19 +663,20 @@ public class Application extends MultiDexApplication {
     private void reportAnalytics() {
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
         if (getCustomApiUrl() == null && getCurrentRegion() != null) {
-            ObaAnalytics.setRegion(mFirebaseAnalytics, getCurrentRegion().getName());
+            buildPlausibleInstance(getCurrentRegion());
+            ObaAnalytics.setRegion(mPlausible, mFirebaseAnalytics, getCurrentRegion().getName());
         } else if (Application.get().getCustomApiUrl() != null) {
             String customUrl = null;
             MessageDigest digest = null;
             try {
                 digest = MessageDigest.getInstance("SHA-1");
-                digest.update(getCustomApiUrl().getBytes());
+                digest.update(getCustomApiUrl().getBytes(StandardCharsets.UTF_8));
                 customUrl = getString(R.string.analytics_label_custom_url) +
                         ": " + getHex(digest.digest());
             } catch (Exception e) {
                 customUrl = Application.get().getString(R.string.analytics_label_custom_url);
             }
-            ObaAnalytics.setRegion(mFirebaseAnalytics, customUrl);
+            ObaAnalytics.setRegion(mPlausible, mFirebaseAnalytics, customUrl);
         }
         Boolean experimentalRegions = getPrefs().getBoolean(getString(R.string.preference_key_experimental_regions),
                 Boolean.FALSE);
@@ -678,7 +729,7 @@ public class Application extends MultiDexApplication {
                     CHANNEL_DESTINATION_ALERT_ID,
                     "Destination alerts",
                     NotificationManager.IMPORTANCE_LOW);
-            channel2.setDescription("All notifications relating to Destination alerts");
+            channel3.setDescription("All notifications relating to Destination alerts");
 
             NotificationManager manager = getSystemService(NotificationManager.class);
             manager.createNotificationChannel(channel1);
@@ -700,4 +751,18 @@ public class Application extends MultiDexApplication {
 
         return false;
     }
+
+    private void initOneSignal() {
+        OneSignal.initWithContext(this, BuildConfig.ONESIGNAL_APP_ID);
+
+        // Handle click on the notification
+        OneSignal.getNotifications().addClickListener(iNotificationClickEvent -> {
+            ReminderUtils.openStopInfo(getBaseContext(), iNotificationClickEvent.getNotification());
+        });
+    }
+
+    public static String getUserPushNotificationID() {
+        return OneSignal.getUser().getPushSubscription().getId();
+    }
+
 }

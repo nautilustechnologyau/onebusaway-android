@@ -58,6 +58,8 @@ public class RegionUtils {
 
     public static final double METERS_TO_MILES = 0.000621371;
 
+    public static final double METERS_TO_FEET = 3.28084;
+
     private static final int DISTANCE_LIMITER = 100;  // miles
 
     /**
@@ -417,7 +419,9 @@ public class RegionUtils {
                     ObaContract.Regions.PAYMENT_WARNING_TITLE,
                     ObaContract.Regions.PAYMENT_WARNING_BODY,
                     ObaContract.Regions.TRAVEL_BEHAVIOR_DATA_COLLECTION,
-                    ObaContract.Regions.ENROLL_PARTICIPANTS_IN_STUDY
+                    ObaContract.Regions.ENROLL_PARTICIPANTS_IN_STUDY,
+                    ObaContract.Regions.SIDECAR_BASE_URL,
+                    ObaContract.Regions.PLAUSIBLE_ANALYTICS_SERVER_URL
             };
 
             ContentResolver cr = context.getContentResolver();
@@ -469,7 +473,9 @@ public class RegionUtils {
                         c.getString(17),               // Payment Warning Title
                         c.getString(18),    // Payment Warning Body
                         c.getInt(19) > 0, // travel behavior data collection enabled for region
-                        c.getInt(20) > 0 // enrolling participants for travel behavior data collection
+                        c.getInt(20) > 0, // enrolling participants for travel behavior data collection
+                        c.getString(21), //Sidecar base URL
+                        c.getString(22) // Plausible analytics server url
                 ));
 
             } while (c.moveToNext());
@@ -661,7 +667,9 @@ public class RegionUtils {
                 BuildConfig.FIXED_REGION_PAYMENT_WARNING_TITLE,
                 BuildConfig.FIXED_REGION_PAYMENT_WARNING_BODY,
                 BuildConfig.FIXED_REGION_TRAVEL_BEHAVIOR_DATA_COLLECTION,
-                BuildConfig.FIXED_REGION_ENROLL_PARTICIPANTS_IN_STUDY);
+                BuildConfig.FIXED_REGION_ENROLL_PARTICIPANTS_IN_STUDY,
+                BuildConfig.FIXED_REGION_SIDECAR_BASE_URL,
+                BuildConfig.FIXED_REGION_PLAUSIBLE_ANALYTICS_SERVER_URL);
         return region;
     }
 
@@ -740,6 +748,8 @@ public class RegionUtils {
                 region.isTravelBehaviorDataCollectionEnabled() ? 1 : 0);
         values.put(ObaContract.Regions.ENROLL_PARTICIPANTS_IN_STUDY,
                 region.isEnrollParticipantsInStudy() ? 1 : 0);
+        values.put(ObaContract.Regions.SIDECAR_BASE_URL, region.getSidecarBaseUrl());
+        values.put(ObaContract.Regions.PLAUSIBLE_ANALYTICS_SERVER_URL, region.getPlausibleAnalyticsServerUrl());
         return values;
     }
 

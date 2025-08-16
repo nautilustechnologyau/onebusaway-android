@@ -25,11 +25,11 @@
                 android:id="@+id/textView5"
                 android:layout_marginHorizontal="@dimen/dialog_margin"
                 android:layout_marginVertical="@dimen/dialog_margin"
-                android:textSize="16sp" />
+                android:textSize="18sp" />
 
         <Button
-                style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
                 android:textSize="24sp"
+                android:backgroundTint="@color/theme_primary"
                 android:textColor="@color/quantum_white_100"
                 android:text="@string/donation_view_donate_now_button"
                 android:layout_width="match_parent"

@@ -21,6 +21,7 @@ import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.database.ContentObserver;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -38,10 +39,12 @@ import android.widget.TextView;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import org.onebusaway.android.R;
+import org.onebusaway.android.app.Application;
 import org.onebusaway.android.io.ObaAnalytics;
+import org.onebusaway.android.io.PlausibleAnalytics;
 import org.onebusaway.android.provider.ObaContract;
-import org.onebusaway.android.tripservice.TripService;
 import org.onebusaway.android.util.PreferenceUtils;
+import org.onebusaway.android.util.ReminderUtils;
 import org.onebusaway.android.util.UIUtils;
 
 import androidx.cursoradapter.widget.SimpleCursorAdapter;
@@ -231,7 +234,7 @@ public final class MyRemindersFragment extends ListFragment
                     //
                     TextView text = (TextView) view;
                     final String routeId = cursor.getString(columnIndex);
-                    final String routeName = TripService.getRouteShortName(
+                    final String routeName = ReminderUtils.getRouteShortName(
                             getActivity(), routeId);
                     if (routeName != null) {
                         text.setText(getString(R.string.trip_info_route,
@@ -303,12 +306,18 @@ public final class MyRemindersFragment extends ListFragment
     private void deleteTrip(ListView l, int position) {
         String[] ids = getIds(l, position);
 
-        // TODO: Confirmation dialog?
-        ContentResolver cr = getActivity().getContentResolver();
-        cr.delete(ObaContract.Trips.buildUri(ids[0], ids[1]), null, null);
-        TripService.scheduleAll(getActivity(), true);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage(R.string.trip_info_delete_trip)
+                .setTitle(R.string.trip_info_delete)
+                .setIcon(R.drawable.baseline_delete_forever_48)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                    Uri tripUri = ObaContract.Trips.buildUri(ids[0], ids[1]);
+                    TripInfoActivity.TripInfoFragment.requestDeleteAlarm(getActivity(), tripUri);
 
-        getLoaderManager().getLoader(0).onContentChanged();
+                    getLoaderManager().getLoader(0).onContentChanged();
+                })
+                .setNegativeButton(android.R.string.cancel, (dialog, which) -> dialog.dismiss());
+        builder.create().show();
     }
 
     private void goToStop(ListView l, int position) {
@@ -382,6 +391,8 @@ public final class MyRemindersFragment extends ListFragment
                 Log.d(TAG, "setSortByClause: sort by name");
                 sortBy = ObaContract.Trips.NAME + " asc";
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                        Application.get().getPlausibleInstance(),
+                        PlausibleAnalytics.REPORT_REMINDERS_EVENT_URL,
                         getString(R.string.analytics_label_sort_by_name_reminder),
                         null);
                 break;
@@ -389,6 +400,8 @@ public final class MyRemindersFragment extends ListFragment
                 Log.d(TAG, "setSortByClause: sort by time");
                 sortBy = ObaContract.Trips.DEPARTURE + " asc";
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                        Application.get().getPlausibleInstance(),
+                        PlausibleAnalytics.REPORT_REMINDERS_EVENT_URL,
                         getString(R.string.analytics_label_sort_by_departure_time_reminder),
                         null);
                 break;

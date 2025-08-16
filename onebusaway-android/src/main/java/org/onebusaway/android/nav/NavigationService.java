@@ -23,6 +23,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ServiceInfo;
 import android.location.Location;
 import android.os.Build;
 import android.os.IBinder;
@@ -41,6 +42,7 @@ import org.apache.commons.io.FileUtils;
 import org.onebusaway.android.R;
 import org.onebusaway.android.app.Application;
 import org.onebusaway.android.io.ObaAnalytics;
+import org.onebusaway.android.io.PlausibleAnalytics;
 import org.onebusaway.android.nav.model.Path;
 import org.onebusaway.android.nav.model.PathLink;
 import org.onebusaway.android.provider.ObaContract;
@@ -155,7 +157,11 @@ public class NavigationService extends Service implements LocationHelper.Listene
             mNavProvider.navigate(path);
         }
         Notification notification = mNavProvider.getForegroundStartingNotification();
-        startForeground(NavigationServiceProvider.NOTIFICATION_ID, notification);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            startForeground(NavigationServiceProvider.NOTIFICATION_ID, notification,ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION);
+        }else{
+            startForeground(NavigationServiceProvider.NOTIFICATION_ID, notification);
+        }
         return START_STICKY;
     }
 
@@ -214,7 +220,7 @@ public class NavigationService extends Service implements LocationHelper.Listene
             if (mFinishedTime == 0) {
                 mFinishedTime = System.currentTimeMillis();
             } else if (System.currentTimeMillis() - mFinishedTime >= 30000) {
-                ObaAnalytics.reportUiEvent(mFirebaseAnalytics, getString(R.string.analytics_label_destination_reminder), getString(R.string.analytics_label_destination_reminder_variant_ended));
+                ObaAnalytics.reportUiEvent(mFirebaseAnalytics, Application.get().getPlausibleInstance(), PlausibleAnalytics.REPORT_DESTINATION_REMINDER_EVENT_URL, getString(R.string.analytics_label_destination_reminder), getString(R.string.analytics_label_destination_reminder_variant_ended));
                 getUserFeedback();
                 stopSelf();
                 setupLogCleanupTask();

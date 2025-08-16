@@ -54,7 +54,6 @@
         <item>Mostra sulla mappa</item>
     </string-array>
     <string-array name="reminder_time">
-        <item>Nessun promemoria</item>
         <item>1 minuto</item>
         <item>3 minuti</item>
         <item>5 minuti</item>
@@ -98,6 +97,11 @@
     <string-array name="arrival_info_style_options">
         <item>@string/preferences_arrival_info_style_options_a</item>
         <item>@string/preferences_arrival_info_style_options_b</item>
+    </string-array>
+    <string-array name="preferred_map_options">
+        <item>@string/preferences_preferred_map_option_normal2d</item>
+        <item>@string/preferences_preferred_map_option_normal3d</item>
+        <item>@string/preferences_preferred_map_option_satellite</item>
     </string-array>
 
     <!-- Spoken directions based on 16 compass points, but pointing from the user's current location

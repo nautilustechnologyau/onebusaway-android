@@ -134,22 +134,23 @@
                     android:orientation="horizontal">
 
                     <ImageButton
-                        android:id="@+id/btnZoomOut"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/zoom_btn_drop_shadow_left"
-                        android:contentDescription="zoom_control_zoom_in"
-                        android:src="@drawable/zoom_out_button"
-                        tools:ignore="TouchTargetSizeCheck" />
+                            android:id="@+id/btnZoomOut"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/zoom_btn_drop_shadow_left"
+                            android:contentDescription="@string/map_option_zoom_out"
+                            android:padding="8dp"
+                            android:src="@drawable/zoom_out_button"/>
 
                     <ImageButton
-                        android:id="@+id/btnZoomIn"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/zoom_btn_drop_shadow_right"
-                        android:contentDescription="@string/zoom_control_zoom_out"
-                        android:src="@drawable/zoom_in_button"
-                        tools:ignore="TouchTargetSizeCheck" />
+                            android:id="@+id/btnZoomIn"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/zoom_btn_drop_shadow_right"
+                            android:contentDescription="@string/map_option_zoom_in"
+                            android:padding="8dp"
+                            android:src="@drawable/zoom_in_button"/>
+
                 </LinearLayout>
                 -->
 
@@ -202,6 +203,15 @@
                 </androidx.cardview.widget.CardView>
 
                 <include layout="@layout/donation_view" />
+                <include
+                    android:id="@+id/surveyView"
+                    android:layout_width="match_parent"
+                    android:layout_marginStart="8dp"
+                    android:visibility="gone"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginTop="58dp"
+                    android:layout_height="wrap_content"
+                    layout="@layout/item_survey"/>
 
                 <uk.co.markormesher.android_fab.FloatingActionButton
                     android:id="@+id/btnZoomOut"

@@ -16,6 +16,7 @@
  */
 package org.onebusaway.android.ui;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -53,6 +54,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.core.app.ActivityCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.AsyncTaskLoader;
@@ -74,6 +76,7 @@ import org.onebusaway.android.R;
 import org.onebusaway.android.app.Application;
 import org.onebusaway.android.io.ObaAnalytics;
 import org.onebusaway.android.io.ObaApi;
+import org.onebusaway.android.io.PlausibleAnalytics;
 import org.onebusaway.android.io.elements.ObaReferences;
 import org.onebusaway.android.io.elements.ObaRoute;
 import org.onebusaway.android.io.elements.ObaStop;
@@ -95,6 +98,8 @@ import org.onebusaway.android.util.UIUtils;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.concurrent.TimeUnit;
+
+import static org.onebusaway.android.util.PermissionUtils.NOTIFICATION_PERMISSION_REQUEST;
 
 public class TripDetailsListFragment extends ListFragment {
 
@@ -555,7 +560,13 @@ public class TripDetailsListFragment extends ListFragment {
                             createDestinationReminderBetaDialog().show();
                         }
 
-                        ObaAnalytics.reportUiEvent(mFirebaseAnalytics, getString(R.string.analytics_label_destination_reminder), getString(R.string.analytics_label_destination_reminder_variant_started));
+                        ObaAnalytics.reportUiEvent(mFirebaseAnalytics, Application.get().getPlausibleInstance(), PlausibleAnalytics.REPORT_DESTINATION_REMINDER_EVENT_URL, getString(R.string.analytics_label_destination_reminder), getString(R.string.analytics_label_destination_reminder_variant_started));
+
+                        // Request the user to grant the POST_NOTIFICATIONS permission.
+                        ActivityCompat.requestPermissions(getActivity(),
+                                new String[] {Manifest.permission.POST_NOTIFICATIONS},
+                                NOTIFICATION_PERMISSION_REQUEST);
+                        dialog.dismiss();
 
                         startNavigationService(setUpNavigationService(position));
                         Toast.makeText(Application.get(),
@@ -1195,7 +1206,11 @@ public class TripDetailsListFragment extends ListFragment {
         // filter specifies which event Receiver should listen to
         IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_SERVICE_DESTROYED);
-        getActivity().registerReceiver(new TripEndReceiver(), filter);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE){
+            getActivity().registerReceiver(new TripEndReceiver(), filter, Context.RECEIVER_NOT_EXPORTED);
+        }else{
+            getActivity().registerReceiver(new TripEndReceiver(), filter);
+        }
     }
 
     /**

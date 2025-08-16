@@ -16,8 +16,8 @@ OneBusAway for Android provides:
 4. Reminders to notify you when your bus is arriving or departing
 5. The ability to search for nearby stops or routes
 6. Real-time multimodal trip planning, using real-time transit and bike share information (requires a regional [OpenTripPlanner](http://www.opentripplanner.org/) server)
-6. Bike share map layer, which includes real-time availability information for floating bikes and bike rack capacity (requires a regional [OpenTripPlanner](http://www.opentripplanner.org/) server)
-7. Issue reporting to any Open311-compliant issue management system (see [this page](ISSUE_REPORTING.md) for details)
+7. Bike share map layer, which includes real-time availability information for floating bikes and bike rack capacity (requires a regional [OpenTripPlanner](http://www.opentripplanner.org/) server)
+8. Issue reporting to any Open311-compliant issue management system (see [this page](ISSUE_REPORTING.md) for details)
 
 OneBusAway for Android automatically keeps track of your most used stops and routes, and allows you to put shortcuts on your phone's home screen for any stop or route you choose.
 
@@ -50,7 +50,7 @@ Did you just set up your own [OneBusAway](https://github.com/OneBusAway/onebusaw
 
 ## Permissions
 
-In order to support certain features in OneBusAway, we need to request various permissions to access information on your device.  See an explanation of why each permission is needed [here](PERMISSIONS.md).
+In order to support certain features in OneBusAway, we need to request various permissions to access information on your device.  See an explanation of why each permission is needed [here](PRIVACY.md).
 
 ## Troubleshooting
 

@@ -82,6 +82,14 @@
         - Stuknij na czas przyjazdu i wybierz \"Pokaż status podróży\"!
     </string>
     <string name="main_help_close">Zamknij</string>
+    <string name="main_help_legend_title">Legenda</string>
+    <string name="main_help_legend_ontime">Zielony oznacza „Na czas”</string>
+    <string name="main_help_legend_late">Niebieski oznacza „Spóźnienie”</string>
+    <string name="main_help_legend_early">Czerwony oznacza „Bieganie wcześnie”</string>
+    <string name="main_help_legend_scheduled">Szary oznacza „Planowany przyjazd” – nie wiemy, gdzie teraz jest autobus, ale rozkład jazdy mówi, że jest nadchodzący przyjazd
+    </string>
+    <string name="main_help_legend_canceled">Szary z przekreśleniem oznacza, że ​​podróż została odwołana – ten autobus NIE przyjedzie
+    </string>
     <string name="main_nolocation_title">Lokacja niedostępna</string>
     <string name="main_nolocation">KiedyBus would like your location, czy chcesz wybrać ją teraz?
     </string>
@@ -94,7 +102,7 @@
 
     <string name="bus_options_menu_add_star">Dodaj trasę do ulubionych</string>
     <string name="bus_options_menu_remove_star">Usuń linię z ulubionych</string>
-    <string name="bus_options_menu_show_route_on_map">Pokaż linię na mapie</string>
+    <string name="bus_options_menu_show_vehicles_on_map">Pokaż pojazdy na mapie</string>
     <string name="bus_options_menu_show_trip_details">Pokaż status kursu</string>
     <string name="bus_options_menu_set_reminder">Ustaw przypomnienie</string>
     <string name="bus_options_menu_edit_reminder">Edytuj przypomnienie</string>
@@ -168,6 +176,14 @@
         <item quantity="other">
             <xliff:g id="count">%d</xliff:g>
             minut wcześniej
+        </item>
+    </plurals>
+    <plurals name="stop_info_car_count" tools:ignore="MissingQuantity">
+        <item quantity="one">1 wagon</item>
+        <!-- Entire element below should be on a single line if XML is reformatted - see #99 -->
+        <item quantity="other">
+            <xliff:g id="count">%d</xliff:g>
+            wagon
         </item>
     </plurals>
     <string name="stop_info_scheduled_arrival">Planowany przyjazd</string>
@@ -287,6 +303,18 @@
     <!-- <string name="my_option_clear_starred_routes">Remove all starred routes</string>-->
     <string name="my_option_clear_confirm">Nie ma odwrotu! Iść dalej?</string>
     <string name="my_option_clear_confirm_title">Jesteś pewien?</string>
+
+    <string name="my_option_clear_recent_stops_title">Usunąć ostatnie przystanki?</string>
+    <string name="my_option_clear_recent_stops_confirm">Spowoduje to trwałe usunięcie wszystkich ostatnich przystanków.</string>
+
+    <string name="my_option_clear_recent_routes_title">Usunąć ostatnie trasy?</string>
+    <string name="my_option_clear_recent_routes_confirm">Spowoduje to trwałe usunięcie wszystkich ostatnich tras.</string>
+
+    <string name="my_option_clear_starred_stops_title">Usunąć wszystkie przystanki oznaczone gwiazdką?</string>
+    <string name="my_option_clear_starred_stops_confirm">Spowoduje to trwałe usunięcie wszystkich przystanków oznaczonych gwiazdką.</string>
+
+    <string name="my_option_clear_starred_routes_title">Usunąć wszystkie trasy oznaczone gwiazdką?</string>
+    <string name="my_option_clear_starred_routes_confirm">Spowoduje to trwałe usunięcie wszystkich tras oznaczonych gwiazdką.</string>
 
     <string name="my_context_get_stop_info">Pokaż informację o przyjazdach</string>
     <string name="my_context_get_route_info">Pokaż informację o trasie</string>
@@ -715,7 +743,66 @@
     <string name="preferences_reset_donation_timestamps_summary">Dotknięcie tej opcji spowoduje wyczyszczenie znaczników czasu \'Przypomnij mi później\' i \'Nie przeszkadzaj mi\' związanych z prośbami o darowizny.</string>
     <string name="preferences_show_weather_view">Pokaż widok pogody</string>
     <string name="show">Pokaż</string>
-    <string name="preferences_enable_map_3d_mode_title">Włącz tryb 3D mapy</string>
-    <string name="preferences_enable_map_3d_mode_summary">Uwzględnij budynki 3D na mapie</string>
+    <string name="preferences_preferred_maps_title">Preferowany Typ Mapy</string>
+    <string name="preferences_preferred_map_option_normal2d">Domyślna mapa</string>
+    <string name="preferences_preferred_map_option_normal3d">Domyślna mapa z budynkami 3D</string>
+    <string name="preferences_preferred_map_option_satellite">Mapa satelitarna</string>
 
+    <!--Survey-->
+    <string name="preferences_show_available_studies_title">Pokaż dostępne badania</string>
+    <string name="preferences_show_available_studies_body">Dołącz do badań, aby pomóc w poprawie doświadczeń z transportem i aplikacją.</string>
+    <string name="dismiss_survey">Odrzuć ankietę</string>
+    <string name="onebusaway_survey">Ankieta OneBusAway</string>
+    <string name="you_can_select_multiple_options_for_this_pool">(Możesz wybrać wiele opcji dla tej grupy.)</string>
+    <string name="write_your_answer_here">Napisz swoją odpowiedź tutaj</string>
+    <string name="submit">Wyślij</string>
+    <string name="go">IDŹ!</string>
+    <string name="submitted_successfully">Pomyślnie wysłano</string>
+    <string name="please_complete_required_questions">Proszę odpowiedzieć na wszystkie pytania obowiązkowe.</string>
+    <string name="sharing_survey_info_message">Ta ankieta udostępni twoje</string>
+    <string name="are_you_sure_you_want_to_dismiss_the_survey">Czy na pewno chcesz odrzucić tę ankietę?</string>
+    <string name="dismiss_survey_dialog_title">Potwierdź odrzucenie ankiety</string>
+    <string name="remind_me_later">Przypomnij mi później</string>
+    <string name="survey_dismiss_dialog_skip_this_survey">Pomiń tę ankietę</string>
+    <string name="dismiss_survey_dialog_body">Twoja opinia pomoże w poprawie usług transportowych i doświadczeń z aplikacją.</string>
+    <string name="preferences_show_weather_view_on_map">Wyświetl widok pogody na mapie</string>
+    <string name="failed_to_set_reminder">Nie udało się ustawić przypomnienia</string>
+    <string name="reminder_not_enabled">Lembrete não ativado</string>
+    <string name="stop_added_to_favorites">Przystanek dodany do ulubionych</string>
+    <string name="stop_removed_from_favorites">Przystanek usunięty z ulubionych</string>
+    <string name="route_added_to_favorites">Trasa dodana do ulubionych</string>
+    <string name="route_removed_from_favorites">Trasa usunięta z ulubionych</string>
+    <string name="dismiss">Odrzuć</string>
+    <string name="more_info">Więcej informacji</string>
+    <string name="display_test_alerts">Wyświetl alerty testowe</string>
+    <string name="display_test_wide_alerts_for_regions">Wyświetl szerokie alerty testowe dla regionów</string>
+    <string name="no_description_available">Brak dostępnego opisu</string>
+    <string name="close_donation_card">Zamknij kartę darowizny</string>
+    <string name="send_email">Wyślij email</string>
+    <string name="make_a_phone_call">Wykonaj telefon</string>
+    <string name="browse_the_web">Naviga sul web</string>
+
+    <!-- Trip Planner strings -->
+    <string name="trip_plan_departure_status">Status</string>
+    <string name="trip_plan_date">Data</string>
+    <string name="trip_plan_time">Czas</string>
+    <string name="select_origin_from_contacts">Wybierz źródło z kontaktóws</string>
+    <string name="select_destination_from_contacts">Wybierz miejsce docelowe z kontaktów</string>
+    <string name="map_option_zoom_out">Riduci</string>
+    <string name="map_option_zoom_in">Przybliż</string>
+    <string name="map_option_layers_close">Zamknij przycisk warstw mapy</string>
+
+    <!-- Destination reminder feedback Activity -->
+    <string name="feedback_like_button_description">Tak, zostałem powiadomiony we właściwym czasie</string>
+    <string name="feedback_dislike_button_description">Nie, nie zostałem powiadomiony we właściwym czasie</string>
+
+    <!-- Accessibility content descriptions for ETA rows -->
+    <string name="arrival_favorite_first_description">Zapisz pierwszą trasę jako ulubioną</string>
+    <string name="arrival_favorite_second_description">Zapisz drugą trasę jako ulubioną</string>
+    <string name="arrival_reminder_first_description">Ustaw przypomnienie o pierwszym przybyciu</string>
+    <string name="arrival_reminder_second_description">Ustaw przypomnienie o drugim przybyciu</string>
+    <string name="arrival_options_first_description">Opcje pierwszego przyjazdu</string>
+    <string name="arrival_options_second_description">Opcje drugiego przyjazdu</string>
+
+    <string name="map_option_layers">Przycisk warstw mapy</string>
 </resources>
