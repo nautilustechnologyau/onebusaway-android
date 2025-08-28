@@ -114,7 +114,7 @@ public class PreferencesActivity extends PreferenceActivity
 
     Preference pushFirebaseData;
 
-    Preference resetDonationTimestamps;
+    // Preference resetDonationTimestamps;
 
     boolean mAutoSelectInitialValue;
 
@@ -123,7 +123,7 @@ public class PreferencesActivity extends PreferenceActivity
 
     ListPreference preferredUnits;
     ListPreference preferredTempUnits;
-    ListPreference showWeatherDisplayPref;
+    // ListPreference showWeatherDisplayPref;
 
     ListPreference mThemePref;
 
@@ -179,8 +179,8 @@ public class PreferencesActivity extends PreferenceActivity
             pushFirebaseData.setOnPreferenceClickListener(this);
         }
 
-        resetDonationTimestamps = findPreference(getString(R.string.preference_key_reset_donation_timestamps));
-        resetDonationTimestamps.setOnPreferenceClickListener(this);
+        //resetDonationTimestamps = findPreference(getString(R.string.preference_key_reset_donation_timestamps));
+        //resetDonationTimestamps.setOnPreferenceClickListener(this);
 
         mHideAlertsPref = findPreference(getString(R.string.preference_key_hide_alerts));
         mHideAlertsPref.setOnPreferenceChangeListener(this);
@@ -207,8 +207,8 @@ public class PreferencesActivity extends PreferenceActivity
         preferredTempUnits = (ListPreference) findPreference(
                 getString(R.string.preference_key_preferred_temperature_units));
 
-        showWeatherDisplayPref = (ListPreference) findPreference(
-                getString(R.string.preference_key_show_weather_view));
+//        showWeatherDisplayPref = (ListPreference) findPreference(
+//                getString(R.string.preference_key_show_weather_view));
 
         mThemePref = (ListPreference) findPreference(
                 getString(R.string.preference_key_app_theme));
@@ -285,7 +285,7 @@ public class PreferencesActivity extends PreferenceActivity
         changePreferenceSummary(getString(R.string.preference_key_region));
         changePreferenceSummary(getString(R.string.preference_key_preferred_units));
         changePreferenceSummary(getString(R.string.preference_key_preferred_temperature_units));
-        changePreferenceSummary(getString(R.string.preference_key_show_weather_view));
+        // changePreferenceSummary(getString(R.string.preference_key_show_weather_view));
         changePreferenceSummary(getString(R.string.preference_key_app_theme));
         changePreferenceSummary(getString(R.string.preference_key_otp_api_url));
 
@@ -367,9 +367,10 @@ public class PreferencesActivity extends PreferenceActivity
         }else if (preferenceKey
                 .equalsIgnoreCase(getString(R.string.preference_key_preferred_temperature_units))) {
             preferredTempUnits.setSummary(preferredTempUnits.getValue());
-        }else if(preferenceKey.equalsIgnoreCase(getString(R.string.preference_key_show_weather_view))){
-            showWeatherDisplayPref.setSummary(showWeatherDisplayPref.getValue());
         }
+//        else if(preferenceKey.equalsIgnoreCase(getString(R.string.preference_key_show_weather_view))){
+//            showWeatherDisplayPref.setSummary(showWeatherDisplayPref.getValue());
+//        }
     }
 
     @Override
@@ -383,8 +384,8 @@ public class PreferencesActivity extends PreferenceActivity
                     null);
             ShowcaseViewUtils.resetAllTutorials(this);
             NavHelp.goHome(this, true);
-        } else if (pref.equals(mDonatePref)) {
-            startActivity(Application.getDonationsManager().buildOpenDonationsPageIntent());
+//        } else if (pref.equals(mDonatePref)) {
+//            startActivity(Application.getDonationsManager().buildOpenDonationsPageIntent());
         } else if (pref.equals(mPoweredByObaPref)) {
             ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
                     getString(R.string.analytics_label_button_press_powered_by_oba),
@@ -409,10 +410,11 @@ public class PreferencesActivity extends PreferenceActivity
             // Try to push firebase data to the server
             FirebaseDataPusher pusher = new FirebaseDataPusher();
             pusher.push(this);
-        } else if (pref.equals(resetDonationTimestamps)) {
-            Application.getDonationsManager().setDonationRequestReminderDate(null);
-            Application.getDonationsManager().setDonationRequestDismissedDate(null);
         }
+//        else if (pref.equals(resetDonationTimestamps)) {
+//            Application.getDonationsManager().setDonationRequestReminderDate(null);
+//            Application.getDonationsManager().setDonationRequestDismissedDate(null);
+//        }
         return true;
     }
 
@@ -660,10 +662,11 @@ public class PreferencesActivity extends PreferenceActivity
         }else if (key.equalsIgnoreCase(getString(R.string.preference_key_preferred_temperature_units))) {
             // Change the preferred temp unit description
             changePreferenceSummary(key);
-        }else if (key.equalsIgnoreCase(getString(R.string.preference_key_show_weather_view))) {
-            // Change the preferred weather show or hide option
-            changePreferenceSummary(key);
         }
+//        else if (key.equalsIgnoreCase(getString(R.string.preference_key_show_weather_view))) {
+//            // Change the preferred weather show or hide option
+//            changePreferenceSummary(key);
+//        }
     }
 
     /**

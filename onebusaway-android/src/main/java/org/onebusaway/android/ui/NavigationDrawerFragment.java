@@ -74,7 +74,7 @@ public class NavigationDrawerFragment extends Fragment {
 
     public static final int NAVDRAWER_ITEM_NEARBY = 1;
 
-    protected static final int NAVDRAWER_ITEM_STARRED_ROUTES = 2;
+    protected static final int NAVDRAWER_ITEM_STARRED_STOPS = 2;
 
     protected static final int NAVDRAWER_ITEM_MY_REMINDERS = 3;
 
@@ -123,12 +123,12 @@ public class NavigationDrawerFragment extends Fragment {
             R.string.navdrawer_item_region,
             R.string.navdrawer_item_nearby,
             R.string.navdrawer_item_starred_stops,
-            R.string.navdrawer_item_starred_routes,
             R.string.navdrawer_item_my_reminders,
             R.string.navdrawer_item_settings,
             R.string.navdrawer_item_help,
             R.string.navdrawer_item_send_feedback,
             R.string.navdrawer_item_plan_trip,
+            0, // Popular discussions
             0, // Pinned discussions
             0, // Social activity feed
             0, // My profile
@@ -149,6 +149,7 @@ public class NavigationDrawerFragment extends Fragment {
             R.drawable.ic_help, // Help
             R.drawable.ic_feedback, // Send feedback
             R.drawable.ic_trip, // Plan a trip
+            0, // Popular discussions
             0, // Pinned discussions
             0, // Social activity feed
             0, // My profile
@@ -170,6 +171,7 @@ public class NavigationDrawerFragment extends Fragment {
             0, // Help
             0, // Send feedback
             0, // Plan a trip
+            0, // Popular discussions
             0, // Pinned discussions
             0, // Social activity feed
             0, // My profile
@@ -454,7 +456,7 @@ public class NavigationDrawerFragment extends Fragment {
 
         mNavDrawerItems.add(NAVDRAWER_ITEM_REGION);
         mNavDrawerItems.add(NAVDRAWER_ITEM_NEARBY);
-        mNavDrawerItems.add(NAVDRAWER_ITEM_STARRED_ROUTES);
+        mNavDrawerItems.add(NAVDRAWER_ITEM_STARRED_STOPS);
         mNavDrawerItems.add(NAVDRAWER_ITEM_MY_REMINDERS);
 
         if (currentRegion != null) {
@@ -632,7 +634,7 @@ public class NavigationDrawerFragment extends Fragment {
                 itemId == NAVDRAWER_ITEM_OPEN_SOURCE ||
                 itemId == NAVDRAWER_ITEM_RATE_APP ||
                 itemId == NAVDRAWER_ITEM_REMOVE_ADS ||
-                itemId == NAVDRAWER_ITEM_STARRED_ROUTES ||
+                itemId == NAVDRAWER_ITEM_STARRED_STOPS ||
                 itemId == NAVDRAWER_ITEM_MY_REMINDERS ||
                 itemId == NAVDRAWER_ITEM_REGION;
     }

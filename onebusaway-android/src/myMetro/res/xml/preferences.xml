@@ -48,6 +48,11 @@
             android:summary="@string/preferences_show_zoom_controls_summary"
             android:title="@string/preferences_show_zoom_controls_title" />
         -->
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="@string/preference_key_enable_map_3d_mode"
+            android:summary="@string/preferences_enable_map_3d_mode_summary"
+            android:title="@string/preferences_enable_map_3d_mode_title" />
 
         <CheckBoxPreference
             android:defaultValue="true"
@@ -70,6 +75,22 @@
             android:entryValues="@array/preferred_units_options"
             android:key="@string/preference_key_preferred_units"
             android:title="@string/preferences_preferred_units_title"></ListPreference>
+
+        <ListPreference
+            android:defaultValue="@string/preferences_preferred_units_option_automatic"
+            android:negativeButtonText="@string/close"
+            android:entries="@array/preferred_temp_unit_options"
+            android:entryValues="@array/preferred_temp_unit_options"
+            android:key="@string/preference_key_preferred_temperature_units"
+            android:title="@string/preferred_temperature_unit" />
+
+        <ListPreference
+            android:defaultValue="@string/preferences_app_theme_option_system_default"
+            android:negativeButtonText="@string/close"
+            android:entries="@array/app_theme_options"
+            android:entryValues="@array/app_theme_options"
+            android:key="@string/preference_key_app_theme"
+            android:title="@string/preferences_app_theme_title" />
     </PreferenceCategory>
     <PreferenceCategory
         android:key="@string/preference_key_notifications"
