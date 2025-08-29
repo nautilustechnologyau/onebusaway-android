@@ -35,12 +35,13 @@
     <string name="preferences_key_about">preference_about</string>
     <string name="preference_key_preferred_units">preference_preferred_units</string>
     <string name="preference_key_preferred_temperature_units">preference_preferred_temperature_units</string>
-    <string name="preference_key_show_weather_view">preference_key_show_weather_view</string>
+    <string name="preference_key_display_weather_view">preference_key_display_weather_view</string>
     <string name="preference_key_app_theme">preference_app_theme</string>
     <string name="preference_key_arrival_info_style">preference_arrival_info_style</string>
     <string name="preference_key_show_negative_arrivals">preference_show_negative_arrivals</string>
     <string name="preference_key_show_zoom_controls">preference_show_zoom_controls</string>
-    <string name="preference_key_enable_map_3d_mode">preference_enable_map_3d_view</string>
+    <string name="preference_key_map_mode">preference_key_map_mode</string>
+    <string name="preference_key_show_available_studies">preference_show_available_studies</string>
     <string name="preference_key_hide_alerts">preference_hide_alerts</string>
     <string name="preference_key_default_stop_sort">preference_default_stop_sort</string>
     <string name="preference_key_default_route_sort">preference_default_route_sort</string>
@@ -79,12 +80,24 @@
     <string name="preferences_key_travel_behavior">preference_travel_behavior</string>
     <string name="preferences_key_user_denied_location_permissions">preferences_key_user_denied_location_permissions</string>
     <string name="preference_key_push_firebase_data">preference_key_push_firebase_data</string>
-
+    <string name="preferences_display_test_alerts">preferences_display_test_alerts</string>
     <!-- Regions API URL -->
     <string name="regions_api_url">https://regions.onebusaway.org/regions-v3.json</string>
 
     <!-- Weather API URL -->
-    <string name="weather_api_url">https://onebusaway.co/api/v1/regions/regionID/weather.json</string>
+    <string name="weather_api_endpoint">/api/v1/regions/regionID/weather.json</string>
+
+    <!-- GET Survey API URL -->
+    <string name="studies_api_endpoint">/api/v1/regions/regionID/surveys.json</string>
+
+    <!-- POST Survey API URL -->
+    <string name="submit_survey_api_endpoint">/api/v1/survey_responses/</string>
+
+    <!-- Arrivals Alarm API URL -->
+    <string name="arrivals_reminders_api_endpoint">/api/v1/regions/</string>
+
+    <!-- Alerts API Endpoint -->
+    <string name="alerts_api_endpoint">/api/v1/regions/regionID/alerts.pb</string>
 
     <!-- Donate URL -->
     <string name="donate_url">https://onebusaway.org/donate/</string>

@@ -43,6 +43,7 @@ import org.onebusaway.android.R;
 import org.onebusaway.android.app.Application;
 import org.onebusaway.android.io.ObaAnalytics;
 import org.onebusaway.android.io.ObaApi;
+import org.onebusaway.android.io.PlausibleAnalytics;
 import org.onebusaway.android.io.elements.ObaReferences;
 import org.onebusaway.android.io.elements.ObaRegion;
 import org.onebusaway.android.io.elements.ObaRoute;
@@ -214,6 +215,8 @@ public class BaseMapFragment extends SupportMapFragment
                     if (controller instanceof BikeshareMapController) {
                         ((BikeshareMapController) controller).showBikes(true);
                         ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                                Application.get().getPlausibleInstance(),
+                                PlausibleAnalytics.REPORT_MAP_EVENT_URL,
                                 getString(R.string.analytics_layer_bikeshare),
                                 getString(R.string.analytics_label_bikeshare_activated));
                     }
@@ -223,6 +226,8 @@ public class BaseMapFragment extends SupportMapFragment
             case "Grayscale": {
                 applyMapStyle(R.raw.mapstyle_grayscale);
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                        Application.get().getPlausibleInstance(),
+                        PlausibleAnalytics.REPORT_MAP_EVENT_URL,
                         getString(R.string.analytics_layer_mapstyle_grayscale),
                         getString(R.string.analytics_label_mapstyle_grascale_activated));
                 break;
@@ -230,6 +235,8 @@ public class BaseMapFragment extends SupportMapFragment
             case "Night": {
                 applyMapStyle(R.raw.mapstyle_night);
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                        Application.get().getPlausibleInstance(),
+                        PlausibleAnalytics.REPORT_MAP_EVENT_URL,
                         getString(R.string.analytics_layer_mapstyle_night),
                         getString(R.string.analytics_label_mapstyle_night_activated));
                 break;
@@ -237,6 +244,8 @@ public class BaseMapFragment extends SupportMapFragment
             case "Retro": {
                 applyMapStyle(R.raw.mapstyle_retro);
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                        Application.get().getPlausibleInstance(),
+                        PlausibleAnalytics.REPORT_MAP_EVENT_URL,
                         getString(R.string.analytics_layer_mapstyle_retro),
                         getString(R.string.analytics_label_mapstyle_retro_activated));
                 break;
@@ -244,6 +253,8 @@ public class BaseMapFragment extends SupportMapFragment
             case "Aubergine": {
                 applyMapStyle(R.raw.mapstyle_aubergine);
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                        Application.get().getPlausibleInstance(),
+                        PlausibleAnalytics.REPORT_MAP_EVENT_URL,
                         getString(R.string.analytics_layer_mapstyle_aubergine),
                         getString(R.string.analytics_label_mapstyle_aubergine_activated));
                 break;
@@ -251,6 +262,8 @@ public class BaseMapFragment extends SupportMapFragment
             case "Dark": {
                 applyMapStyle(R.raw.mapstyle_dark);
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                        Application.get().getPlausibleInstance(),
+                        PlausibleAnalytics.REPORT_MAP_EVENT_URL,
                         getString(R.string.analytics_layer_mapstyle_dark),
                         getString(R.string.analytics_label_mapstyle_dark_activated));
                 break;
@@ -258,6 +271,8 @@ public class BaseMapFragment extends SupportMapFragment
             case "Standard": {
                 applyMapStyle(R.raw.mapstyle_standard);
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                        Application.get().getPlausibleInstance(),
+                        PlausibleAnalytics.REPORT_MAP_EVENT_URL,
                         getString(R.string.analytics_layer_mapstyle_standard),
                         getString(R.string.analytics_label_mapstyle_standard_activated));
                 break;
@@ -265,6 +280,8 @@ public class BaseMapFragment extends SupportMapFragment
             case "Silver": {
                 applyMapStyle(R.raw.mapstyle_silver);
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                        Application.get().getPlausibleInstance(),
+                        PlausibleAnalytics.REPORT_MAP_EVENT_URL,
                         getString(R.string.analytics_layer_mapstyle_silver),
                         getString(R.string.analytics_label_mapstyle_silver_activated));
                 break;
@@ -280,6 +297,8 @@ public class BaseMapFragment extends SupportMapFragment
                     if (controller instanceof BikeshareMapController) {
                         ((BikeshareMapController) controller).showBikes(false);
                         ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                                Application.get().getPlausibleInstance(),
+                                PlausibleAnalytics.REPORT_MAP_EVENT_URL,
                                 getString(R.string.analytics_layer_bikeshare),
                                 getString(R.string.analytics_label_bikeshare_deactivated));
                     }
@@ -327,6 +346,7 @@ public class BaseMapFragment extends SupportMapFragment
 
         /**
          * Called when a result has been obtained after requesting user location permission.
+         *
          * @param grantResult The grant results for the location permission which is either PackageManager.PERMISSION_GRANTED or PackageManager.PERMISSION_DENIED. Never null.
          */
         void onLocationPermissionResult(int grantResult);
@@ -452,8 +472,8 @@ public class BaseMapFragment extends SupportMapFragment
         uiSettings.setMyLocationButtonEnabled(false);
         // Hide Toolbar
         uiSettings.setMapToolbarEnabled(false);
-        // Check for 3D map mode settings
-        updateMap3DModeSettings();
+        // Check for map mode settings
+        updateMapModeSettings();
         // Instantiate class that holds generic markers to be added by outside classes
         mSimpleMarkerOverlay = new SimpleMarkerOverlay(mMap);
 
@@ -598,7 +618,7 @@ public class BaseMapFragment extends SupportMapFragment
                 controller.notifyMapChanged();
             }
         }
-        updateMap3DModeSettings();
+        updateMapModeSettings();
         super.onResume();
     }
 
@@ -1004,6 +1024,7 @@ public class BaseMapFragment extends SupportMapFragment
             mMap.animateCamera((CameraUpdateFactory.newLatLngBounds(b, width, height, padding)));
         }
     }
+
     private RegionCallback regionCallback;
 
     public void setRegionCallback(RegionCallback callback) {
@@ -1583,17 +1604,52 @@ public class BaseMapFragment extends SupportMapFragment
     }
 
     /**
-     * Updates the map settings based on the current state of 3D mode preference.
+     * Updates the map settings based on the current state of map mode preference.
      */
-    private void updateMap3DModeSettings() {
-        if(mMap == null) return;
+    private void updateMapModeSettings() {
+        if (mMap == null) return;
 
-        boolean isEnabled = Application.getPrefs().getBoolean(getString(R.string.preference_key_enable_map_3d_mode), true);
+        String normal2D = getString(R.string.preferences_preferred_map_option_normal2d);
+        String normal3D = getString(R.string.preferences_preferred_map_option_normal3d);
+        String satellite = getString(R.string.preferences_preferred_map_option_satellite);
 
-        mMap.getUiSettings().setTiltGesturesEnabled(isEnabled);
-        mMap.setBuildingsEnabled(isEnabled);
+        String mapType = Application.getPrefs().getString(getString(R.string.preference_key_map_mode), normal2D);
 
-        // Reset tilt to 0 degrees
+        if (mapType.equals(normal2D)) {
+            setMapType(GoogleMap.MAP_TYPE_NORMAL, false, false);
+        } else if (mapType.equals(normal3D)) {
+            if (mMap.getMapType() == GoogleMap.MAP_TYPE_HYBRID) {
+                mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+            }
+            setMapType(GoogleMap.MAP_TYPE_NORMAL, true, true);
+        } else if (mapType.equals(satellite)) {
+            setMapType(GoogleMap.MAP_TYPE_HYBRID, false, false);
+        } else {
+            return; // Should never happen
+        }
+
+        resetCameraTilt();
+    }
+
+    /**
+     * Sets the map type, tilt gestures, and 3D buildings visibility for the Google Map.
+     *
+     * @param type The map type to be set. Can be one of the following constants:
+     *             - GoogleMap.MAP_TYPE_NORMAL
+     *             - GoogleMap.MAP_TYPE_HYBRID
+     * @param tiltEnabled A boolean value to determine whether tilt gestures are enabled on the map.
+     * @param buildingsEnabled A boolean value that determines whether 3D buildings are enabled on the map.
+     */
+    private void setMapType(int type, boolean tiltEnabled, boolean buildingsEnabled) {
+        mMap.setMapType(type);
+        mMap.getUiSettings().setTiltGesturesEnabled(tiltEnabled);
+        mMap.setBuildingsEnabled(buildingsEnabled);
+    }
+
+    /**
+     * Resets camera tilt to defaults (0 degrees)
+     */
+    private void resetCameraTilt() {
         mMap.moveCamera(CameraUpdateFactory.newCameraPosition(
                 new CameraPosition.Builder()
                         .target(mMap.getCameraPosition().target)

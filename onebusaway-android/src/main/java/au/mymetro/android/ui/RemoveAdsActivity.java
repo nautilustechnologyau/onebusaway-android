@@ -17,7 +17,9 @@ import com.android.billingclient.api.ProductDetails;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import org.onebusaway.android.R;
+import org.onebusaway.android.app.Application;
 import org.onebusaway.android.io.ObaAnalytics;
+import org.onebusaway.android.io.PlausibleAnalytics;
 import org.onebusaway.android.ui.HomeActivity;
 import org.onebusaway.android.ui.NavHelp;
 import org.onebusaway.android.util.PreferenceUtils;
@@ -113,6 +115,8 @@ public class RemoveAdsActivity extends AppCompatActivity {
     public void onBuyAdsFreeSubscriptionBtnClick(View view) {
         mBillingClient.launchBillingFlow(this, BillingClientLifecycle.ADS_FREE_PRODUCT_ID);
         ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                Application.get().getPlausibleInstance(),
+                PlausibleAnalytics.REPORT_MAP_EVENT_URL,
                 getString(R.string.analytics_label_button_press_buy_ads_free_subscription),
                 null);
     }

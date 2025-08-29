@@ -143,6 +143,10 @@ public class ObaRegionElement implements ObaRegion {
 
     private final String obaBaseUrl;
 
+    private final String sidecarBaseUrl;
+
+    private final String plausibleAnalyticsServerUrl;
+
     private final String siriBaseUrl;
 
     private final Bounds[] bounds;
@@ -210,6 +214,8 @@ public class ObaRegionElement implements ObaRegion {
         paymentWarningBody = null;
         travelBehaviorDataCollectionEnabled = false;
         enrollParticipantsInStudy = false;
+        sidecarBaseUrl = "";
+        plausibleAnalyticsServerUrl = "";
     }
 
     public ObaRegionElement(long id,
@@ -235,7 +241,9 @@ public class ObaRegionElement implements ObaRegion {
                             String paymentWarningTitle,
                             String paymentWarningBody,
                             boolean travelBehaviorDataCollectionEnabled,
-                            boolean enrollParticipantsInStudy) {
+                            boolean enrollParticipantsInStudy,
+                            String sidecarBaseUrl,
+                            String plausibleAnalyticsServerUrl) {
         this.id = id;
         this.regionName = name;
         this.active = active;
@@ -260,6 +268,8 @@ public class ObaRegionElement implements ObaRegion {
         this.paymentWarningBody = paymentWarningBody;
         this.travelBehaviorDataCollectionEnabled = travelBehaviorDataCollectionEnabled;
         this.enrollParticipantsInStudy = enrollParticipantsInStudy;
+        this.sidecarBaseUrl = sidecarBaseUrl;
+        this.plausibleAnalyticsServerUrl = plausibleAnalyticsServerUrl;
     }
 
     @Override
@@ -280,6 +290,16 @@ public class ObaRegionElement implements ObaRegion {
     @Override
     public String getObaBaseUrl() {
         return obaBaseUrl;
+    }
+
+    @Override
+    public String getSidecarBaseUrl() {
+        return sidecarBaseUrl;
+    }
+
+    @Override
+    public String getPlausibleAnalyticsServerUrl() {
+        return plausibleAnalyticsServerUrl;
     }
 
     @Override
@@ -437,6 +457,8 @@ public class ObaRegionElement implements ObaRegion {
                 ", paymentAndroidAppId=" + paymentAndroidAppId + '\'' +
                 ", paymentWarningTitle=" + paymentWarningTitle + '\'' +
                 ", paymentWarningBody=" + paymentWarningBody + '\'' +
+                ", sidecarBaseUrl=" + sidecarBaseUrl + '\'' +
+                ", plausibleAnalyticsServerUrl=" + plausibleAnalyticsServerUrl + '\'' +
                 '}';
     }
 }

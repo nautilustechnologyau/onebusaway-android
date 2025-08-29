@@ -59,8 +59,10 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 
 import org.onebusaway.android.R;
 import org.onebusaway.android.app.Application;
+import org.onebusaway.android.database.recentStops.RecentStopsManager;
 import org.onebusaway.android.io.ObaAnalytics;
 import org.onebusaway.android.io.ObaApi;
+import org.onebusaway.android.io.PlausibleAnalytics;
 import org.onebusaway.android.io.elements.ObaArrivalInfo;
 import org.onebusaway.android.io.elements.ObaReferences;
 import org.onebusaway.android.io.elements.ObaRoute;
@@ -70,10 +72,14 @@ import org.onebusaway.android.io.elements.ObaTrip;
 import org.onebusaway.android.io.elements.Occupancy;
 import org.onebusaway.android.io.elements.OccupancyState;
 import org.onebusaway.android.io.request.ObaArrivalInfoResponse;
+import org.onebusaway.android.io.request.survey.SurveyListener;
+import org.onebusaway.android.io.request.survey.model.SubmitSurveyResponse;
 import org.onebusaway.android.map.MapParams;
 import org.onebusaway.android.provider.ObaContract;
 import org.onebusaway.android.report.ui.InfrastructureIssueActivity;
 import org.onebusaway.android.travelbehavior.TravelBehaviorManager;
+import org.onebusaway.android.ui.survey.SurveyManager;
+import org.onebusaway.android.io.request.survey.model.StudyResponse;
 import org.onebusaway.android.util.ArrayAdapterWithIcon;
 import org.onebusaway.android.util.ArrivalInfoUtils;
 import org.onebusaway.android.util.BuildFlavorUtils;
@@ -81,6 +87,7 @@ import org.onebusaway.android.util.DBUtil;
 import org.onebusaway.android.util.FragmentUtils;
 import org.onebusaway.android.util.LocationUtils;
 import org.onebusaway.android.util.PreferenceUtils;
+import org.onebusaway.android.util.ReminderUtils;
 import org.onebusaway.android.util.ShowcaseViewUtils;
 import org.onebusaway.android.util.UIUtils;
 
@@ -94,9 +101,7 @@ import java.util.Set;
 // We don't use the ListFragment because the support library's version of
 // the ListFragment doesn't work well with our header.
 //
-public class ArrivalsListFragment extends ListFragment
-        implements LoaderManager.LoaderCallbacks<ObaArrivalInfoResponse>,
-        ArrivalsListHeader.Controller {
+public class ArrivalsListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<ObaArrivalInfoResponse>, ArrivalsListHeader.Controller {
 
     private static final String TAG = "ArrivalsListFragment";
 
@@ -134,6 +139,7 @@ public class ArrivalsListFragment extends ListFragment
     private ArrivalsListHeader mHeader;
 
     private View mHeaderView;
+    private View surveyHeaderView;
 
     private View mFooter;
 
@@ -174,6 +180,8 @@ public class ArrivalsListFragment extends ListFragment
     ObaArrivalInfo[] mArrivalInfo;
 
     private FirebaseAnalytics mFirebaseAnalytics;
+
+    private SurveyManager surveyManager;
 
     public interface Listener {
 
@@ -226,6 +234,7 @@ public class ArrivalsListFragment extends ListFragment
         public IntentBuilder(Context context, ObaStop stop, HashMap<String, ObaRoute> routes) {
             mIntent = new Intent(context, ArrivalsListFragment.class);
             mIntent.setData(Uri.withAppendedPath(ObaContract.Stops.CONTENT_URI, stop.getId()));
+            RecentStopsManager.saveStop(context,stop);
             setStopName(stop.getName());
             setStopCode(stop.getStopCode());
             setStopDirection(stop.getDirection());
@@ -284,7 +293,6 @@ public class ArrivalsListFragment extends ListFragment
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(getContext());
 
         initArrivalInfoViews(inflater);
-
         return inflater.inflate(R.layout.fragment_arrivals_list, null);
     }
 
@@ -439,7 +447,7 @@ public class ArrivalsListFragment extends ListFragment
             // Report Stop distance metric
             Location stopLocation = mStop.getLocation();
             Location myLocation = Application.getLastKnownLocation(getActivity(), null);
-            ObaAnalytics.reportViewStopEvent(mFirebaseAnalytics, mStop.getId(), mStop.getName(), myLocation, stopLocation);
+            ObaAnalytics.reportViewStopEvent(Application.get().getPlausibleInstance(), mFirebaseAnalytics, mStop.getId(), mStop.getName(), myLocation, stopLocation);
         } else {
             // If there was a last good response, then this is a refresh
             // and we should use a toast. Otherwise, it's a initial
@@ -459,6 +467,7 @@ public class ArrivalsListFragment extends ListFragment
         }
 
         setResponseData(info, situations, refs);
+        initSurveyManager();
 
         // The list should now be shown.
         if (isResumed()) {
@@ -769,7 +778,11 @@ public class ArrivalsListFragment extends ListFragment
                 } else if (which == 2) {
                     goToTripDetails(arrivalInfo);
                 } else if (which == 3) {
-                    goToTrip(arrivalInfo);
+                    if(ReminderUtils.shouldShowReminders()){
+                        goToTrip(arrivalInfo);
+                    }else{
+                        Toast.makeText(getActivity(), R.string.reminder_not_enabled, Toast.LENGTH_SHORT).show();
+                    }
                 } else if (which == 4) {
                     ArrayList<String> routes = new ArrayList<String>(1);
                     routes.add(arrivalInfo.getInfo().getRouteId());
@@ -805,7 +818,10 @@ public class ArrivalsListFragment extends ListFragment
                     }
                 } else if (occupancy != null &&
                         ((!hasUrl && which == 6) || (hasUrl && which == 7))) {
-                    ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                    ObaAnalytics.reportUiEvent(
+                            mFirebaseAnalytics,
+                            Application.get().getPlausibleInstance(),
+                            PlausibleAnalytics.REPORT_ARRIVALS_EVENT_URL,
                             getActivity().getString(R.string.analytics_label_button_press_about_occupancy),
                             null);
                     createOccupancyDialog().show();
@@ -1018,7 +1034,10 @@ public class ArrivalsListFragment extends ListFragment
         // menus like we did before...
         getActivity().supportInvalidateOptionsMenu();
 
-        ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+        ObaAnalytics.reportUiEvent(
+                mFirebaseAnalytics,
+                Application.get().getPlausibleInstance(),
+                PlausibleAnalytics.REPORT_BOOKMARK_EVENT_URL,
                 getString(R.string.analytics_label_edit_field_bookmark),
                 null);
 
@@ -1192,12 +1211,16 @@ public class ArrivalsListFragment extends ListFragment
                             // Sort by eta
                             Log.d(TAG, "Sort by ETA");
                             ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                                    Application.get().getPlausibleInstance(),
+                                    PlausibleAnalytics.REPORT_ARRIVALS_EVENT_URL,
                                     getString(R.string.analytics_label_sort_by_eta_arrival),
                                     null);
                         } else if (index == 1) {
                             // Sort by route
                             Log.d(TAG, "Sort by route");
                             ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                                    Application.get().getPlausibleInstance(),
+                                    PlausibleAnalytics.REPORT_ARRIVALS_EVENT_URL,
                                     getString(R.string.analytics_label_sort_by_route_arrival),
                                     null);
                         }
@@ -1232,12 +1255,16 @@ public class ArrivalsListFragment extends ListFragment
             // Currently we're showing arrivals in header - we need to remove them
             mHeader.showArrivals(false);
             ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                    Application.get().getPlausibleInstance(),
+                    PlausibleAnalytics.REPORT_ARRIVALS_EVENT_URL,
                     getString(R.string.analytics_label_hide_arrivals_in_header),
                     null);
         } else {
             // Currently we're hiding arrivals - we need to show them
             mHeader.showArrivals(true);
             ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                    Application.get().getPlausibleInstance(),
+                    PlausibleAnalytics.REPORT_ARRIVALS_EVENT_URL,
                     getString(R.string.analytics_label_show_arrivals_in_header),
                     null);
         }
@@ -1302,6 +1329,8 @@ public class ArrivalsListFragment extends ListFragment
                 (String) stopDetails.second).show();
 
         ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                Application.get().getPlausibleInstance(),
+                PlausibleAnalytics.REPORT_ARRIVALS_EVENT_URL,
                 getActivity().getString(R.string.analytics_label_button_press_stop_details),
                 null);
     }
@@ -1435,8 +1464,11 @@ public class ArrivalsListFragment extends ListFragment
                 stopInfo.getRouteId(),
                 stopInfo.getShortName(),
                 mStop.getName(),
-                stopInfo.getScheduledDepartureTime(),
-                stopInfo.getHeadsign());
+                ReminderUtils.getReminderDepartureTime(stopInfo),
+                stopInfo.getHeadsign(),
+                stopInfo.getStopSequence(),
+                stopInfo.getServiceDate(),
+                stopInfo.getVehicleId());
     }
 
     private void goToTripDetails(ArrivalInfo stop) {
@@ -1479,6 +1511,8 @@ public class ArrivalsListFragment extends ListFragment
         refresh();
 
         ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                Application.get().getPlausibleInstance(),
+                PlausibleAnalytics.REPORT_ARRIVALS_EVENT_URL,
                 getActivity().getString(R.string.analytics_label_load_more_arrivals),
                 null);
     }
@@ -1691,6 +1725,8 @@ public class ArrivalsListFragment extends ListFragment
 
         for (String agencyId : agencyIds) {
             ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                    Application.get().getPlausibleInstance(),
+                    PlausibleAnalytics.REPORT_ARRIVALS_EVENT_URL,
                     getString(R.string.analytics_service_alerts),
                     getString(R.string.analytics_label_service_alerts) + agencyId);
         }
@@ -1770,4 +1806,54 @@ public class ArrivalsListFragment extends ListFragment
         builder.setNeutralButton(R.string.main_help_close, (dialogInterface, i) -> dialogInterface.dismiss());
         return builder.create();
     }
+
+    private void initSurveyManager(){
+        // Avoiding doing multiple calls when updating the stop arrivals list
+        if(surveyManager == null){
+            View surveyView = getLayoutInflater().inflate(R.layout.item_survey,null);
+            surveyManager = new SurveyManager(requireContext(), surveyView,true, new SurveyListener() {
+                @Override
+                public void onSurveyResponseReceived(StudyResponse response) {
+                    surveyManager.onSurveyResponseReceived(response);
+                }
+
+                @Override
+                public void onSurveyResponseFail() {
+                    surveyManager.onSurveyResponseFail();
+                }
+
+                @Override
+                public void onSubmitSurveyResponseReceived(SubmitSurveyResponse response) {
+                    surveyManager.onSubmitSurveyResponseReceived(response);
+                }
+
+                @Override
+                public void onSubmitSurveyFail() {
+                    surveyManager.onSubmitSurveyFail();
+                }
+
+
+                @Override
+                public void onSkipSurvey() {
+                    surveyManager.onSkipSurvey();
+                }
+
+                @Override
+                public void onRemindMeLater() {
+                    surveyManager.onRemindMeLater();
+                }
+
+                @Override
+                public void onCancelSurvey() {
+                    surveyManager.onCancelSurvey();
+                }
+
+            });
+            surveyManager.initSurveyArrivalsList(getListView());
+            surveyManager.requestSurveyData();
+            surveyManager.setCurrentStop(mStop);
+        }
+    }
+
+
 }

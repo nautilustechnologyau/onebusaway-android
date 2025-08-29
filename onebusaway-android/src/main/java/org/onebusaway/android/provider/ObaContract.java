@@ -24,6 +24,7 @@ import org.onebusaway.android.BuildConfig;
 import org.onebusaway.android.R;
 import org.onebusaway.android.app.Application;
 import org.onebusaway.android.io.ObaAnalytics;
+import org.onebusaway.android.io.PlausibleAnalytics;
 import org.onebusaway.android.io.elements.ObaRegion;
 import org.onebusaway.android.io.elements.ObaRegionElement;
 import org.onebusaway.android.nav.model.PathLink;
@@ -221,12 +222,47 @@ public final class ObaContract {
         public static final String REMINDER = "reminder";
 
         /**
-         * A bitmask representing the days the reminder should be used.
+         * A String representing the ALARM_DELETE_PATH from the post request
+         * used for deleting an alarm.
          * <P>
-         * Type: INTEGER
+         * Type: String
          * </P>
          */
-        public static final String DAYS = "days";
+        public static final String ALARM_DELETE_PATH = "alarm_delete_path";
+
+        /**
+         * A String representing the ID of a trip.
+         * <p>
+         * Type: String
+         * </p>
+         */
+        public static final String TRIP_ID = "trip_id";
+
+        /**
+         * A String representing the service date for a particular trip.
+         * <p>
+         * Type: String
+         * </p>
+         */
+        public static final String SERVICE_DATE = "service_date";
+
+        /**
+         * A String representing the stop sequence number in the trip.
+         * <p>
+         * Type: String
+         * </p>
+         */
+        public static final String STOP_SEQUENCE = "stop_sequence";
+
+        /**
+         * A String representing the ID of a vehicle assigned to the trip.
+         * <p>
+         * Type: String
+         * </p>
+         */
+        public static final String VEHICLE_ID = "vehicle_id";
+
+
     }
 
     protected interface TripAlertsColumns {
@@ -344,6 +380,22 @@ public final class ObaContract {
          * </P>
          */
         public static final String OBA_BASE_URL = "oba_base_url";
+
+        /**
+         * The Sidecar Base URL for the API.
+         * <P>
+         * Type: TEXT
+         * </P>
+         */
+        public static final String SIDECAR_BASE_URL = "sidecar_base_url";
+
+        /**
+         * The plausible analytics server URL for the region.
+         * <P>
+         * Type: TEXT
+         * </P>
+         */
+        public static final String PLAUSIBLE_ANALYTICS_SERVER_URL = "plausible_analytics_server_url";
 
         /**
          * The base SIRI URL.
@@ -1452,7 +1504,9 @@ public final class ObaContract {
                     PAYMENT_WARNING_TITLE,
                     PAYMENT_WARNING_BODY,
                     TRAVEL_BEHAVIOR_DATA_COLLECTION,
-                    ENROLL_PARTICIPANTS_IN_STUDY
+                    ENROLL_PARTICIPANTS_IN_STUDY,
+                    SIDECAR_BASE_URL,
+                    PLAUSIBLE_ANALYTICS_SERVER_URL
             };
 
             Cursor c = cr.query(buildUri((int) id), PROJECTION, null, null, null);
@@ -1485,7 +1539,9 @@ public final class ObaContract {
                             c.getString(17),               // Payment Warning Title
                             c.getString(18),               // Payment Warning Body
                             c.getInt(19) > 0, // Travel behavior data collection
-                            c.getInt(20) > 0 // Enroll participants in travel behavior study
+                            c.getInt(20) > 0, // Enroll participants in travel behavior study
+                            c.getString(21), // Sidecar Base URL
+                            c.getString(22) // Plausible analytics server url
                     );
                 } finally {
                     c.close();
@@ -1770,6 +1826,8 @@ public final class ObaContract {
                 analyticsParam.append("all stops");
             }
             ObaAnalytics.reportUiEvent(FirebaseAnalytics.getInstance(context),
+                    Application.get().getPlausibleInstance(),
+                    PlausibleAnalytics.REPORT_BOOKMARK_EVENT_URL,
                     analyticsEvent.toString(),
                     analyticsParam.toString());
         }

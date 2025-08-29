@@ -17,17 +17,13 @@
  */
 package org.onebusaway.android.ui;
 
-import static org.onebusaway.android.util.PermissionUtils.RESTORE_BACKUP_PERMISSION_REQUEST;
-import static org.onebusaway.android.util.PermissionUtils.SAVE_BACKUP_PERMISSION_REQUEST;
-import static org.onebusaway.android.util.PermissionUtils.STORAGE_PERMISSIONS;
+
 import static org.onebusaway.android.util.UIUtils.setAppTheme;
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -49,7 +45,6 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.ActivityCompat;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 
@@ -57,17 +52,14 @@ import org.onebusaway.android.BuildConfig;
 import org.onebusaway.android.R;
 import org.onebusaway.android.app.Application;
 import org.onebusaway.android.io.ObaAnalytics;
+import org.onebusaway.android.io.PlausibleAnalytics;
 import org.onebusaway.android.io.elements.ObaRegion;
 import org.onebusaway.android.provider.ObaContract;
 import org.onebusaway.android.region.ObaRegionsTask;
-import org.onebusaway.android.travelbehavior.TravelBehaviorManager;
 import org.onebusaway.android.travelbehavior.io.coroutines.FirebaseDataPusher;
-import org.onebusaway.android.travelbehavior.utils.TravelBehaviorUtils;
 import org.onebusaway.android.util.BackupUtils;
 import org.onebusaway.android.util.BuildFlavorUtils;
 import org.onebusaway.android.util.LocationUtils;
-import org.onebusaway.android.util.PermissionUtils;
-import org.onebusaway.android.util.PreferenceUtils;
 import org.onebusaway.android.util.RegionUtils;
 import org.onebusaway.android.util.ShowcaseViewUtils;
 
@@ -85,6 +77,7 @@ public class PreferencesActivity extends PreferenceActivity
     public static final String SHOW_CHECK_REGION_DIALOG = ".checkRegionDialog";
 
     public static final int REQUEST_CODE_RESTORE_BACKUP = 1234;
+    public static final int REQUEST_CODE_SAVE_BACKUP = 1199;
 
     Preference mPreference;
 
@@ -126,13 +119,16 @@ public class PreferencesActivity extends PreferenceActivity
     // ListPreference showWeatherDisplayPref;
 
     ListPreference mThemePref;
+    ListPreference mapMode;
 
     private FirebaseAnalytics mFirebaseAnalytics;
 
     @SuppressWarnings("deprecation")
     public void onCreate(Bundle savedInstanceState) {
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        setTheme();
         super.onCreate(savedInstanceState);
+
         setProgressBarIndeterminate(true);
 
         addPreferencesFromResource(R.xml.preferences);
@@ -160,18 +156,18 @@ public class PreferencesActivity extends PreferenceActivity
         mAnalyticsPref = findPreference(getString(R.string.preferences_key_analytics));
         mAnalyticsPref.setOnPreferenceChangeListener(this);
 
-        mTravelBehaviorPref = (CheckBoxPreference) findPreference(getString(R.string.preferences_key_travel_behavior));
-        mTravelBehaviorPref.setOnPreferenceChangeListener(this);
+//        mTravelBehaviorPref = (CheckBoxPreference) findPreference(getString(R.string.preferences_key_travel_behavior));
+//        mTravelBehaviorPref.setOnPreferenceChangeListener(this);
 
-        if (!TravelBehaviorUtils.isTravelBehaviorActiveInRegion() ||
-                (!TravelBehaviorUtils.allowEnrollMoreParticipantsInStudy() &&
-                        !TravelBehaviorUtils.isUserParticipatingInStudy())) {
-            PreferenceCategory aboutCategory = (PreferenceCategory)
-                    findPreference(getString(R.string.preferences_category_about));
-            aboutCategory.removePreference(mTravelBehaviorPref);
-        } else {
-            mTravelBehaviorPref.setChecked(TravelBehaviorUtils.isUserParticipatingInStudy());
-        }
+//        if (!TravelBehaviorUtils.isTravelBehaviorActiveInRegion() ||
+//                (!TravelBehaviorUtils.allowEnrollMoreParticipantsInStudy() &&
+//                        !TravelBehaviorUtils.isUserParticipatingInStudy())) {
+//            PreferenceCategory aboutCategory = (PreferenceCategory)
+//                    findPreference(getString(R.string.preferences_category_about));
+//            aboutCategory.removePreference(mTravelBehaviorPref);
+//        } else {
+//            mTravelBehaviorPref.setChecked(TravelBehaviorUtils.isUserParticipatingInStudy());
+//        }
 
         ObaRegion region = Application.get().getCurrentRegion();
         if (region != null && region.isTravelBehaviorDataCollectionEnabled()) {
@@ -196,6 +192,9 @@ public class PreferencesActivity extends PreferenceActivity
 
         mAboutPref = findPreference(getString(R.string.preferences_key_about));
         mAboutPref.setOnPreferenceClickListener(this);
+
+        mapMode = (ListPreference) findPreference(getString(R.string.preference_key_map_mode));
+        mapMode.setOnPreferenceChangeListener(this);
 
         SharedPreferences settings = Application.getPrefs();
         mAutoSelectInitialValue = settings
@@ -277,7 +276,6 @@ public class PreferencesActivity extends PreferenceActivity
 
         onAddCustomRegion();
     }
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -288,6 +286,8 @@ public class PreferencesActivity extends PreferenceActivity
         // changePreferenceSummary(getString(R.string.preference_key_show_weather_view));
         changePreferenceSummary(getString(R.string.preference_key_app_theme));
         changePreferenceSummary(getString(R.string.preference_key_otp_api_url));
+        changePreferenceSummary(getString(R.string.preference_key_map_mode));
+
 
         // Remove preferences for notifications if no trip planning
         ObaRegion obaRegion = Application.get().getCurrentRegion();
@@ -364,9 +364,11 @@ public class PreferencesActivity extends PreferenceActivity
                         getString(R.string.preferences_otp_api_servername_summary));
             }
             Application.get().setUseOldOtpApiUrlVersion(false);
-        }else if (preferenceKey
+        } else if (preferenceKey
                 .equalsIgnoreCase(getString(R.string.preference_key_preferred_temperature_units))) {
             preferredTempUnits.setSummary(preferredTempUnits.getValue());
+        } else if (preferenceKey.equalsIgnoreCase(getString(R.string.preference_key_map_mode))) {
+            mapMode.setSummary(mapMode.getValue());
         }
 //        else if(preferenceKey.equalsIgnoreCase(getString(R.string.preference_key_show_weather_view))){
 //            showWeatherDisplayPref.setSummary(showWeatherDisplayPref.getValue());
@@ -380,6 +382,8 @@ public class PreferencesActivity extends PreferenceActivity
             RegionsActivity.start(this);
         } else if (pref.equals(mTutorialPref)) {
             ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                    Application.get().getPlausibleInstance(),
+                    PlausibleAnalytics.REPORT_PREFERENCES_EVENT_URL,
                     getString(R.string.analytics_label_button_press_tutorial),
                     null);
             ShowcaseViewUtils.resetAllTutorials(this);
@@ -388,6 +392,8 @@ public class PreferencesActivity extends PreferenceActivity
 //            startActivity(Application.getDonationsManager().buildOpenDonationsPageIntent());
         } else if (pref.equals(mPoweredByObaPref)) {
             ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                    Application.get().getPlausibleInstance(),
+                    PlausibleAnalytics.REPORT_PREFERENCES_EVENT_URL,
                     getString(R.string.analytics_label_button_press_powered_by_oba),
                     null);
             Intent intent = new Intent(Intent.ACTION_VIEW,
@@ -395,17 +401,15 @@ public class PreferencesActivity extends PreferenceActivity
             startActivity(intent);
         } else if (pref.equals(mAboutPref)) {
             ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                    Application.get().getPlausibleInstance(),
+                    PlausibleAnalytics.REPORT_PREFERENCES_EVENT_URL,
                     getString(R.string.analytics_label_button_press_about),
                     null);
             AboutActivity.start(this);
         } else if (pref.equals(mSaveBackup)) {
-            // SavePreference will get the click event but will ignore it if permissions haven't
-            // been granted yet so we can handle permissions here
-            maybeRequestPermissions(SAVE_BACKUP_PERMISSION_REQUEST);
+            BackupUtils.createBackupFile(this);
         } else if (pref.equals(mRestoreBackup)){
-            // RestorePreference will get the click event but will ignore it if permissions haven't
-            // been granted yet so we can handle permissions here.
-            maybeRequestPermissions(RESTORE_BACKUP_PERMISSION_REQUEST);
+            BackupUtils.selectBackupFile(this);
         } else if (pref.equals(pushFirebaseData)) {
             // Try to push firebase data to the server
             FirebaseDataPusher pusher = new FirebaseDataPusher();
@@ -418,67 +422,19 @@ public class PreferencesActivity extends PreferenceActivity
         return true;
     }
 
-    private void maybeRequestPermissions(int permissionRequest) {
-        if (!PermissionUtils.hasGrantedAllPermissions(this, STORAGE_PERMISSIONS)) {
-            // Request permissions from the user
-            ActivityCompat.requestPermissions(this, STORAGE_PERMISSIONS, permissionRequest);
-        }
-    }
-
-    @SuppressLint("MissingPermission")
-    @Override
-    public void onRequestPermissionsResult(
-            int requestCode, String[] permissions, int[] grantResults) {
-        int result = PackageManager.PERMISSION_DENIED;
-        if (requestCode == SAVE_BACKUP_PERMISSION_REQUEST || requestCode == RESTORE_BACKUP_PERMISSION_REQUEST) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                result = PackageManager.PERMISSION_GRANTED;
-                // User granted permission
-                if (requestCode == SAVE_BACKUP_PERMISSION_REQUEST) {
-                    BackupUtils.save(this);
-                } else {
-                    // For restore, ask them to browse to the backup file, because after targeting Android 11 we can't just access it directly
-                    // This is automatically invoked by RestorePreference.onClick(), so do nothing here
-                }
-            } else {
-                showStoragePermissionDialog(this, requestCode);
-            }
-        }
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CODE_RESTORE_BACKUP) {
-            if (data != null) {
-                BackupUtils.restore(this, data.getData());
+        if(resultCode != RESULT_OK) return;
+        Uri uri = data.getData();
+        if(uri != null){
+            if (requestCode == REQUEST_CODE_RESTORE_BACKUP) {
+                BackupUtils.restore(this, uri);
+            }else if(requestCode == REQUEST_CODE_SAVE_BACKUP){
+                BackupUtils.save(this,uri);
             }
         }
-    }
-
-    /**
-     * Shows the dialog to explain why storage permissions are needed
-     * @param activity Activity used to show the dialog
-     * @param requestCode The requesting permission code (SAVE_BACKUP_PERMISSION_REQUEST or RESTORE_BACKUP_PERMISSION_REQUEST)
-     */
-    private void showStoragePermissionDialog(Activity activity, int requestCode) {
-        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this)
-                .setTitle(R.string.storage_permissions_title)
-                .setMessage(R.string.storage_permissions_message)
-                .setCancelable(false)
-                .setPositiveButton(R.string.ok,
-                        (dialog, which) -> {
-                            // Request permissions from the user
-                            ActivityCompat
-                                    .requestPermissions(activity, STORAGE_PERMISSIONS, requestCode);
-                        }
-                )
-                .setNegativeButton(R.string.no_thanks,
-                        (dialog, which) -> {
-                            // No-op
-                        }
-                );
-        builder.create().show();
     }
 
     @Override
@@ -519,14 +475,14 @@ public class PreferencesActivity extends PreferenceActivity
             //Report if the analytics turns off, just before shared preference changed
             ObaAnalytics.setSendAnonymousData(mFirebaseAnalytics, isAnalyticsActive);
         } else if (preference.equals(mTravelBehaviorPref) && newValue instanceof Boolean) {
-            Boolean activateTravelBehaviorCollection = (Boolean) newValue;
-            if (activateTravelBehaviorCollection) {
-                new TravelBehaviorManager(this, getApplicationContext()).
-                        registerTravelBehaviorParticipant(true);
-            } else {
-                showOptOutDialog();
-                return false;
-            }
+//            Boolean activateTravelBehaviorCollection = (Boolean) newValue;
+//            if (activateTravelBehaviorCollection) {
+//                new TravelBehaviorManager(this, getApplicationContext()).
+//                        registerTravelBehaviorParticipant(true);
+//            } else {
+//                showOptOutDialog();
+//                return false;
+//            }
         } else if (preference.equals(mLeftHandMode) && newValue instanceof Boolean) {
             Boolean isLeftHandEnabled = (Boolean) newValue;
             //Report if left handed mode is turned on, just before shared preference changed
@@ -536,37 +492,42 @@ public class PreferencesActivity extends PreferenceActivity
             if (hideAlerts) {
                 ObaContract.ServiceAlerts.hideAllAlerts();
             }
+        } else if (preference.equals(mThemePref) && newValue instanceof String) {
+            String theme = ((String) newValue);
+            setAppTheme(theme);
+            recreate();
         }
         return true;
     }
 
     /**
      * Shows the dialog to explain user is choosing to opt out of travel behavior research study
+     * Currently disabled see ticket https://github.com/OneBusAway/onebusaway-android/issues/1240
      */
-    private void showOptOutDialog() {
-        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this)
-                .setTitle(R.string.travel_behavior_dialog_opt_out_title)
-                .setMessage(R.string.travel_behavior_dialog_opt_out_message)
-                .setCancelable(false)
-                .setPositiveButton(R.string.ok,
-                        (dialog, which) -> {
-                            // Remove user from study
-                            new TravelBehaviorManager(this, getApplicationContext()).
-                                    stopCollectingData();
-                            TravelBehaviorManager.optOutUser();
-                            TravelBehaviorManager.optOutUserOnServer();
-                            // Change preference
-                            mTravelBehaviorPref.setChecked(false);
-                            PreferenceUtils.saveBoolean(getString(R.string.preferences_key_travel_behavior), false);
-                        }
-                )
-                .setNegativeButton(R.string.cancel,
-                        (dialog, which) -> {
-                            // No-op
-                        }
-                );
-        builder.create().show();
-    }
+//    private void showOptOutDialog() {
+//        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this)
+//                .setTitle(R.string.travel_behavior_dialog_opt_out_title)
+//                .setMessage(R.string.travel_behavior_dialog_opt_out_message)
+//                .setCancelable(false)
+//                .setPositiveButton(R.string.ok,
+//                        (dialog, which) -> {
+//                            // Remove user from study
+//                            new TravelBehaviorManager(this, getApplicationContext()).
+//                                    stopCollectingData();
+//                            TravelBehaviorManager.optOutUser();
+//                            TravelBehaviorManager.optOutUserOnServer();
+//                            // Change preference
+//                            mTravelBehaviorPref.setChecked(false);
+//                            PreferenceUtils.saveBoolean(getString(R.string.preferences_key_travel_behavior), false);
+//                        }
+//                )
+//                .setNegativeButton(R.string.cancel,
+//                        (dialog, which) -> {
+//                            // No-op
+//                        }
+//                );
+//        builder.create().show();
+//    }
 
     @Override
     protected void onDestroy() {
@@ -613,10 +574,14 @@ public class PreferencesActivity extends PreferenceActivity
             //Analytics
             if (experimentalServers) {
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                        Application.get().getPlausibleInstance(),
+                        PlausibleAnalytics.REPORT_PREFERENCES_EVENT_URL,
                         getString(R.string.analytics_label_button_press_experimental_on),
                         null);
             } else {
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                        Application.get().getPlausibleInstance(),
+                        PlausibleAnalytics.REPORT_PREFERENCES_EVENT_URL,
                         getString(R.string.analytics_label_button_press_experimental_off),
                         null);
             }
@@ -640,10 +605,14 @@ public class PreferencesActivity extends PreferenceActivity
                     .getBoolean(getString(R.string.preference_key_auto_select_region), true);
             if (autoSelect) {
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                        Application.get().getPlausibleInstance(),
+                        PlausibleAnalytics.REPORT_PREFERENCES_EVENT_URL,
                         getString(R.string.analytics_label_button_press_auto),
                         null);
             } else {
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                        Application.get().getPlausibleInstance(),
+                        PlausibleAnalytics.REPORT_PREFERENCES_EVENT_URL,
                         getString(R.string.analytics_label_button_press_manual),
                         null);
             }
@@ -661,6 +630,9 @@ public class PreferencesActivity extends PreferenceActivity
             ObaAnalytics.setShowDepartedVehicles(mFirebaseAnalytics, showDepartedBuses);
         }else if (key.equalsIgnoreCase(getString(R.string.preference_key_preferred_temperature_units))) {
             // Change the preferred temp unit description
+            changePreferenceSummary(key);
+        } else if (key.equalsIgnoreCase(getString(R.string.preference_key_map_mode))) {
+            // Change map mode description
             changePreferenceSummary(key);
         }
 //        else if (key.equalsIgnoreCase(getString(R.string.preference_key_show_weather_view))) {
@@ -758,5 +730,32 @@ public class PreferencesActivity extends PreferenceActivity
         startActivity(i);
         finish();
 
+    }
+
+    /**
+     * Set the theme based on the current night mode
+     */
+    private void setTheme() {
+        int nightMode = AppCompatDelegate.getDefaultNightMode();
+        int theme = getThemeForMode(nightMode);
+        setTheme(theme);
+    }
+
+    private int getThemeForMode(int nightMode) {
+        switch (nightMode) {
+            case AppCompatDelegate.MODE_NIGHT_YES:
+                return android.R.style.ThemeOverlay_Material_Dark;
+            case AppCompatDelegate.MODE_NIGHT_NO:
+                return android.R.style.ThemeOverlay_Material_Light;
+            case AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM:
+            default:
+                return isSystemInNightMode() ? android.R.style.ThemeOverlay_Material_Dark
+                        : android.R.style.ThemeOverlay_Material_Light;
+        }
+    }
+
+    private boolean isSystemInNightMode() {
+        int currentNightMode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        return currentNightMode == Configuration.UI_MODE_NIGHT_YES;
     }
 }

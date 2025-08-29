@@ -95,7 +95,9 @@ public class MockRegion {
                 null,
                 null,
                 false,
-                false);
+                false,
+                "https://onebusaway.co",
+                null);
     }
 
     /**
@@ -135,7 +137,9 @@ public class MockRegion {
                 null,
                 null,
                 false,
-                false);
+                false,
+                "https://onebusaway.co",
+                null);
     }
 
     /**
@@ -175,7 +179,9 @@ public class MockRegion {
                 null,
                 null,
                 false,
-                false);
+                false,
+                "https://onebusaway.co",
+                null);
     }
 
     /**
@@ -215,7 +221,9 @@ public class MockRegion {
                 null,
                 null,
                 false,
-                false);
+                false,
+                "https://onebusaway.co",
+                null);
     }
 
     /**
@@ -255,7 +263,9 @@ public class MockRegion {
                 null,
                 null,
                 false,
-                false);
+                false,
+                "https://onebusaway.co",
+                null);
     }
 
     /**
@@ -295,7 +305,9 @@ public class MockRegion {
                 null,
                 null,
                 false,
-                false);
+                false,
+                "https://onebusaway.co",
+                null);
     }
 
     /**
@@ -333,7 +345,9 @@ public class MockRegion {
                 null,
                 null,
                 false,
-                false);
+                false,
+                "https://onebusaway.co",
+                null);
     }
 
     /**
@@ -371,6 +385,8 @@ public class MockRegion {
                 null,
                 null,
                 false,
-                false);
+                false,
+                "https://onebusaway.co",
+                null);
     }
 }

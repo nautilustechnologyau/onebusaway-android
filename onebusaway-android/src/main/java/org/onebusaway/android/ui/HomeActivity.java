@@ -52,6 +52,8 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import org.onebusaway.android.BuildConfig;
 import org.onebusaway.android.R;
+import org.onebusaway.android.io.PlausibleAnalytics;
+import org.onebusaway.android.widealerts.GtfsAlertCallBack;
 import org.onebusaway.android.app.Application;
 import org.onebusaway.android.donations.DonationsManager;
 import org.onebusaway.android.io.ObaAnalytics;
@@ -59,6 +61,9 @@ import org.onebusaway.android.io.elements.ObaRegion;
 import org.onebusaway.android.io.elements.ObaRoute;
 import org.onebusaway.android.io.elements.ObaStop;
 import org.onebusaway.android.io.request.ObaArrivalInfoResponse;
+import org.onebusaway.android.io.request.survey.SurveyListener;
+import org.onebusaway.android.io.request.survey.model.StudyResponse;
+import org.onebusaway.android.io.request.survey.model.SubmitSurveyResponse;
 import org.onebusaway.android.io.request.weather.ObaWeatherRequest;
 import org.onebusaway.android.io.request.weather.models.ObaWeatherResponse;
 import org.onebusaway.android.io.request.weather.WeatherRequestListener;
@@ -70,9 +75,9 @@ import org.onebusaway.android.map.googlemapsv2.LayerInfo;
 import org.onebusaway.android.region.ObaRegionsTask;
 import org.onebusaway.android.report.ui.ReportActivity;
 import org.onebusaway.android.travelbehavior.TravelBehaviorManager;
-import org.onebusaway.android.travelbehavior.constants.TravelBehaviorConstants;
 import org.onebusaway.android.travelbehavior.utils.TravelBehaviorUtils;
-import org.onebusaway.android.tripservice.TripService;
+import org.onebusaway.android.ui.survey.SurveyManager;
+import org.onebusaway.android.ui.survey.utils.SurveyViewUtils;
 import org.onebusaway.android.ui.weather.RegionCallback;
 import org.onebusaway.android.ui.weather.WeatherUtils;
 import org.onebusaway.android.util.FragmentUtils;
@@ -82,6 +87,7 @@ import org.onebusaway.android.util.PreferenceUtils;
 import org.onebusaway.android.util.RegionUtils;
 import org.onebusaway.android.util.ShowcaseViewUtils;
 import org.onebusaway.android.util.UIUtils;
+import org.onebusaway.android.widealerts.GtfsAlertsHelper;
 import org.opentripplanner.routing.bike_rental.BikeRentalStation;
 
 import android.Manifest;
@@ -102,6 +108,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -131,8 +138,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -140,6 +145,9 @@ import androidx.cardview.widget.CardView;
 import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.AccessibilityDelegateCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Observer;
 
@@ -180,6 +188,7 @@ public class HomeActivity extends AppCompatActivity
         BaseMapFragment.OnProgressBarChangedListener,
         ArrivalsListFragment.Listener, NavigationDrawerCallbacks, WeatherRequestListener , RegionCallback,
         ObaRegionsTask.Callback, StopSpeedDialAdapter.StopSpeedDialListener {
+
 
     interface SlidingPanelController {
 
@@ -228,6 +237,8 @@ public class HomeActivity extends AppCompatActivity
     View mArrivalsListHeaderSubView;
 
     CardView weatherView;
+
+    View mSurveyView;
 
     View mDonationView;
 
@@ -335,7 +346,7 @@ public class HomeActivity extends AppCompatActivity
 
     private FirebaseRemoteConfig mFirebaseRemoteConfig;
 
-    private ActivityResultLauncher<String> travelBehaviorPermissionsLauncher;
+    //private ActivityResultLauncher<String> travelBehaviorPermissionsLauncher;
 
     private BillingClientLifecycle mBillingClient;
 
@@ -349,6 +360,7 @@ public class HomeActivity extends AppCompatActivity
 
     private ObaWeatherResponse weatherResponse;
 
+    private SurveyManager surveyManager;
     /**
      * Starts the MapActivity with a particular stop focused with the center of
      * the map at a particular point.
@@ -485,7 +497,7 @@ public class HomeActivity extends AppCompatActivity
 
         setupGooglePlayServices();
 
-        setupPermissions(this);
+        //setupPermissions(this);
 
         UIUtils.setupActionBar(this);
 
@@ -519,6 +531,7 @@ public class HomeActivity extends AppCompatActivity
 
         setupMainSearch();
         initWeatherView();
+        setupSurvey();
     }
 
     @Override
@@ -644,13 +657,19 @@ public class HomeActivity extends AppCompatActivity
                 if (!BuildConfig.USE_FIXED_REGION) {
                     RegionsActivity.start(this);
                     mCurrentNavDrawerPosition = NAVDRAWER_ITEM_NEARBY;
-                    ObaAnalytics.reportUiEvent(mFirebaseAnalytics, getString(R.string.analytics_label_region_select), null);
+                    ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                            Application.get().getPlausibleInstance(),
+                            PlausibleAnalytics.REPORT_MENU_EVENT_URL,
+                            getString(R.string.analytics_label_region_select),
+                            null);
                 }
                 break;
             case NAVDRAWER_ITEM_STARRED_STOPS:
                 if (mCurrentNavDrawerPosition != NAVDRAWER_ITEM_STARRED_STOPS) {
                     showStarredStopsRoutesFragment();
                     ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                            Application.get().getPlausibleInstance(),
+                            PlausibleAnalytics.REPORT_MENU_EVENT_URL,
                             getString(R.string.analytics_label_button_press_star),
                             null);
                     mCurrentNavDrawerPosition = NAVDRAWER_ITEM_NEARBY;
@@ -661,6 +680,8 @@ public class HomeActivity extends AppCompatActivity
                     showMyRemindersFragment();
                     mCurrentNavDrawerPosition = NAVDRAWER_ITEM_NEARBY;
                     ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                            Application.get().getPlausibleInstance(),
+                            PlausibleAnalytics.REPORT_MENU_EVENT_URL,
                             getString(R.string.analytics_label_button_press_reminders),
                             null);
                 }
@@ -671,6 +692,8 @@ public class HomeActivity extends AppCompatActivity
 //                    showStarredRoutesFragment();
 //                    mCurrentNavDrawerPosition = item;
 //                    ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+//                            Application.get().getPlausibleInstance(),
+//                            PlausibleAnalytics.REPORT_MENU_EVENT_URL,
 //                            getString(R.string.analytics_label_button_press_star),
 //                            null);
 //                }
@@ -686,6 +709,8 @@ public class HomeActivity extends AppCompatActivity
                     showMapFragment();
                     mCurrentNavDrawerPosition = NAVDRAWER_ITEM_NEARBY;
                     ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                            Application.get().getPlausibleInstance(),
+                            PlausibleAnalytics.REPORT_MENU_EVENT_URL,
                             getString(R.string.analytics_label_button_press_nearby),
                             null);
                 }
@@ -700,6 +725,8 @@ public class HomeActivity extends AppCompatActivity
                     Intent planTrip = new Intent(HomeActivity.this, TripPlanActivity.class);
                     startActivity(planTrip);
                     ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                            Application.get().getPlausibleInstance(),
+                            PlausibleAnalytics.REPORT_MENU_EVENT_URL,
                             getString(R.string.analytics_label_button_press_trip_plan),
                             null);
                 }
@@ -711,17 +738,23 @@ public class HomeActivity extends AppCompatActivity
                 Intent preferences = new Intent(HomeActivity.this, PreferencesActivity.class);
                 startActivity(preferences);
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                        Application.get().getPlausibleInstance(),
+                        PlausibleAnalytics.REPORT_MENU_EVENT_URL,
                         getString(R.string.analytics_label_button_press_settings),
                         null);
                 break;
             case NAVDRAWER_ITEM_HELP:
                 showDialog(HELP_DIALOG);
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                        Application.get().getPlausibleInstance(),
+                        PlausibleAnalytics.REPORT_MENU_EVENT_URL,
                         getString(R.string.analytics_label_button_press_help),
                         null);
                 break;
             case NAVDRAWER_ITEM_SEND_FEEDBACK:
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                        Application.get().getPlausibleInstance(),
+                        PlausibleAnalytics.REPORT_MENU_EVENT_URL,
                         getString(R.string.analytics_label_button_press_feedback),
                         null);
                 goToSendFeedBack();
@@ -729,6 +762,8 @@ public class HomeActivity extends AppCompatActivity
             case NAVDRAWER_ITEM_RATE_APP:
                 UIUtils.goToMarket(HomeActivity.this, getPackageName());
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                        Application.get().getPlausibleInstance(),
+                        PlausibleAnalytics.REPORT_MENU_EVENT_URL,
                         getString(R.string.analytics_label_button_press_rate_app),
                         null);
                 break;
@@ -736,11 +771,15 @@ public class HomeActivity extends AppCompatActivity
                 Intent removeAds = new Intent(HomeActivity.this, RemoveAdsActivity.class);
                 startActivity(removeAds);
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                        Application.get().getPlausibleInstance(),
+                        PlausibleAnalytics.REPORT_MENU_EVENT_URL,
                         getString(R.string.analytics_label_button_press_remove_ads),
                         null);
                 break;
             case NAVDRAWER_ITEM_OPEN_SOURCE:
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                        Application.get().getPlausibleInstance(),
+                        PlausibleAnalytics.REPORT_MENU_EVENT_URL,
                         getString(R.string.analytics_label_button_press_open_source),
                         null);
                 Intent i = new Intent(Intent.ACTION_VIEW);
@@ -748,7 +787,10 @@ public class HomeActivity extends AppCompatActivity
                 startActivity(i);
                 break;
         }
+        updateDonationsUIVisibility();
         if (mCurrentNavDrawerPosition != NAVDRAWER_ITEM_NEARBY) {
+            // Hide survey view unless it's on the map
+            SurveyViewUtils.hideSurveyView(mSurveyView);
             WeatherUtils.toggleWeatherViewVisibility(false,weatherView);
         }else{
             setWeatherData();
@@ -1020,6 +1062,8 @@ public class HomeActivity extends AppCompatActivity
         if (id == R.id.search) {
             onSearchRequested();
             ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                    Application.get().getPlausibleInstance(),
+                    PlausibleAnalytics.REPORT_SEARCH_EVENT_URL,
                     getString(R.string.analytics_label_button_press_search_box),
                     null);
             return true;
@@ -1097,6 +1141,8 @@ public class HomeActivity extends AppCompatActivity
                                 }
                                 UIUtils.goToUrl(HomeActivity.this, twitterUrl);
                                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                                        Application.get().getPlausibleInstance(),
+                                        PlausibleAnalytics.REPORT_MENU_EVENT_URL,
                                         getString(R.string.analytics_label_twitter),
                                         null);
                                 break;
@@ -1227,11 +1273,6 @@ public class HomeActivity extends AppCompatActivity
 
         if (oldVer < newVer && mActivityWeakRef.get() != null && !mActivityWeakRef.get().isFinishing()) {
             mActivityWeakRef.get().showDialog(WHATSNEW_DIALOG);
-
-            // Updates will remove the alarms. This should put them back.
-            // (Unfortunately I can't find a way to reschedule them without
-            // having the app run again).
-            TripService.scheduleAll(this, true);
             PreferenceUtils.saveInt(WHATS_NEW_VER, appInfo.versionCode);
             return true;
         }
@@ -1270,6 +1311,8 @@ public class HomeActivity extends AppCompatActivity
 
             showStopFab();
             ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                    Application.get().getPlausibleInstance(),
+                    PlausibleAnalytics.REPORT_MAP_EVENT_URL,
                     getString(R.string.analytics_label_button_press_map_icon),
                     null);
         } else {
@@ -1662,6 +1705,8 @@ public class HomeActivity extends AppCompatActivity
 
                 mMapFragment.setMyLocation(true, true);
                 ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                        Application.get().getPlausibleInstance(),
+                        PlausibleAnalytics.REPORT_MAP_EVENT_URL,
                         getString(R.string.analytics_label_button_press_location),
                         null);
             }
@@ -2168,13 +2213,22 @@ public class HomeActivity extends AppCompatActivity
 
     private void setupLayersSpeedDial() {
         mLayersFab = findViewById(R.id.layersSpeedDial);
-
         ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) mLayersFab
                 .getLayoutParams();
         LAYERS_FAB_DEFAULT_BOTTOM_MARGIN = p.bottomMargin;
 
         mLayersFab.setButtonIconResource(R.drawable.ic_layers_white_24dp);
-        mLayersFab.setButtonBackgroundColour(ContextCompat.getColor(this, R.color.theme_primary));
+        mLayersFab.setButtonBackgroundColour(ContextCompat.getColor(this, R.color.theme_accent));
+
+        // Find the card view (the actual clickable element) to set accessibility properties
+        View fabCard = mLayersFab.findViewById(R.id.fab_card);
+        if (fabCard != null) {
+            fabCard.setContentDescription(getString(R.string.map_option_layers));
+            fabCard.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+        } else {
+            // Fallback to the main container if card isn't available
+            mLayersFab.setContentDescription(getString(R.string.map_option_layers));
+        }
 
         LayersSpeedDialAdapter adapter = new LayersSpeedDialAdapter(this);
         // Add the BaseMapFragment listener to activate the layer on the map
@@ -2200,9 +2254,25 @@ public class HomeActivity extends AppCompatActivity
         });
         mLayersFab.setSpeedDialMenuAdapter(adapter);
         mLayersFab.setOnSpeedDialMenuOpenListener(
-                v -> mLayersFab.setButtonIconResource(R.drawable.ic_add_white_24dp));
+                v -> {
+                    mLayersFab.setButtonIconResource(R.drawable.ic_add_white_24dp);
+                    // Update content description to match the new state
+                    if (fabCard != null) {
+                        fabCard.setContentDescription(getString(R.string.map_option_layers_close));
+                    } else {
+                        mLayersFab.setContentDescription(getString(R.string.map_option_layers_close));
+                    }
+                });
         mLayersFab.setOnSpeedDialMenuCloseListener(
-                v -> mLayersFab.setButtonIconResource(R.drawable.ic_layers_white_24dp));
+                v -> {
+                    mLayersFab.setButtonIconResource(R.drawable.ic_layers_white_24dp);
+                    // Reset content description to default state
+                    if (fabCard != null) {
+                        fabCard.setContentDescription(getString(R.string.map_option_layers));
+                    } else {
+                        mLayersFab.setContentDescription(getString(R.string.map_option_layers));
+                    }
+                });
         mLayersFab.setContentCoverEnabled(false);
     }
 
@@ -2498,15 +2568,15 @@ public class HomeActivity extends AppCompatActivity
      * @param activity
      */
     private void setupPermissions(AppCompatActivity activity) {
-        travelBehaviorPermissionsLauncher =
-                registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-                    if (isGranted) {
-                        // User opt-ed into study and granted physical activity tracking - now request background location permissions (when targeting Android 11 we can't request both simultaneously)
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            activity.requestPermissions(TravelBehaviorConstants.BACKGROUND_LOCATION_PERMISSION, BACKGROUND_LOCATION_PERMISSION_REQUEST);
-                        }
-                    }
-                });
+//        travelBehaviorPermissionsLauncher =
+//                registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+//                    if (isGranted) {
+//                        // User opt-ed into study and granted physical activity tracking - now request background location permissions (when targeting Android 11 we can't request both simultaneously)
+//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                            activity.requestPermissions(TravelBehaviorConstants.BACKGROUND_LOCATION_PERMISSION, BACKGROUND_LOCATION_PERMISSION_REQUEST);
+//                        }
+//                    }
+//                });
     }
 
     /**
@@ -2515,9 +2585,9 @@ public class HomeActivity extends AppCompatActivity
      * activity permissions. This method should only be called after the user opts into the travel behavior study.
      */
     public void requestPhysicalActivityPermission() {
-        if (travelBehaviorPermissionsLauncher != null){
-            travelBehaviorPermissionsLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION);
-        }
+//        if (travelBehaviorPermissionsLauncher != null){
+//            travelBehaviorPermissionsLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION);
+//        }
     }
 
     /**
@@ -2676,6 +2746,8 @@ public class HomeActivity extends AppCompatActivity
             //planTrip.putExtras(mBuilder.getBundle());
             startActivity(planTrip, mBuilder.getBundle());
             ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                    Application.get().getPlausibleInstance(),
+                    PlausibleAnalytics.REPORT_MENU_EVENT_URL,
                     getString(R.string.analytics_label_button_press_trip_plan),
                     null);
         });
@@ -2726,6 +2798,8 @@ public class HomeActivity extends AppCompatActivity
         planTrip.putExtra(OTPConstants.INTENT_SOURCE, OTPConstants.Source.EXTERNAL_ACTIVITY);
         startActivity(planTrip);
         ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                Application.get().getPlausibleInstance(),
+                PlausibleAnalytics.REPORT_MENU_EVENT_URL,
                 getString(R.string.analytics_label_button_press_trip_plan),
                 null);
     }
@@ -2752,6 +2826,8 @@ public class HomeActivity extends AppCompatActivity
             planTrip.putExtra(OTPConstants.INTENT_SOURCE, OTPConstants.Source.NOTIFICATION);
             startActivity(planTrip);
             ObaAnalytics.reportUiEvent(mFirebaseAnalytics,
+                    Application.get().getPlausibleInstance(),
+                    PlausibleAnalytics.REPORT_MENU_EVENT_URL,
                     getString(R.string.analytics_label_button_press_trip_plan),
                     null);
         }
@@ -2772,6 +2848,7 @@ public class HomeActivity extends AppCompatActivity
     public void onValidRegion(boolean isValid) {
         if(isValid){
             makeWeatherRequest();
+            getGtfsAlerts();
         }else{
             WeatherUtils.toggleWeatherViewVisibility(false,weatherView);
             weatherResponse = null;
@@ -2863,9 +2940,10 @@ public class HomeActivity extends AppCompatActivity
 
     private void updateDonationsUIVisibility() {
         mDonationView = findViewById(R.id.donationView);
+        if(mDonationView == null) return;
         DonationsManager donationsManager = Application.getDonationsManager();
 
-        if (donationsManager.shouldShowDonationUI()) {
+        if (donationsManager.shouldShowDonationUI() && mCurrentNavDrawerPosition == NAVDRAWER_ITEM_NEARBY) {
             mDonationView.setVisibility(View.VISIBLE);
         }
         else {
@@ -2898,4 +2976,67 @@ public class HomeActivity extends AppCompatActivity
 
         return builder.create();
     }
+    private void initSurveyView(){
+        mSurveyView = findViewById(R.id.surveyView);
+    }
+    private void setupSurvey() {
+        if(Application.get().getCurrentRegion() == null || mCurrentNavDrawerPosition != NAVDRAWER_ITEM_NEARBY) return;
+        initSurveyView();
+        initSurveyManager(mSurveyView);
+    }
+
+    private void initSurveyManager(View surveyView){
+        surveyManager = new SurveyManager(this, surveyView,false, new SurveyListener() {
+            @Override
+            public void onSurveyResponseReceived(StudyResponse response) {
+                surveyManager.onSurveyResponseReceived(response);
+            }
+
+            @Override
+            public void onSurveyResponseFail() {
+                surveyManager.onSurveyResponseFail();
+            }
+
+            @Override
+            public void onSubmitSurveyResponseReceived(SubmitSurveyResponse response) {
+                surveyManager.onSubmitSurveyResponseReceived(response);
+            }
+
+            @Override
+            public void onSubmitSurveyFail() {
+                surveyManager.onSubmitSurveyFail();
+            }
+
+
+            @Override
+            public void onSkipSurvey() {
+                surveyManager.onSkipSurvey();
+            }
+
+            @Override
+            public void onRemindMeLater() {
+                surveyManager.onRemindMeLater();
+            }
+
+            @Override
+            public void onCancelSurvey() {
+                surveyManager.onCancelSurvey();
+            }
+
+        });
+        surveyManager.requestSurveyData();
+    }
+
+    private void getGtfsAlerts() {
+        String regionId = String.valueOf(Application.get().getCurrentRegion().getId());
+        Application.getGtfsAlerts().fetchAlerts(regionId, new GtfsAlertCallBack() {
+            @Override
+            public void onAlert(String title, String message, String url) {
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    GtfsAlertsHelper.showWideAlertDialog(HomeActivity.this, title, message, url);
+                });
+            }
+        });
+    }
+
 }

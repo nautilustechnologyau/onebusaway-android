@@ -31,6 +31,7 @@ import android.os.Handler;
 import android.view.View;
 import android.widget.ListView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cursoradapter.widget.SimpleCursorAdapter;
 import androidx.fragment.app.DialogFragment;
@@ -134,31 +135,31 @@ abstract class MyListFragmentBase extends ListFragment
     }
 
     protected static abstract class ClearConfirmDialog extends DialogFragment {
+        private final int dialogTitleResId;
+        private final int dialogMessageResId;
 
+        public ClearConfirmDialog() {
+            this(R.string.my_option_clear_confirm, R.string.my_option_clear_confirm_title);
+        }
+
+        public ClearConfirmDialog(int dialogMessageResId, int dialogTitleResId) {
+            this.dialogMessageResId = dialogMessageResId;
+            this.dialogTitleResId = dialogTitleResId;
+        }
+
+        @NonNull
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
-            return new AlertDialog.Builder(getActivity(), R.style.CustomAlertDialog)
-                    .setMessage(R.string.my_option_clear_confirm)
-                    .setTitle(R.string.my_option_clear_confirm_title)
-                    .setIcon(R.drawable.ic_alert)
-                    .setPositiveButton(android.R.string.yes,
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    doClear();
-                                }
-                            })
-                    .setNegativeButton(android.R.string.no,
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.dismiss();
-                                }
-                            })
+            return new AlertDialog.Builder(requireActivity(), R.style.CustomAlertDialog)
+                    .setMessage(dialogMessageResId)
+                    .setTitle(dialogTitleResId)
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setPositiveButton(android.R.string.yes, (dialog, which) -> doClear())
+                    .setNegativeButton(android.R.string.no, (dialog, which) -> dialog.dismiss())
                     .create();
         }
 
-        abstract protected void doClear();
+        protected abstract void doClear();
     }
 
     //

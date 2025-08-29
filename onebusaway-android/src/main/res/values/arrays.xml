@@ -59,7 +59,6 @@
         <item>Show on map</item>
     </string-array>
     <string-array name="reminder_time">
-        <item>No reminder</item>
         <item>1 minute</item>
         <item>3 minutes</item>
         <item>5 minutes</item>
@@ -95,6 +94,11 @@
         <item>The bus doesn\'t stop here</item>
         <item>Something else</item>
     </string-array>
+    <string-array name="preferred_map_options">
+        <item>@string/preferences_preferred_map_option_normal2d</item>
+        <item>@string/preferences_preferred_map_option_normal3d</item>
+        <item>@string/preferences_preferred_map_option_satellite</item>
+    </string-array>
     <string-array name="preferred_units_options">
         <item>@string/preferences_preferred_units_option_automatic</item>
         <item>@string/preferences_preferred_units_option_metric</item>
@@ -104,10 +108,6 @@
         <item>@string/preferences_preferred_units_option_automatic</item>
         <item>@string/fahrenheit</item>
         <item>@string/celsius</item>
-    </string-array>
-    <string-array name="preferred_weather_view_option">
-        <item>@string/show</item>
-        <item>@string/hide</item>
     </string-array>
     <string-array name="app_theme_options">
         <item>@string/preferences_app_theme_option_system_default</item>

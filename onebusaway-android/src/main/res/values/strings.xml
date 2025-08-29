@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2010-2017 Paul Watts (paulcwatts@gmail.com),
+<?xml version="1.0" encoding="utf-8"?><!-- Copyright (C) 2010-2017 Paul Watts (paulcwatts@gmail.com),
     University of South Florida (sjbarbeau@gmail.com)
     Benjamin Du (bendu@me.com),
     Microsoft Corporation
@@ -134,7 +133,7 @@
 
     <string name="bus_options_menu_add_star">Add star to route</string>
     <string name="bus_options_menu_remove_star">Remove star from route</string>
-    <string name="bus_options_menu_show_route_on_map">Show route on map</string>
+    <string name="bus_options_menu_show_vehicles_on_map">Show vehicles on map</string>
     <string name="bus_options_menu_show_trip_details">Show trip status</string>
     <string name="bus_options_menu_set_reminder">Set a reminder</string>
     <string name="bus_options_menu_edit_reminder">Edit this reminder</string>
@@ -209,6 +208,14 @@
         <item quantity="other">
             <xliff:g id="count">%d</xliff:g>
             min early
+        </item>
+    </plurals>
+    <plurals name="stop_info_car_count">
+        <item quantity="one">1 car</item>
+        <!-- Entire element below should be on a single line if XML is reformatted - see #99 -->
+        <item quantity="other">
+            <xliff:g id="count">%d</xliff:g>
+            cars
         </item>
     </plurals>
     <string name="stop_info_scheduled_arrival">Scheduled arrival</string>
@@ -321,6 +328,8 @@
     <string name="feedback_msg">Were you notified at the right time to exit at your stop?</string>
     <string name="feedback_freeText">Write your feedback</string>
     <string name="feedback_checkbox_text">Include system log (your choice will be saved for future trips)</string>
+    <string name="feedback_like_button_description">Yes, I was notified at the right time</string>
+    <string name="feedback_dislike_button_description">No, I was not notified at the right time</string>
     <string name="feedback_log_guide">Your feedback will be sent to OneBusAway. If you check \"Include system logs\"
         , real-time location information from your device recorded as you
         approached your destination stop will be shared with OneBusAway so developers can improve
@@ -386,6 +395,18 @@
     <string name="my_context_remove_recent">Remove from recent</string>
     <string name="my_context_remove_star">Remove star</string>
     <string name="my_context_show_schedule">Show schedule</string>
+
+    <string name="my_option_clear_recent_stops_title">Delete Recent Stops?</string>
+    <string name="my_option_clear_recent_stops_confirm">This will permanently delete all recent stops.</string>
+
+    <string name="my_option_clear_recent_routes_title">Delete Recent Routes?</string>
+    <string name="my_option_clear_recent_routes_confirm">This will permanently delete all recent routes.</string>
+
+    <string name="my_option_clear_starred_stops_title">Remove All Starred Stops?</string>
+    <string name="my_option_clear_starred_stops_confirm">This will permanently remove all starred stops.</string>
+
+    <string name="my_option_clear_starred_routes_title">Remove All Starred Routes?</string>
+    <string name="my_option_clear_starred_routes_confirm">This will permanently remove all starred routes.</string>
 
     <!-- Service Alerts  -->
     <string name="alert_content_description_warning">Service alert warning - tap to slide up panel
@@ -677,7 +698,8 @@
     <string name="preferences_save_title">Save to storage</string>
     <string name="preferences_save_summary">Saves your starred and recent stops and routes</string>
     <string name="preferences_restore_title">Restore from storage</string>
-    <string name="preferences_restore_summary">Restores from previous save. After selecting this option you\'ll be asked to pick a file. Please select \"db.backup\" or \"OneBusAway.backup\", which will be in a folder \"OBABackups\", likely on your SD card or under your \"Documents\" folder.</string>
+    <string name="preferences_restore_summary">Restores from a previous backup. After selecting this option, you\'ll be asked to pick a file. Please select the backup file (e.g., "db.backup" or "OneBusAway.backup"), which may be in your "Documents" folder or any location where you saved the backup.
+</string>
 
     <string name="preferences_db_saved">Saved successfully!</string>
     <string name="preferences_db_save_error">Unable to save: %1$s</string>
@@ -984,9 +1006,14 @@
     <string name="trip_plan_leaving">Leaving</string>
     <string name="trip_plan_arriving">Arriving</string>
     <string name="trip_plan_stop_connector">at</string>
+    <string name="trip_plan_departure_status">Status</string>
+    <string name="trip_plan_date">Date</string>
+    <string name="trip_plan_time">Time</string>
 
     <string name="trip_plan_start_location_hint">Starting address or location name</string>
     <string name="trip_plan_end_location_hint">Ending address or location name</string>
+    <string name="select_origin_from_contacts">Select origin from contacts</string>
+    <string name="select_destination_from_contacts">Select destination from contacts</string>
     <string name="trip_plan_where_to_go_hint">Where to go today?</string>
 
     <string name="trip_plan_list_view">List View</string>
@@ -1306,6 +1333,56 @@
     <string name="preferences_reset_donation_timestamps_summary">Tapping this option will clear both the \'Remind Me Later\' and \'Don\'t Bother Me\' timestamps associated with donation requests.</string>
     <string name="preferences_show_weather_view">Show weather view</string>
     <string name="show">Show</string>
-    <string name="preferences_enable_map_3d_mode_title">Enable map 3D mode</string>
-    <string name="preferences_enable_map_3d_mode_summary">Include 3D buildings in the map</string>
+    <string name="preferences_preferred_maps_title">Preferred Map Type</string>
+    <string name="preferences_preferred_map_option_normal2d">Default Map</string>
+    <string name="preferences_preferred_map_option_normal3d">Default Map with 3D Buildings</string>
+    <string name="preferences_preferred_map_option_satellite">Satellite Map</string>
+
+    <!-- Survey -->
+    <string name="preferences_show_available_studies_title">Show available studies</string>
+    <string name="preferences_show_available_studies_body">Join studies to help improve your transit and app experience.</string>
+    <string name="dismiss_survey">Dismiss survey</string>
+    <string name="onebusaway_survey">OneBusAway Survey</string>
+    <string name="you_can_select_multiple_options_for_this_pool">(You can select multiple options for this pool.)</string>
+    <string name="write_your_answer_here">Write your answer here</string>
+    <string name="submit">Submit</string>
+    <string name="go">GO!</string>
+    <string name="submitted_successfully">Submission Successful</string>
+    <string name="please_complete_required_questions">Please answer all required questions.</string>
+    <string name="sharing_survey_info_message">"This survey will share your "</string>
+    <string name="are_you_sure_you_want_to_dismiss_the_survey">Are you sure you want to dismiss this survey?</string>
+    <string name="dismiss_survey_dialog_title">Confirm Survey Dismissal</string>
+    <string name="remind_me_latter">Remind Me Later</string>
+    <string name="survey_dismiss_dialog_skip_this_survey">Skip This Survey</string>
+    <string name="dismiss_survey_dialog_body">Your feedback helps improve transit services and app experiences.</string>
+    <string name="preferences_show_weather_view_on_map">Display the weather view on the map</string>
+    <string name="failed_to_set_reminder">Failed to set reminder</string>
+    <string name="reminder_not_enabled">Reminder not enabled</string>
+    <string name="stop_added_to_favorites">Stop added to favorites</string>
+    <string name="stop_removed_from_favorites">Stop removed from favorites</string>
+    <string name="route_added_to_favorites">Route added to favorites</string>
+    <string name="route_removed_from_favorites">Route removed from favorites</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="more_info">More Info</string>
+    <string name="display_test_alerts">Display test alerts</string>
+    <string name="display_test_wide_alerts_for_regions">Display test-wide alerts for regions</string>
+    <string name="do_you_want_to_plan_the_trip_now">Do you want to plan the trip now?</string>
+    <string name="plan_trip">Plan Trip?</string>
+    <string name="no_description_available">No description available</string>
+    <string name="close_donation_card">Close donation card</string>
+    <string name="send_email">Send email</string>
+    <string name="make_a_phone_call">Make a phone call</string>
+    <string name="browse_the_web">Browse the web</string>
+    <string name="map_option_zoom_out">Zoom out</string>
+    <string name="map_option_zoom_in">Zoom in</string>
+    <string name="map_option_layers_close">Close Map Layers Button</string>
+
+    <!-- Accessibility content descriptions for ETA rows -->
+    <string name="arrival_favorite_first_description">Save first route as favorite</string>
+    <string name="arrival_favorite_second_description">Save second route as favorite</string>
+    <string name="arrival_reminder_first_description">Set reminder for first arrival</string>
+    <string name="arrival_reminder_second_description">Set reminder for second arrival</string>
+    <string name="arrival_options_first_description">Options for first arrival</string>
+    <string name="arrival_options_second_description">Options for second arrival</string>
+    <string name="map_option_layers">Maps Layers Button</string>
 </resources>
