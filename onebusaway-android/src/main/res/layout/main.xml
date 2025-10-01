@@ -329,11 +329,11 @@
                         android:id="@+id/weatherView"
                         android:layout_marginEnd="16dp"
                         android:layout_marginTop="16dp"
-                        android:layout_alignParentTop="true"
+                        android:layout_below="@+id/main_search"
                         android:animateLayoutChanges="true"
                         android:layout_alignParentEnd="true"
                         android:layout_width="wrap_content"
-                        android:visibility="gone"
+                        android:visibility="visible"
                         android:background="@color/quantum_white_100"
                         app:cardCornerRadius="12dp"
                         android:layout_height="30dp">

@@ -49,7 +49,7 @@ public class ObaProvider extends ContentProvider {
 
     private class OpenHelper extends SQLiteOpenHelper {
 
-        private static final int DATABASE_VERSION = 33;
+        private static final int DATABASE_VERSION = 34;
 
         public OpenHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -309,17 +309,35 @@ public class ObaProvider extends ContentProvider {
             }
 
             if (oldVersion == 30) {
+                db.execSQL(
+                        "CREATE TABLE " +
+                                ObaContract.TripPlans.PATH + " (" +
+                                ObaContract.TripPlans._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                                + ObaContract.TripPlans.REGION_ID + " INTEGER NOT NULL, "
+                                + ObaContract.TripPlans.PLAN_NAME + " VARCHAR NOT NULL, "
+                                + ObaContract.TripPlans.FROM_ADDRESS_LINE1 + " VARCHAR, "
+                                + ObaContract.TripPlans.FROM_ADDRESS_LATITUDE + " DOUBLE NOT NULL, "
+                                + ObaContract.TripPlans.FROM_ADDRESS_LONGITUDE + " DOUBLE NOT NULL, "
+                                + ObaContract.TripPlans.TO_ADDRESS_LINE1 + " VARCHAR, "
+                                + ObaContract.TripPlans.TO_ADDRESS_LATITUDE + " DOUBLE NOT NULL, "
+                                + ObaContract.TripPlans.TO_ADDRESS_LONGITUDE + " DOUBLE NOT NULL " +
+                                ");"
+                );
+                oldVersion++;
+            }
+
+            if (oldVersion == 31) {
                 db.execSQL("DROP TABLE IF EXISTS " + ObaContract.Trips.PATH);
                 createTripsTable(db);
                 ++oldVersion;
             }
 
-            if(oldVersion == 31) {
+            if(oldVersion == 32) {
                 db.execSQL("ALTER TABLE " + ObaContract.Regions.PATH +
                         " ADD COLUMN " + ObaContract.Regions.SIDECAR_BASE_URL + " VARCHAR DEFAULT 'https://onebusaway.co'");
                 ++oldVersion;
             }
-            if (oldVersion == 32){
+            if (oldVersion == 33){
                 db.execSQL("ALTER TABLE " + ObaContract.Regions.PATH +
                         " ADD COLUMN " + ObaContract.Regions.PLAUSIBLE_ANALYTICS_SERVER_URL + " VARCHAR DEFAULT NULL");
             }
@@ -549,7 +567,6 @@ public class ObaProvider extends ContentProvider {
         sTripsProjectionMap.put(ObaContract.Trips.STOP_SEQUENCE, ObaContract.Trips.STOP_SEQUENCE);
         sTripsProjectionMap.put(ObaContract.Trips.SERVICE_DATE, ObaContract.Trips.SERVICE_DATE);
         sTripsProjectionMap.put(ObaContract.Trips.VEHICLE_ID, ObaContract.Trips.VEHICLE_ID);
-
         sTripsProjectionMap.put(ObaContract.Trips._COUNT, "count(*)");
 
         sTripAlertsProjectionMap = new HashMap<String, String>();

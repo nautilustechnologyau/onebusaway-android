@@ -17,6 +17,8 @@
  */
 package org.onebusaway.android.io.elements;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.Arrays;
 
 public class ObaRegionElement implements ObaRegion {
@@ -294,6 +296,9 @@ public class ObaRegionElement implements ObaRegion {
 
     @Override
     public String getSidecarBaseUrl() {
+        if (StringUtils.isEmpty(sidecarBaseUrl)) {
+            return "https://deep-link.mymetro.au";
+        }
         return sidecarBaseUrl;
     }
 

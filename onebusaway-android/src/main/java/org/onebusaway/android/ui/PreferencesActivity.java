@@ -97,7 +97,7 @@ public class PreferencesActivity extends PreferenceActivity
 
     Preference mTutorialPref;
 
-    Preference mDonatePref;
+    // Preference mDonatePref;
 
     Preference mPoweredByObaPref;
 
@@ -107,7 +107,7 @@ public class PreferencesActivity extends PreferenceActivity
 
     Preference mRestoreBackup;
 
-    Preference pushFirebaseData;
+    // Preference pushFirebaseData;
 
     // Preference resetDonationTimestamps;
 
@@ -118,8 +118,6 @@ public class PreferencesActivity extends PreferenceActivity
 
     ListPreference preferredUnits;
     ListPreference preferredTempUnits;
-    // ListPreference showWeatherDisplayPref;
-
     ListPreference mThemePref;
     ListPreference mapMode;
 
@@ -171,14 +169,11 @@ public class PreferencesActivity extends PreferenceActivity
 //            mTravelBehaviorPref.setChecked(TravelBehaviorUtils.isUserParticipatingInStudy());
 //        }
 
-        ObaRegion region = Application.get().getCurrentRegion();
-        if (region != null && region.isTravelBehaviorDataCollectionEnabled()) {
-            pushFirebaseData = findPreference(getString(R.string.preference_key_push_firebase_data));
-            pushFirebaseData.setOnPreferenceClickListener(this);
-        }
+//        pushFirebaseData = findPreference(getString(R.string.preference_key_push_firebase_data));
+//        pushFirebaseData.setOnPreferenceClickListener(this);
 
-        //resetDonationTimestamps = findPreference(getString(R.string.preference_key_reset_donation_timestamps));
-        //resetDonationTimestamps.setOnPreferenceClickListener(this);
+//        resetDonationTimestamps = findPreference(getString(R.string.preference_key_reset_donation_timestamps));
+//        resetDonationTimestamps.setOnPreferenceClickListener(this);
 
         mHideAlertsPref = findPreference(getString(R.string.preference_key_hide_alerts));
         mHideAlertsPref.setOnPreferenceChangeListener(this);
@@ -186,8 +181,8 @@ public class PreferencesActivity extends PreferenceActivity
         mTutorialPref = findPreference(getString(R.string.preference_key_tutorial));
         mTutorialPref.setOnPreferenceClickListener(this);
 
-        mDonatePref = findPreference(getString(R.string.preferences_key_donate));
-        mDonatePref.setOnPreferenceClickListener(this);
+//        mDonatePref = findPreference(getString(R.string.preferences_key_donate));
+//        mDonatePref.setOnPreferenceClickListener(this);
 
         mPoweredByObaPref = findPreference(getString(R.string.preferences_key_powered_by_oba));
         mPoweredByObaPref.setOnPreferenceClickListener(this);
@@ -208,9 +203,6 @@ public class PreferencesActivity extends PreferenceActivity
         preferredTempUnits = (ListPreference) findPreference(
                 getString(R.string.preference_key_preferred_temperature_units));
 
-//        showWeatherDisplayPref = (ListPreference) findPreference(
-//                getString(R.string.preference_key_show_weather_view));
-
         mThemePref = (ListPreference) findPreference(
                 getString(R.string.preference_key_app_theme));
         mThemePref.setOnPreferenceChangeListener(this);
@@ -229,20 +221,6 @@ public class PreferencesActivity extends PreferenceActivity
             Preference experimentalRegion = findPreference(
                     getString(R.string.preference_key_experimental_regions));
             advancedCategory.removePreference(experimentalRegion);
-
-            if (BuildConfig.DISABLE_ADVANCED_PREFERENCE) {
-                PreferenceCategory category = (PreferenceCategory) preferenceScreen.findPreference(
-                        getString(R.string.preferences_category_parent_advanced));
-                getPreferenceScreen().removePreference(category);
-            }
-        }
-
-        if (region == null || !region.isTravelBehaviorDataCollectionEnabled()) {
-            PreferenceCategory advancedCategory = (PreferenceCategory)
-                    findPreference(getString(R.string.preferences_category_advanced));
-            Preference pushFirebase = findPreference(
-                    getString(R.string.preference_key_push_firebase_data));
-            advancedCategory.removePreference(pushFirebase);
         }
 
         // If the Android version is Oreo (8.0) hide "Notification" preference
@@ -261,13 +239,13 @@ public class PreferencesActivity extends PreferenceActivity
         if (BuildConfig.FLAVOR_brand == "myMetro") {
             // TODO: Decide whether we should show these options
             aboutCategory.removePreference(mPoweredByObaPref);
-            aboutCategory.removePreference(mDonatePref);
+//            aboutCategory.removePreference(mDonatePref);
         } else {
             if (BuildConfig.FLAVOR_brand.equalsIgnoreCase(BuildFlavorUtils.OBA_FLAVOR_BRAND)) {
                 aboutCategory.removePreference(mPoweredByObaPref);
             } else {
                 // Its not the OBA brand flavor, then hide the "Donate" preference and show "Powered by OBA"
-                aboutCategory.removePreference(mDonatePref);
+//                aboutCategory.removePreference(mDonatePref);
             }
         }
 
@@ -285,7 +263,6 @@ public class PreferencesActivity extends PreferenceActivity
         changePreferenceSummary(getString(R.string.preference_key_region));
         changePreferenceSummary(getString(R.string.preference_key_preferred_units));
         changePreferenceSummary(getString(R.string.preference_key_preferred_temperature_units));
-        // changePreferenceSummary(getString(R.string.preference_key_show_weather_view));
         changePreferenceSummary(getString(R.string.preference_key_app_theme));
         changePreferenceSummary(getString(R.string.preference_key_otp_api_url));
         changePreferenceSummary(getString(R.string.preference_key_map_mode));
@@ -372,9 +349,6 @@ public class PreferencesActivity extends PreferenceActivity
         } else if (preferenceKey.equalsIgnoreCase(getString(R.string.preference_key_map_mode))) {
             mapMode.setSummary(mapMode.getValue());
         }
-//        else if(preferenceKey.equalsIgnoreCase(getString(R.string.preference_key_show_weather_view))){
-//            showWeatherDisplayPref.setSummary(showWeatherDisplayPref.getValue());
-//        }
     }
 
     @Override
@@ -412,11 +386,12 @@ public class PreferencesActivity extends PreferenceActivity
             BackupUtils.createBackupFile(this);
         } else if (pref.equals(mRestoreBackup)){
             BackupUtils.selectBackupFile(this);
-        } else if (pref.equals(pushFirebaseData)) {
-            // Try to push firebase data to the server
-            FirebaseDataPusher pusher = new FirebaseDataPusher();
-            pusher.push(this);
         }
+//        else if (pref.equals(pushFirebaseData)) {
+//            // Try to push firebase data to the server
+//            FirebaseDataPusher pusher = new FirebaseDataPusher();
+//            pusher.push(this);
+//        }
 //        else if (pref.equals(resetDonationTimestamps)) {
 //            Application.getDonationsManager().setDonationRequestReminderDate(null);
 //            Application.getDonationsManager().setDonationRequestDismissedDate(null);
@@ -637,10 +612,6 @@ public class PreferencesActivity extends PreferenceActivity
             // Change map mode description
             changePreferenceSummary(key);
         }
-//        else if (key.equalsIgnoreCase(getString(R.string.preference_key_show_weather_view))) {
-//            // Change the preferred weather show or hide option
-//            changePreferenceSummary(key);
-//        }
     }
 
     /**

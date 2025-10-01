@@ -114,6 +114,7 @@ public final class ObaReminderRequest extends RequestBase implements Callable<Re
     public ReminderResponse call() {
         ReminderResponse response = call(ReminderResponse.class);
         if (response != null) {
+            response.setUrl(mUri.toString());
             Log.d(TAG, "Response received: " + response);
             if (listener != null) {
                 listener.onReminderResponseReceived(response);

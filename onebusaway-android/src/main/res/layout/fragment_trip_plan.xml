@@ -66,7 +66,7 @@
                     android:layout_gravity="center_vertical"
                     android:layout_toLeftOf="@id/fromCurrentLocationImageButton"
                     android:layout_centerVertical="true"
-                    android:contentDescription="@string/select_origin_from_contacts" />
+                    android:contentDescription="@string/select_origin_from_contacts"/>
 
 
             <ImageButton

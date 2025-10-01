@@ -2,6 +2,7 @@ package org.onebusaway.android.widealerts;
 
 import com.google.transit.realtime.GtfsRealtime;
 
+import org.apache.commons.lang3.StringUtils;
 import org.onebusaway.android.R;
 import org.onebusaway.android.app.Application;
 
@@ -91,7 +92,7 @@ public class GtfsAlerts {
         Application app = Application.get();
         SharedPreferences sharedPreferences = Application.getPrefs();
         String baseUrl = app.getCurrentRegion().getSidecarBaseUrl();
-        if (baseUrl == null) return null;
+        if (StringUtils.isEmpty(baseUrl)) return null;
         boolean isTestAlert = sharedPreferences.getBoolean(app.getString(R.string.preferences_display_test_alerts), false);
         String alertAPIURL = baseUrl + app.getString(R.string.alerts_api_endpoint);
         alertAPIURL = alertAPIURL.replace("regionID", regionId);

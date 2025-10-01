@@ -36,6 +36,7 @@
     <uses-permission android:name="${applicationId}.permission.TRIP_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
 
     <!-- Permission request for activity recognition and background location is disabled because the related feature has been turned off.
     See issue #1240 for more details: https://github.com/OneBusAway/onebusaway-android/issues/1240-->
@@ -49,6 +50,8 @@
     <!--<uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>-->
     <!-- For reminders - SCHEDULE_EXACT_ALARM is required when targeting Android 12 or higher-->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
+    <!-- For notifications, POST_NOTIFICATIONS is required when targeting Android 12 or higher-->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.CAMERA" />
     <!--
     <uses-feature android:name="android.hardware.camera" android:required="true" />
