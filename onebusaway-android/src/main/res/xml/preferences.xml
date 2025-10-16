@@ -100,6 +100,14 @@
             android:title="@string/preferred_temperature_unit" />
 
         <ListPreference
+            android:defaultValue="@string/hide"
+            android:negativeButtonText="@string/close"
+            android:entries="@array/preferred_weather_view_option"
+            android:entryValues="@array/preferred_weather_view_option"
+            android:key="@string/preference_key_show_weather_view"
+            android:title="@string/preferences_show_weather_view" />
+
+        <ListPreference
                 android:defaultValue="@string/preferences_app_theme_option_system_default"
                 android:negativeButtonText="@string/close"
                 android:entries="@array/app_theme_options"
