@@ -85,7 +85,7 @@
             android:title="@string/preferred_temperature_unit" />
 
         <ListPreference
-            android:defaultValue="@string/show"
+            android:defaultValue="@string/hide"
             android:negativeButtonText="@string/close"
             android:entries="@array/preferred_weather_view_option"
             android:entryValues="@array/preferred_weather_view_option"

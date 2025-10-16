@@ -44,10 +44,10 @@ public class WeatherUtils {
         Application app = Application.get();
         SharedPreferences sharedPreferences = Application.getPrefs();
 
-        String showOption = app.getString(R.string.show);
+        String showOption = app.getString(R.string.hide);
         String pref = sharedPreferences.getString(app.getString(R.string.preference_key_show_weather_view), showOption);
 
-        return (!pref.equals(showOption));
+        return (pref.equals(showOption));
     }
 
     public static void toggleWeatherViewVisibility(boolean shouldShow, View weatherView) {
