@@ -946,6 +946,10 @@ public class HomeActivity extends AppCompatActivity
     }
 
     private void showMyRemindersFragment() {
+        Intent myIntent = new Intent(this, MyRemindersActivity.class);
+        startActivity(myIntent);
+    }
+    private void showMyRemindersFragment1() {
         FragmentManager fm = getSupportFragmentManager();
         /**
          * Hide everything that shouldn't be shown

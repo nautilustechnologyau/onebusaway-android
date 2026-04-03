@@ -16,11 +16,14 @@
  */
 
 import org.apache.tools.ant.filters.ConcatFilter
+import com.android.build.api.variant.BuildConfigField
 
 apply plugin: 'com.android.application'
+apply plugin: 'com.google.devtools.ksp'
+// apply plugin: 'com.github.triplet.play'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-kapt'
-apply plugin: 'com.google.gms.google-services'
+// apply plugin: 'kotlin-kapt'
+// apply plugin: 'com.google.gms.google-services'
 
 repositories {
     maven {
@@ -31,21 +34,19 @@ repositories {
         // CUTR Releases
         url "https://github.com/CUTR-at-USF/cutr-mvn-repo/raw/master/snapshots"
     }
-    google()
     mavenCentral()
     maven { url 'https://jitpack.io' }
+    google()
 }
 
 android {
     compileSdk 36
 
     defaultConfig {
-        minSdkVersion 23
+        minSdkVersion 21
         targetSdkVersion 36
         versionCode 165
         versionName "4.0.6"
-
-        multiDexEnabled true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -53,11 +54,18 @@ android {
         buildConfigField("String", "CI", "\"" + System.getenv('CI') + "\"")
 
         // Configure Java compile options to specify the schema location for Room database to keep track of schema versions
-        javaCompileOptions {
-            annotationProcessorOptions {
-                arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
-            }
-        }
+//        ksp {
+//            arg("room.schemaLocation", "$projectDir/schemas")
+//        }
+
+//        multiDexEnabled true
+
+//        // Configure Java compile options to specify the schema location for Room database to keep track of schema versions
+//        javaCompileOptions {
+//            annotationProcessorOptions {
+//                arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
+//            }
+//        }
     }
 
     /**
@@ -71,230 +79,25 @@ android {
             // Normal Google Play release - see src/google
             dimension "platform"
             isDefault = true
+            buildConfigField "String", "MAP_FRAGMENT_CLASS", "\"org.onebusaway.android.map.googlemapsv2.BaseMapFragment\""
+            buildConfigField "String", "MAP_HELPER_CLASS", "\"org.onebusaway.android.map.googlemapsv2.GoogleProprietaryMapHelper\""
         }
 
-        oba {
-            /**
-             * Original OneBusAway brand
-             *
-             * To allow this app to be distributed via Google Play, the applicationId MUST remain the
-             * original package name of the app before it was re-branded to OneBusAway:
-             * com.joulespersecond.seattlebusbot
-             */
-            dimension "brand"
-            isDefault = true
-            applicationId "com.joulespersecond.seattlebusbot"
-            manifestPlaceholders = [databaseAuthority: "com.joulespersecond.oba"]
-            buildConfigField "int", "ARRIVAL_INFO_STYLE", "0" // Defined in BuildFlavorConstants
-            buildConfigField "boolean", "USE_FIXED_REGION", "false" // Supports multi-region
-            buildConfigField "boolean", "USE_PELIAS_GEOCODING", "true"
-            buildConfigField "String", "PELIAS_API_KEY", "\"" + getPeliasKey(name) + "\""
-            // Below fields need to be defined so flavor builds, but will not be used by app
-            buildConfigField "String", "FIXED_REGION_NAME", "null"
-            buildConfigField "String", "FIXED_REGION_OBA_BASE_URL", "null"
-            buildConfigField "String", "FIXED_REGION_SIRI_BASE_URL", "null"
-            buildConfigField "double", "FIXED_REGION_BOUNDS_LAT", "0"
-            buildConfigField "double", "FIXED_REGION_BOUNDS_LON", "0"
-            buildConfigField "double", "FIXED_REGION_BOUNDS_LAT_SPAN", "0"
-            buildConfigField "double", "FIXED_REGION_BOUNDS_LON_SPAN", "0"
-            buildConfigField "String", "FIXED_REGION_LANG", "null"
-            buildConfigField "String", "FIXED_REGION_CONTACT_EMAIL", "null"
-            buildConfigField "boolean", "FIXED_REGION_SUPPORTS_OBA_DISCOVERY_APIS", "true"
-            buildConfigField "boolean", "FIXED_REGION_SUPPORTS_OBA_REALTIME_APIS", "true"
-            buildConfigField "boolean", "FIXED_REGION_SUPPORTS_SIRI_REALTIME_APIS", "false"
-            buildConfigField "String", "FIXED_REGION_TWITTER_URL", "null"
-            buildConfigField "String", "FIXED_REGION_STOP_INFO_URL", "null"
-            buildConfigField "String", "FIXED_REGION_OPEN311_JURISDICTION_ID", "null"
-            buildConfigField "String", "FIXED_REGION_OPEN311_API_KEY", "null"
-            buildConfigField "String", "FIXED_REGION_OPEN311_BASE_URL", "null"
-            buildConfigField "String", "FIXED_REGION_OTP_BASE_URL", "null"
-            buildConfigField "String", "FIXED_REGION_OTP_CONTACT_EMAIL", "null"
-            buildConfigField "boolean", "FIXED_REGION_SUPPORTS_OTP_BIKESHARE", "false"
-            buildConfigField "String", "FIXED_REGION_PAYMENT_ANDROID_APP_ID", "null"
-            buildConfigField "String", "FIXED_REGION_PAYMENT_WARNING_TITLE", "null"
-            buildConfigField "String", "FIXED_REGION_PAYMENT_WARNING_BODY", "null"
-            buildConfigField "boolean", "FIXED_REGION_TRAVEL_BEHAVIOR_DATA_COLLECTION", "false"
-            buildConfigField "boolean", "FIXED_REGION_ENROLL_PARTICIPANTS_IN_STUDY", "false"
-            buildConfigField "String", "FIXED_REGION_SIDECAR_BASE_URL", "\"https://onebusaway.co\""
-            buildConfigField "String", "FIXED_REGION_PLAUSIBLE_ANALYTICS_SERVER_URL", "null"
-            buildConfigField "String", "ONESIGNAL_APP_ID", ONESIGNAL_APP_ID
-
-            // TODO: set the values for this fixed region
-            buildConfigField "boolean", "DISABLE_ADVANCED_PREFERENCE", "false"
-            buildConfigField "double", "FIXED_REGION_MAP_CENTRE_LAT", "0.0"
-            buildConfigField "double", "FIXED_REGION_MAP_CENTRE_LON", "0.0"
-            buildConfigField "int", "FIXED_REGION_MAP_ZOOM_LEVEL", "10"
-
-            // Turn on if you want to serve ads. also ads-free subscription will be enabled automatically
-            // to use this feature, make sure that you have secrets-debug.properties
-            // and secrets-release.properties file on the app root (same directory as this build.gradle file)
-            // Sample content can look like. Don't put production ads id in debug. your ads may be blocked by google.
-            // ADMOB_APPLICATION_ID="your admob application id"
-            // ADMOB_BANNER_UNIT_ID="your admob banner ads unit id"
-            // ADMOB_INTERSTITIAL_UNIT_ID="your interstitial ads unit id"
-            buildConfigField "boolean", "ENABLE_ADMOB", "false"
+        maplibre {
+            // MapLibre-based build using OpenFreeMap tiles - see src/maplibre
+            dimension "platform"
+            buildConfigField "String", "MAP_FRAGMENT_CLASS", "\"org.onebusaway.android.map.maplibre.MapLibreMapFragment\""
+            buildConfigField "String", "MAP_HELPER_CLASS", "\"org.onebusaway.android.map.maplibre.MapLibreProprietaryMapHelper\""
         }
 
-        /**
-         * Rebranded versions of OBA using brand build flavors are below.  To add a new brand:
-         *  1. Add a new brand build flavor variant below
-         *  2. Create a new folder src/{brandName}/res (or copy from one of the samples - src/agencyX or src/agencyY)
-         *  3. Edit resource files in src/{brandName}/res subfolders with the brand information
-         *
-         *  For generating icons for the res/mipmap-* folders, see http://romannurik.github.io/AndroidAssetStudio/icons-launcher.html
-         */
-        agencyX {
-            // "Agency X" rebranding OneBusAway as another app - see src/agencyX/res for branded resources
-            dimension "brand"
-            applicationId "org.agencyx.android" // Unique listing of this brand on app store
-            manifestPlaceholders = [databaseAuthority: applicationId.toString() + '.provider']
-            buildConfigField "int", "ARRIVAL_INFO_STYLE", "0"  // Defined in BuildFlavorConstants
-            buildConfigField "boolean", "USE_FIXED_REGION", "false" // Supports multi-region
-            buildConfigField "boolean", "USE_PELIAS_GEOCODING", "true"
-            buildConfigField "String", "PELIAS_API_KEY", "\"" + getPeliasKey(name) + "\""
-            // Below fields need to be defined so flavor builds, but will not be used by app
-            buildConfigField "String", "FIXED_REGION_NAME", "null"
-            buildConfigField "String", "FIXED_REGION_OBA_BASE_URL", "null"
-            buildConfigField "String", "FIXED_REGION_SIRI_BASE_URL", "null"
-            buildConfigField "double", "FIXED_REGION_BOUNDS_LAT", "0"
-            buildConfigField "double", "FIXED_REGION_BOUNDS_LON", "0"
-            buildConfigField "double", "FIXED_REGION_BOUNDS_LAT_SPAN", "0"
-            buildConfigField "double", "FIXED_REGION_BOUNDS_LON_SPAN", "0"
-            buildConfigField "String", "FIXED_REGION_LANG", "null"
-            buildConfigField "String", "FIXED_REGION_CONTACT_EMAIL", "null"
-            buildConfigField "boolean", "FIXED_REGION_SUPPORTS_OBA_DISCOVERY_APIS", "true"
-            buildConfigField "boolean", "FIXED_REGION_SUPPORTS_OBA_REALTIME_APIS", "true"
-            buildConfigField "boolean", "FIXED_REGION_SUPPORTS_SIRI_REALTIME_APIS", "false"
-            buildConfigField "String", "FIXED_REGION_TWITTER_URL", "null"
-            buildConfigField "String", "FIXED_REGION_STOP_INFO_URL", "null"
-            buildConfigField "String", "FIXED_REGION_OPEN311_JURISDICTION_ID", "null"
-            buildConfigField "String", "FIXED_REGION_OPEN311_API_KEY", "null"
-            buildConfigField "String", "FIXED_REGION_OPEN311_BASE_URL", "null"
-            buildConfigField "String", "FIXED_REGION_OTP_BASE_URL", "null"
-            buildConfigField "String", "FIXED_REGION_OTP_CONTACT_EMAIL", "null"
-            buildConfigField "boolean", "FIXED_REGION_SUPPORTS_OTP_BIKESHARE", "false"
-            buildConfigField "String", "FIXED_REGION_PAYMENT_ANDROID_APP_ID", "null"
-            buildConfigField "String", "FIXED_REGION_PAYMENT_WARNING_TITLE", "null"
-            buildConfigField "String", "FIXED_REGION_PAYMENT_WARNING_BODY", "null"
-            buildConfigField "boolean", "FIXED_REGION_TRAVEL_BEHAVIOR_DATA_COLLECTION", "false"
-            buildConfigField "boolean", "FIXED_REGION_ENROLL_PARTICIPANTS_IN_STUDY", "false"
-            buildConfigField "String", "FIXED_REGION_SIDECAR_BASE_URL", "null"
-            buildConfigField "String", "FIXED_REGION_PLAUSIBLE_ANALYTICS_SERVER_URL", "null"
-            buildConfigField "String", "ONESIGNAL_APP_ID", ONESIGNAL_APP_ID
+        // Brand flavors are loaded from separate files in flavors/ directory.
+        // See flavors/README.md for instructions on adding new white-label brands.
 
-            // TODO: set the values for this fixed region. check oba section for details
-            buildConfigField "boolean", "DISABLE_ADVANCED_PREFERENCE", "false"
-            buildConfigField "double", "FIXED_REGION_MAP_CENTRE_LAT", "0.0"
-            buildConfigField "double", "FIXED_REGION_MAP_CENTRE_LON", "0.0"
-            buildConfigField "int", "FIXED_REGION_MAP_ZOOM_LEVEL", "10"
-
-            buildConfigField "boolean", "ENABLE_ADMOB", "false"
-        }
-
-        agencyY {
-            // "Agency Y" rebranding OneBusAway as another app - see src/agencyY/res for branded resources
-            dimension "brand"
-            applicationId "org.agencyy.android" // Unique listing of this brand on app store
-            manifestPlaceholders = [databaseAuthority: applicationId.toString() + '.provider']
-            buildConfigField "int", "ARRIVAL_INFO_STYLE", "1" // Defined in BuildFlavorConstants
-            buildConfigField "boolean", "USE_FIXED_REGION", "true" // Does not support multi-region
-            buildConfigField "boolean", "USE_PELIAS_GEOCODING", "true"
-            buildConfigField "String", "PELIAS_API_KEY", "\"" + getPeliasKey(name) + "\""
-            // Fixed region info that the app will use
-            buildConfigField "String", "FIXED_REGION_NAME", "\"Agency Y\""
-            buildConfigField "String", "FIXED_REGION_OBA_BASE_URL",
-                    "\"http://api.tampa.onebusaway.org/api\""
-            buildConfigField "String", "FIXED_REGION_SIRI_BASE_URL", "null"
-            buildConfigField "double", "FIXED_REGION_BOUNDS_LAT", "27.976910500000002"
-            buildConfigField "double", "FIXED_REGION_BOUNDS_LON", "-82.445851"
-            buildConfigField "double", "FIXED_REGION_BOUNDS_LAT_SPAN", "0.5424609999999994"
-            buildConfigField "double", "FIXED_REGION_BOUNDS_LON_SPAN", "0.576357999999999"
-            buildConfigField "String", "FIXED_REGION_LANG", "\"en_US\""
-            buildConfigField "String", "FIXED_REGION_CONTACT_EMAIL", "\"onebusaway@gohart.org\""
-            buildConfigField "boolean", "FIXED_REGION_SUPPORTS_OBA_DISCOVERY_APIS", "true"
-            buildConfigField "boolean", "FIXED_REGION_SUPPORTS_OBA_REALTIME_APIS", "true"
-            buildConfigField "boolean", "FIXED_REGION_SUPPORTS_SIRI_REALTIME_APIS", "false"
-            buildConfigField "String", "FIXED_REGION_TWITTER_URL",
-                    "\"http://mobile.twitter.com/OBA_tampa\""
-            buildConfigField "String", "FIXED_REGION_STOP_INFO_URL", "null"
-            buildConfigField "String", "FIXED_REGION_OPEN311_JURISDICTION_ID", "null"
-            buildConfigField "String", "FIXED_REGION_OPEN311_API_KEY", "\"937033cad3054ec58a1a8156dcdd6ad8a416af2f\""
-            buildConfigField "String", "FIXED_REGION_OPEN311_BASE_URL",
-                    "\"https://seeclickfix.com/open311/v2/\""
-            buildConfigField "String", "FIXED_REGION_OTP_BASE_URL",
-                    "\"http://otp.staging.obahart.org/otp/\""
-            buildConfigField "String", "FIXED_REGION_OTP_CONTACT_EMAIL",
-                    "\"otp-tampa@onebusaway.org\""
-            buildConfigField "boolean", "FIXED_REGION_SUPPORTS_OTP_BIKESHARE", "true"
-            buildConfigField "String", "FIXED_REGION_PAYMENT_ANDROID_APP_ID", "\"co.bytemark.hart\""
-            buildConfigField "String", "FIXED_REGION_PAYMENT_WARNING_TITLE", "null"
-            buildConfigField "String", "FIXED_REGION_PAYMENT_WARNING_BODY", "null"
-            buildConfigField "boolean", "FIXED_REGION_TRAVEL_BEHAVIOR_DATA_COLLECTION", "false"
-            buildConfigField "boolean", "FIXED_REGION_ENROLL_PARTICIPANTS_IN_STUDY", "false"
-            buildConfigField "String", "FIXED_REGION_SIDECAR_BASE_URL", "null"
-            buildConfigField "String", "FIXED_REGION_PLAUSIBLE_ANALYTICS_SERVER_URL", "null"
-            buildConfigField "String", "ONESIGNAL_APP_ID", ONESIGNAL_APP_ID
-
-            // TODO: set the values for this fixed region. check oba section for details
-            buildConfigField "boolean", "DISABLE_ADVANCED_PREFERENCE", "false"
-            buildConfigField "double", "FIXED_REGION_MAP_CENTRE_LAT", "0.0"
-            buildConfigField "double", "FIXED_REGION_MAP_CENTRE_LON", "0.0"
-            buildConfigField "int", "FIXED_REGION_MAP_ZOOM_LEVEL", "10"
-
-            buildConfigField "boolean", "ENABLE_ADMOB", "false"
-        }
-
-        /**
-         * MyMetro - rebranding
-         */
         myMetro {
-            // MyMetro - rebranding
-            dimension "brand"
-            applicationId "au.mymetro.android"
-            manifestPlaceholders = [databaseAuthority: applicationId.toString() + '.provider']
-            buildConfigField "int", "ARRIVAL_INFO_STYLE", "0" // Defined in BuildFlavorConstants
-            buildConfigField "boolean", "USE_FIXED_REGION", "false" // Supports multi-region
-            buildConfigField "boolean", "USE_PELIAS_GEOCODING", "false"
-            buildConfigField "String", "PELIAS_API_KEY", "\"" + getPeliasKey(name) + "\""
-            // Fixed region info that the app will use
-            buildConfigField "String", "FIXED_REGION_NAME", "\"Adelaide Metro\""
-            buildConfigField "String", "FIXED_REGION_OBA_BASE_URL",
-                    "\"https://transit.nautilus-tech.com.au/onebusaway-api-webapp/\""
-            buildConfigField "String", "FIXED_REGION_SIRI_BASE_URL", "\"https://transit.nautilus-tech.com.au/onebusaway-api-webapp/siri/\""
-            buildConfigField "double", "FIXED_REGION_BOUNDS_LAT", "-34.89224"
-            buildConfigField "double", "FIXED_REGION_BOUNDS_LON", "138.61566499999998"
-            buildConfigField "double", "FIXED_REGION_BOUNDS_LAT_SPAN", "0.5954540000000037"
-            buildConfigField "double", "FIXED_REGION_BOUNDS_LON_SPAN", "0.2644420000000025"
-            buildConfigField "String", "FIXED_REGION_LANG", "\"en_AU\""
-            buildConfigField "String", "FIXED_REGION_CONTACT_EMAIL", "\"mymetro@nautilus-tech.com.au\""
-            buildConfigField "boolean", "FIXED_REGION_SUPPORTS_OBA_DISCOVERY_APIS", "true"
-            buildConfigField "boolean", "FIXED_REGION_SUPPORTS_OBA_REALTIME_APIS", "true"
-            buildConfigField "boolean", "FIXED_REGION_SUPPORTS_SIRI_REALTIME_APIS", "true"
-            buildConfigField "String", "FIXED_REGION_TWITTER_URL", "null"
-            buildConfigField "String", "FIXED_REGION_STOP_INFO_URL", "null"
-            buildConfigField "String", "FIXED_REGION_OPEN311_JURISDICTION_ID", "null"
-            buildConfigField "String", "FIXED_REGION_OPEN311_API_KEY", "\"642bda8b6edd6\""
-            buildConfigField "String", "FIXED_REGION_OPEN311_BASE_URL", "\"https://ureport.mymetro.au/open311/v2/\""
-            buildConfigField "String", "FIXED_REGION_OTP_BASE_URL",
-                    "\"https://otp.nautilus-tech.com.au/otp\""
-            buildConfigField "String", "FIXED_REGION_OTP_CONTACT_EMAIL",
-                    "\"mymetro@nautilus-tech.com.au\""
-            buildConfigField "boolean", "FIXED_REGION_SUPPORTS_OTP_BIKESHARE", "false"
-            buildConfigField "String", "FIXED_REGION_PAYMENT_ANDROID_APP_ID", "null"
-            buildConfigField "String", "FIXED_REGION_PAYMENT_WARNING_TITLE", "null"
-            buildConfigField "String", "FIXED_REGION_PAYMENT_WARNING_BODY", "null"
-            buildConfigField "boolean", "FIXED_REGION_TRAVEL_BEHAVIOR_DATA_COLLECTION", "false"
-            buildConfigField "boolean", "FIXED_REGION_ENROLL_PARTICIPANTS_IN_STUDY", "false"
-            buildConfigField "String", "FIXED_REGION_SIDECAR_BASE_URL", "null"
-            buildConfigField "String", "FIXED_REGION_PLAUSIBLE_ANALYTICS_SERVER_URL", "null"
-            buildConfigField "String", "ONESIGNAL_APP_ID", ONESIGNAL_APP_ID
-
-            // MyMetro specific settings
-            buildConfigField "boolean", "ENABLE_ADMOB", "true"
-            buildConfigField "boolean", "DISABLE_ADVANCED_PREFERENCE", "true"
-            buildConfigField "double", "FIXED_REGION_MAP_CENTRE_LAT", "-34.921230"
-            buildConfigField "double", "FIXED_REGION_MAP_CENTRE_LON", "138.599503"
-            buildConfigField "int", "FIXED_REGION_MAP_ZOOM_LEVEL", "10"
+            // MapLibre-based build using OpenFreeMap tiles - see src/maplibre
+            dimension "platform"
+            buildConfigField "String", "MAP_FRAGMENT_CLASS", "\"org.onebusaway.android.map.maplibre.MapLibreMapFragment\""
+            buildConfigField "String", "MAP_HELPER_CLASS", "\"org.onebusaway.android.map.maplibre.MapLibreProprietaryMapHelper\""
         }
     }
 
@@ -332,15 +135,20 @@ android {
         variant.buildConfigField "String", "GOOGLE_MAPS_API_KEY", apikeyProperties['GOOGLE_MAPS_API_KEY']
     }
 
-    // http://stackoverflow.com/questions/20673625/gradle-0-7-0-duplicate-files-during-packaging-of-apk
     packagingOptions {
-        exclude 'META-INF/LICENSE'
-        exclude 'META-INF/NOTICE'
+        resources {
+            excludes += ['META-INF/LICENSE', 'META-INF/NOTICE']
+        }
     }
+//    // http://stackoverflow.com/questions/20673625/gradle-0-7-0-duplicate-files-during-packaging-of-apk
+//    packagingOptions {
+//        exclude 'META-INF/LICENSE'
+//        exclude 'META-INF/NOTICE'
+//    }
 
-    lintOptions {
-        disable 'MissingTranslation', 'ExtraTranslation'
-    }
+//    lintOptions {
+//        disable 'MissingTranslation', 'ExtraTranslation'
+//    }
 
     if (project.hasProperty("secure.properties")
             && new File(project.property("secure.properties")).exists()) {
@@ -393,18 +201,84 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-    kotlinOptions {
-        jvmTarget = "1.8"
+    kotlin {
+        compilerOptions {
+            jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8
+        }
     }
+//    kotlinOptions {
+//        jvmTarget = "1.8"
+//    }
     testOptions {
         unitTests.includeAndroidResources true
+    }
+    namespace='org.onebusaway.android'
+    lint {
+        disable 'MissingTranslation', 'ExtraTranslation'
     }
 
     useLibrary 'android.test.runner'
     useLibrary 'android.test.base'
     useLibrary 'android.test.mock'
-    namespace 'org.onebusaway.android'
+//    namespace 'org.onebusaway.android'
+
+    buildFeatures {
+        buildConfig = true
+    }
+
 }
+
+///**
+// * Set brand BuildConfig.DATABASE_AUTHORITY, used in org.onebusaway.android.provider.ObaContract
+// */
+//androidComponents {
+//    onVariants(selector().all(), { variant ->
+//        def authority
+//        // Check if the primary flavor is "oba"
+//        if (variant.productFlavors.any { it.second == "oba" }) {
+//            authority = '"' + "com.joulespersecond.oba" + '"'
+//            // Must keep the original OBA authority
+//        } else {
+//            // It's cleaner to just append ".provider" to the applicationId for brand flavors
+//            authority = '"' + variant.applicationId.get() + '.provider' + '"'
+//        }
+//
+//        variant.buildConfigFields.put("DATABASE_AUTHORITY",
+//                new com.android.build.api.variant.BuildConfigField("String", authority, null)
+//        )
+//    })
+//
+//    onVariants(selector().withBuildType("release"), { variant ->
+//        // Append the version name to the end of aligned APKs
+//        variant.outputs.forEach { output ->
+//            // Access versionName from the output object
+//            output.outputFileName.set("${variant.name}-v${output.versionName.get()}.apk")
+//        }
+//    })
+
+//    onVariants(selector().all(), { variant ->
+//        def buildType = variant.buildType // Sets the current build type
+//        def apikeyProperties = new Properties()
+//        def filename = "./onebusaway-android/secrets-${buildType}.properties"
+//        def apikeyPropertiesFile = rootProject.file(filename)
+//        apikeyProperties.load(new FileInputStream(apikeyPropertiesFile))
+//        variant.resValues.put(variant.makeResValueKey("string", "admob_application_id"), apikeyProperties['ADMOB_APPLICATION_ID'])
+//        variant.resValues.put(variant.makeResValueKey("string", "admob_banner_unit_id"), apikeyProperties['ADMOB_BANNER_UNIT_ID'])
+//        variant.resValues.put(variant.makeResValueKey("string", "admob_interstitial_unit_id"), apikeyProperties['ADMOB_INTERSTITIAL_UNIT_ID'])
+//        variant.resValues.put(variant.makeResValueKey("string", "admob_native_unit_id"), apikeyProperties['ADMOB_NATIVE_UNIT_ID'])
+//        variant.resValues.put(variant.makeResValueKey("string", "an_banner_placement_id"), apikeyProperties['AN_BANNER_PLACEMENT_ID'])
+//        variant.resValues.put(variant.makeResValueKey("string", "an_interstitial_placement_id"), apikeyProperties['AN_INTERSTITIAL_PLACEMENT_ID'])
+//        variant.resValues.put(variant.makeResValueKey("string", "google_maps_api_key"), apikeyProperties['GOOGLE_MAPS_API_KEY'])
+//
+//        variant.buildConfigFields.put("GOOGLE_MAPS_API_KEY", new BuildConfigField("String", apikeyProperties['GOOGLE_MAPS_API_KEY'], null))
+////
+////        variant.buildConfigField "String", "GOOGLE_MAPS_API_KEY", apikeyProperties['GOOGLE_MAPS_API_KEY']
+//    })
+//}
+
+// Load brand flavor configurations from flavors/ directory
+// See flavors/README.md for instructions on adding new white-label brands
+apply from: "flavors/load-flavors.gradle"
 
 /**
  * Gets the Pelias geocoding API key for the given product flavor
@@ -430,8 +304,9 @@ configurations {
 dependencies {
     // Firebase Analytics
     implementation 'com.google.firebase:firebase-core:21.1.1'
-    implementation 'com.google.firebase:firebase-config:21.4.0'
-    implementation 'com.google.firebase:firebase-analytics:22.1.2'
+    implementation 'com.google.firebase:firebase-analytics:22.5.0'
+    implementation 'com.google.firebase:firebase-config:21.6.3'
+
     // Plausible Analytics
     implementation 'com.github.OneBusAway:plausible-android-sdk:3.3'
     // Cloud Firestore (for storing destination alert test data)
@@ -500,21 +375,21 @@ dependencies {
     implementation "androidx.core:core-ktx:1.13.1"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     // RoomDB
-    implementation "androidx.room:room-runtime:2.6.1"
-    kapt "androidx.room:room-compiler:2.6.1"
-    implementation "androidx.room:room-ktx:2.6.1"
+    implementation "androidx.room:room-runtime:2.7.0"
+    ksp "androidx.room:room-compiler:2.7.0"
+    implementation "androidx.room:room-ktx:2.7.0"
     // GTFS Realtime bindings for parsing GTFS-realtime data
     implementation group: 'org.mobilitydata', name: 'gtfs-realtime-bindings', version: '0.0.8'
     implementation 'com.google.api.grpc:proto-google-common-protos:2.9.0'
 
     // Google Ad
-    implementation 'com.google.android.gms:play-services-ads:22.6.0'
-    implementation 'com.google.ads.mediation:facebook:6.16.0.0'
-    implementation 'com.facebook.android:audience-network-sdk:6.16.0'
+    implementation 'com.google.android.gms:play-services-ads:23.6.0'
+    implementation 'com.google.ads.mediation:facebook:6.18.0.0'
+    implementation 'com.facebook.android:audience-network-sdk:6.18.0'
     implementation project(':nativetemplates')
 
     // Billing
-    implementation 'com.android.billingclient:billing:6.1.0'
+    implementation 'com.android.billingclient:billing:7.1.1'
 
     // App update
     implementation 'com.google.android.play:app-update:2.1.0'

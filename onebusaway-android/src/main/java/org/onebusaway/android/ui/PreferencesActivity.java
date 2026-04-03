@@ -176,8 +176,8 @@ public class PreferencesActivity extends PreferenceActivity
             pushFirebaseData.setOnPreferenceClickListener(this);
         }
 
-        resetDonationTimestamps = findPreference(getString(R.string.preference_key_reset_donation_timestamps));
-        resetDonationTimestamps.setOnPreferenceClickListener(this);
+//        resetDonationTimestamps = findPreference(getString(R.string.preference_key_reset_donation_timestamps));
+//        resetDonationTimestamps.setOnPreferenceClickListener(this);
 
         mHideAlertsPref = findPreference(getString(R.string.preference_key_hide_alerts));
         mHideAlertsPref.setOnPreferenceChangeListener(this);

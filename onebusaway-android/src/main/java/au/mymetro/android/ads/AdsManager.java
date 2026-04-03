@@ -260,7 +260,13 @@ public class AdsManager {
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                 super.onAdFailedToLoad(loadAdError);
-                Log.d(TAG, "AdMob onAdFailedToLoad(): " + loadAdError.getMessage());
+                Log.e(TAG, "AdMob onAdFailedToLoad(): " + loadAdError.getMessage());
+                if (BuildConfig.DEBUG) {
+                    Toast.makeText(mActivity,
+                            "Error: " + loadAdError.getMessage(),
+                            Toast.LENGTH_LONG).show();
+                }
+
                 loadAudienceNetworkBannerAds(bannerAdLayoutView);
             }
         });
@@ -291,7 +297,7 @@ public class AdsManager {
             @Override
             public void onError(Ad ad, com.facebook.ads.AdError adError) {
                 // Ad error callback
-                Log.d(TAG, "Audience Network onError: " + adError.getErrorCode() + " - " + adError.getErrorMessage());
+                Log.e(TAG, "Audience Network onError: " + adError.getErrorCode() + " - " + adError.getErrorMessage());
                 if (BuildConfig.DEBUG) {
                     Toast.makeText(mActivity,
                             "Error: " + adError.getErrorMessage(),
@@ -501,7 +507,7 @@ public class AdsManager {
                             @Override
                             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                                 // Handle the error
-                                Log.d(TAG, "AdMob onAdFailedToLoad: " + loadAdError.toString());
+                                Log.e(TAG, "AdMob onAdFailedToLoad: " + loadAdError.toString());
                                 mAdMobInterstitialAd = null;
                                 mInterstitialAdShowing = false;
                                 loadAudienceNetworkInterstitialAds();
@@ -539,13 +545,13 @@ public class AdsManager {
                 // Interstitial ad displayed callback
                 mInterstitialAdShowing = true;
                 mInterstitialAdShowCount++;
-                Log.e(TAG, "Interstitial ad displayed.");
+                Log.d(TAG, "Interstitial ad displayed.");
             }
 
             @Override
             public void onInterstitialDismissed(Ad ad) {
                 // Interstitial dismissed callback
-                Log.e(TAG, "Audience Network Interstitial ad dismissed.");
+                Log.d(TAG, "Audience Network Interstitial ad dismissed.");
                 mAnInterstitialAd = null;
                 mInterstitialAdShowing = false;
             }
